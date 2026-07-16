@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: eagle-auctioner-backend
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+
+application:
+  cors:
+    allowed-origins: "http://localhost:3000"
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY:}
+      expiration: 3600000 # 1 hour
+      refresh-token:
+        expiration: 604800000 # 7 days
+      issuer: "eagle-auctioner"
+      audience: "eagle-auctioner-app"

@@ -1,0 +1,6 @@
+{
+  "name": "PostgreSQL Auth Schema",
+  "description": "A high-performance, secure, and complete PostgreSQL 15 schema for user authentication, roles, session token rotation, and the newly integrated STRING-5.2 Commercial Document Engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

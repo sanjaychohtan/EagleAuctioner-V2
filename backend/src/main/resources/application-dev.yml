@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eagleauctioner
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: false # Disabled in dev if using ddl-auto: update
+
+logging:
+  level:
+    com.eagleauctioner: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG

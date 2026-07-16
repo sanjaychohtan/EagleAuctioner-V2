@@ -1,0 +1,5 @@
+package com.eagleauctioner.enums;
+
+public enum NotificationType {
+    OTP, AUCTION_ALERT, OUTBID_ALERT, WINNER_NOTIFICATION, INVOICE_NOTIFICATION, PAYMENT_NOTIFICATION, SYSTEM_ALERT
+}

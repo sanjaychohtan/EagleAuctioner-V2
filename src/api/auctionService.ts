@@ -1,0 +1,214 @@
+import { apiClient } from "./client";
+import { API_ENDPOINTS } from "../constants";
+import {
+  ApiResponse,
+  AuctionResponse,
+  AuctionSummaryResponse,
+  AuctionLotResponse,
+  CreateAuctionRequest,
+  UpdateAuctionRequest,
+  UpdateSettingsRequest,
+  CreateLotRequest,
+  UpdateLotRequest,
+  LotSortRequest,
+} from "../types/auction";
+
+export const AuctionService = {
+  /**
+   * Creates a new auction in DRAFT state.
+   * Path: POST /api/v1/auctions
+   */
+  async createAuction(request: CreateAuctionRequest): Promise<AuctionResponse> {
+    console.log("[AuctionService] Creating a new auction draft with title:", request.title);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.CREATE,
+      request
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Updates an existing auction draft or rejected draft.
+   * Path: PUT /api/v1/auctions/{id}
+   */
+  async updateAuction(id: string, request: UpdateAuctionRequest): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Updating auction draft ID: ${id}`);
+    const response = await apiClient.put<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.UPDATE(id),
+      request
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Updates settings/rules of an auction.
+   * Path: PUT /api/v1/auctions/{id}/settings
+   */
+  async updateSettings(id: string, request: UpdateSettingsRequest): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Updating settings for auction ID: ${id}`);
+    const response = await apiClient.put<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.UPDATE_SETTINGS(id),
+      request
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Submits a draft auction for admin review.
+   * Path: POST /api/v1/auctions/{id}/submit-review
+   */
+  async submitForReview(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Submitting auction ID: ${id} for admin review`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.SUBMIT_REVIEW(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Approves an auction (Admin only).
+   * Path: POST /api/v1/auctions/{id}/approve
+   */
+  async approveAuction(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Approving auction ID: ${id} (Admin action)`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.APPROVE(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Rejects an auction draft (Admin only).
+   * Path: POST /api/v1/auctions/{id}/reject
+   */
+  async rejectAuction(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Rejecting auction ID: ${id} (Admin action)`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.REJECT(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Publishes an approved auction live.
+   * Path: POST /api/v1/auctions/{id}/publish
+   */
+  async publishAuction(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Publishing approved auction ID: ${id} to active state`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.PUBLISH(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Cancels an active or scheduled auction.
+   * Path: POST /api/v1/auctions/{id}/cancel
+   */
+  async cancelAuction(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Cancelling auction ID: ${id}`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.CANCEL(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Archives a settled or cancelled auction.
+   * Path: POST /api/v1/auctions/{id}/archive
+   */
+  async archiveAuction(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Archiving auction ID: ${id}`);
+    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.ARCHIVE(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Retrieves complete details of an auction.
+   * Path: GET /api/v1/auctions/{id}
+   */
+  async getAuctionDetails(id: string): Promise<AuctionResponse> {
+    console.log(`[AuctionService] Retrieving full details for auction ID: ${id}`);
+    const response = await apiClient.get<ApiResponse<AuctionResponse>>(
+      API_ENDPOINTS.AUCTION.DETAIL(id)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Retrieves list of all auctions.
+   * Path: GET /api/v1/auctions
+   */
+  async listAuctions(): Promise<AuctionSummaryResponse[]> {
+    console.log("[AuctionService] Retrieving summary list of all auctions");
+    const response = await apiClient.get<ApiResponse<AuctionSummaryResponse[]>>(
+      API_ENDPOINTS.AUCTION.LIST
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Creates a new lot inside an auction.
+   * Path: POST /api/v1/lots/auctions/{auctionId}
+   */
+  async createLot(auctionId: string, request: CreateLotRequest): Promise<AuctionLotResponse> {
+    console.log(`[AuctionService] Creating new lot for auction ID: ${auctionId}`);
+    const response = await apiClient.post<ApiResponse<AuctionLotResponse>>(
+      API_ENDPOINTS.LOT.CREATE(auctionId),
+      request
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Updates an existing lot details.
+   * Path: PUT /api/v1/lots/{lotId}
+   */
+  async updateLot(lotId: string, request: UpdateLotRequest): Promise<AuctionLotResponse> {
+    console.log(`[AuctionService] Updating existing lot ID: ${lotId}`);
+    const response = await apiClient.put<ApiResponse<AuctionLotResponse>>(
+      API_ENDPOINTS.LOT.UPDATE(lotId),
+      request
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Deletes a draft lot from an auction.
+   * Path: DELETE /api/v1/lots/{lotId}
+   */
+  async deleteLot(lotId: string): Promise<void> {
+    console.log(`[AuctionService] Deleting draft lot ID: ${lotId}`);
+    await apiClient.delete<ApiResponse<void>>(
+      API_ENDPOINTS.LOT.DELETE(lotId)
+    );
+  },
+
+  /**
+   * Publishes a draft lot inside an auction.
+   * Path: POST /api/v1/lots/{lotId}/publish
+   */
+  async publishLot(lotId: string): Promise<AuctionLotResponse> {
+    console.log(`[AuctionService] Publishing draft lot ID: ${lotId}`);
+    const response = await apiClient.post<ApiResponse<AuctionLotResponse>>(
+      API_ENDPOINTS.LOT.PUBLISH(lotId)
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Re-orders display order of lots inside an auction.
+   * Path: POST /api/v1/lots/auctions/{auctionId}/sort
+   */
+  async sortLots(auctionId: string, request: LotSortRequest): Promise<void> {
+    console.log(`[AuctionService] Re-sorting display order of lots for auction ID: ${auctionId}`);
+    await apiClient.post<ApiResponse<void>>(
+      API_ENDPOINTS.LOT.SORT(auctionId),
+      request
+    );
+  },
+};
+
+export default AuctionService;
