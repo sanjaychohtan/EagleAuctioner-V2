@@ -98,7 +98,7 @@ public class NotificationTests {
     }
 
     @Test
-    void testProcessDelivery_Idempotency() {
+    void testProcessDelivery_Idempotency() throws Exception {
         Notification notification = Notification.builder()
                 .status(NotificationStatus.SENT)
                 .channel(NotificationChannel.EMAIL)

@@ -62,27 +62,37 @@ public class PaymentTests {
 
     @BeforeEach
     void setUp() {
-        buyer = User.builder().id(UUID.randomUUID()).email("buyer@example.com").build();
-        bidderProfile = BidderProfile.builder().id(UUID.randomUUID()).user(buyer).build();
+        buyer = User.builder().email("buyer@example.com").build();
+        buyer.setId(UUID.randomUUID());
 
-        seller = User.builder().id(UUID.randomUUID()).email("seller@example.com").build();
-        sellerProfile = SellerProfile.builder().id(UUID.randomUUID()).user(seller).build();
+        bidderProfile = BidderProfile.builder().user(buyer).build();
+        bidderProfile.setId(UUID.randomUUID());
 
-        auction = Auction.builder().id(UUID.randomUUID()).sellerProfile(sellerProfile).build();
-        lot = AuctionLot.builder().id(UUID.randomUUID()).auction(auction).build();
+        seller = User.builder().email("seller@example.com").build();
+        seller.setId(UUID.randomUUID());
 
-        winner = AuctionWinner.builder().id(UUID.randomUUID())
+        sellerProfile = SellerProfile.builder().user(seller).build();
+        sellerProfile.setId(UUID.randomUUID());
+
+        auction = Auction.builder().sellerProfile(sellerProfile).build();
+        auction.setId(UUID.randomUUID());
+
+        lot = AuctionLot.builder().auction(auction).build();
+        lot.setId(UUID.randomUUID());
+
+        winner = AuctionWinner.builder()
                 .bidderProfile(bidderProfile)
                 .auctionLot(lot)
                 .build();
+        winner.setId(UUID.randomUUID());
 
-        contract = Contract.builder().id(UUID.randomUUID())
+        contract = Contract.builder()
                 .winner(winner)
                 .status(ContractStatus.ACCEPTED)
                 .build();
+        contract.setId(UUID.randomUUID());
 
         settlement = Settlement.builder()
-                .id(UUID.randomUUID())
                 .contract(contract)
                 .documentNumber("SET-001")
                 .status(SettlementStatus.PAYMENT_PENDING)
@@ -91,6 +101,7 @@ public class PaymentTests {
                 .taxAmount(1800L)
                 .payoutAmount(106200L)
                 .build();
+        settlement.setId(UUID.randomUUID());
     }
 
     private void setupSecurityContext(String username, String role) {
@@ -121,7 +132,7 @@ public class PaymentTests {
 
     @Test
     void testCreatePaymentAdvice_Duplicate() {
-        when(paymentAdviceRepository.findBySettlementId(settlement.getId())).thenReturn(Optional.of(new PaymentAdvice()));
+        when(paymentAdviceRepository.findBySettlementId(settlement.getId())).thenReturn(Optional.of(PaymentAdvice.builder().build()));
         
         assertThrows(IllegalStateException.class, () -> {
             paymentService.createPaymentAdvice(settlement);
