@@ -482,7 +482,7 @@ public class SettlementTests {
     void testSaleConfirmationLinkage() {
         // Winner -> Contract -> Sale Confirmation -> Settlement
         SaleConfirmation saleConfirmation = SaleConfirmation.builder()
-                .confirmationNumber("SC-999")
+                .documentNumber("SC-999")
                 .build();
         saleConfirmation.setId(UUID.randomUUID());
 
@@ -491,7 +491,7 @@ public class SettlementTests {
         assertEquals(winner.getId(), contract.getWinner().getId());
         assertEquals(saleConfirmation.getId(), contract.getSaleConfirmation().getId());
         assertEquals(contract.getId(), settlement.getContract().getId());
-        assertEquals(saleConfirmation.getConfirmationNumber(), settlement.getContract().getSaleConfirmation().getConfirmationNumber());
+        assertEquals(saleConfirmation.getDocumentNumber(), settlement.getContract().getSaleConfirmation().getDocumentNumber());
     }
 
     @Test

@@ -195,9 +195,9 @@ public class ContractTests {
 
         original.setVersion(2L);
 
-        assertThrows(org.hibernate.dialect.lock.OptimisticEntityLockException.class, () -> {
+        assertThrows(jakarta.persistence.OptimisticLockException.class, () -> {
             if (stale.getVersion() < original.getVersion()) {
-                throw new org.hibernate.dialect.lock.OptimisticEntityLockException(stale, "Database conflict has occurred");
+                throw new jakarta.persistence.OptimisticLockException("Database conflict has occurred");
             }
         });
     }
