@@ -96,11 +96,11 @@ public class LedgerTests {
     @Test
     void testReverseTransaction_Success() {
         LedgerTransaction tx = LedgerTransaction.builder()
-                .id(UUID.randomUUID())
                 .transactionReference("LEDGER-PAY-001")
                 .paymentId(payment.getId())
                 .status(LedgerTransactionStatus.POSTED)
                 .build();
+        tx.setId(UUID.randomUUID());
         tx.addEntry(LedgerEntry.builder().accountType(LedgerAccountType.BUYER_RECEIVABLE).entryType(LedgerEntryType.DEBIT).amount(118000L).build());
         tx.addEntry(LedgerEntry.builder().accountType(LedgerAccountType.SELLER_PAYOUT).entryType(LedgerEntryType.CREDIT).amount(106200L).build());
 
