@@ -10,6 +10,8 @@ import com.eagleauctioner.repository.ContractRepository;
 import com.eagleauctioner.repository.SettlementRepository;
 import com.eagleauctioner.repository.SettlementHistoryRepository;
 import com.eagleauctioner.service.SettlementService;
+import com.eagleauctioner.service.FinancialRuleEngine;
+import java.math.BigDecimal;
 import com.eagleauctioner.event.SettlementGeneratedEvent;
 import com.eagleauctioner.event.SettlementApprovedEvent;
 import com.eagleauctioner.event.SettlementRejectedEvent;
@@ -42,6 +44,7 @@ public class SettlementTests {
     @Mock private ContractRepository contractRepository;
     @Mock private SettlementHistoryRepository settlementHistoryRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private FinancialRuleEngine financialRuleEngine;
     @Spy private ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks private SettlementService settlementService;
@@ -140,6 +143,8 @@ public class SettlementTests {
 
         // Setup generic security context as Buyer
         setupSecurityContext("buyer@example.com", "ROLE_BIDDER");
+
+        lenient().when(financialRuleEngine.getPlatformFeePercentage()).thenReturn(new BigDecimal("5.00"));
     }
 
     private void setupSecurityContext(String email, String role) {
@@ -154,7 +159,7 @@ public class SettlementTests {
 
     @Test
     void testGenerateSettlement_Success() {
-        when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
+        when(contractRepository.findByIdWithRelationsForUpdate(contract.getId())).thenReturn(Optional.of(contract));
         when(settlementRepository.findByContractId(contract.getId())).thenReturn(Optional.empty());
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> {
             Settlement s = invocation.getArgument(0);
@@ -179,7 +184,7 @@ public class SettlementTests {
 
     @Test
     void testGenerateSettlement_DuplicatePrevention_ReturnsExisting() {
-        when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
+        when(contractRepository.findByIdWithRelationsForUpdate(contract.getId())).thenReturn(Optional.of(contract));
         when(settlementRepository.findByContractId(contract.getId())).thenReturn(Optional.of(settlement));
 
         SettlementResponse response = settlementService.generateSettlement(contract.getId());
@@ -192,7 +197,7 @@ public class SettlementTests {
     @Test
     void testGenerateSettlement_ContractStatusValidation_ThrowsException() {
         contract.setStatus(ContractStatus.DRAFT);
-        when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
+        when(contractRepository.findByIdWithRelationsForUpdate(contract.getId())).thenReturn(Optional.of(contract));
 
         assertThrows(IllegalStateException.class, () -> {
             settlementService.generateSettlement(contract.getId());
@@ -201,7 +206,7 @@ public class SettlementTests {
 
     @Test
     void testSubmitForApproval_Success() {
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         SettlementResponse response = settlementService.submitForApproval(settlement.getId());
@@ -213,7 +218,7 @@ public class SettlementTests {
     @Test
     void testApproveSettlement_Success() {
         settlement.setStatus(SettlementStatus.PENDING_APPROVAL);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
@@ -228,7 +233,7 @@ public class SettlementTests {
     @Test
     void testRejectSettlement_Success() {
         settlement.setStatus(SettlementStatus.PENDING_APPROVAL);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
@@ -243,7 +248,7 @@ public class SettlementTests {
     @Test
     void testTransitionToPaymentPending_Success() {
         settlement.setStatus(SettlementStatus.APPROVED);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
@@ -257,7 +262,7 @@ public class SettlementTests {
     @Test
     void testValidateSettlementAccess_IDOR_ThrowsException() {
         settlement.setStatus(SettlementStatus.DRAFT);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         setupSecurityContext("intruder@example.com", "ROLE_BIDDER");
 
@@ -269,7 +274,7 @@ public class SettlementTests {
     @Test
     void testValidateSettlementAccess_Admin_Success() {
         settlement.setStatus(SettlementStatus.DRAFT);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         setupSecurityContext("admin@example.com", "ROLE_ADMIN");
 
@@ -280,7 +285,7 @@ public class SettlementTests {
     @Test
     void testOptimisticLocking_ThrowsException() {
         settlement.setStatus(SettlementStatus.DRAFT);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(Settlement.class, settlement.getId()));
 
         assertThrows(org.springframework.orm.ObjectOptimisticLockingFailureException.class, () -> {
@@ -290,7 +295,7 @@ public class SettlementTests {
 
     @Test
     void testSnapshotCreation() throws Exception {
-        when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
+        when(contractRepository.findByIdWithRelationsForUpdate(contract.getId())).thenReturn(Optional.of(contract));
         when(settlementRepository.findByContractId(contract.getId())).thenReturn(Optional.empty());
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -325,7 +330,7 @@ public class SettlementTests {
     @Test
     void testCompleteSettlement_Success() {
         settlement.setStatus(SettlementStatus.PAYMENT_RECEIVED);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
@@ -345,7 +350,7 @@ public class SettlementTests {
     @Test
     void testCompleteSettlement_IllegalState_ThrowsException() {
         settlement.setStatus(SettlementStatus.DRAFT);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
 
@@ -357,7 +362,7 @@ public class SettlementTests {
     @Test
     void testCompleteSettlement_Duplicate_ThrowsException() {
         settlement.setStatus(SettlementStatus.COMPLETED);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         setupSecurityContext("seller@example.com", "ROLE_SELLER");
 
@@ -369,7 +374,7 @@ public class SettlementTests {
     @Test
     void testCancelSettlement_Success() {
         settlement.setStatus(SettlementStatus.PAYMENT_PENDING);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         setupSecurityContext("buyer@example.com", "ROLE_BIDDER");
@@ -389,7 +394,7 @@ public class SettlementTests {
     @Test
     void testCancelSettlement_IllegalCompletedCancellation_ThrowsException() {
         settlement.setStatus(SettlementStatus.COMPLETED);
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         setupSecurityContext("buyer@example.com", "ROLE_BIDDER");
 
@@ -471,7 +476,7 @@ public class SettlementTests {
 
     @Test
     void testAddRemark_Success() {
-        when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
 
         settlementService.addRemark(settlement.getId(), "Operational update.");
 
@@ -507,7 +512,7 @@ public class SettlementTests {
         com.eagleauctioner.context.AuditContext.set(auditCtx);
 
         try {
-            when(settlementRepository.findByIdWithRelations(settlement.getId())).thenReturn(Optional.of(settlement));
+            when(settlementRepository.findByIdWithRelationsForUpdate(settlement.getId())).thenReturn(Optional.of(settlement));
             settlementService.addRemark(settlement.getId(), "Test Audit Context");
 
             verify(settlementHistoryRepository, times(1)).save(argThat(h -> 
