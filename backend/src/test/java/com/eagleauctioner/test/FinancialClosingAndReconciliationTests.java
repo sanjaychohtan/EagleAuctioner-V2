@@ -122,7 +122,7 @@ public class FinancialClosingAndReconciliationTests {
         when(invoiceRepository.findBySettlementId(settlementId)).thenReturn(Optional.of(invoice));
         when(ledgerRepository.findBySettlementId(settlementId)).thenReturn(List.of(entry));
         when(settlementReconRepo.findBySettlementId(settlementId)).thenReturn(Optional.empty());
-        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(0L);
+        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(java.math.BigDecimal.ZERO);
         when(settlementReconRepo.save(any(SettlementReconciliation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ReconcileSettlementRequest request = ReconcileSettlementRequest.builder()
@@ -162,7 +162,7 @@ public class FinancialClosingAndReconciliationTests {
         when(settlementReconRepo.findBySettlementId(settlementId)).thenReturn(Optional.empty());
         
         // 0.10 INR tolerance (10 paise)
-        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(010L);
+        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(new java.math.BigDecimal("0.10"));
         when(settlementReconRepo.save(any(SettlementReconciliation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ReconcileSettlementRequest request = ReconcileSettlementRequest.builder()
@@ -186,7 +186,7 @@ public class FinancialClosingAndReconciliationTests {
         when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
         when(bankReconRepo.findByBankTransactionId("TXN123")).thenReturn(Optional.empty());
         when(bankReconRepo.findByPaymentId(paymentId)).thenReturn(Optional.empty());
-        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(0L);
+        when(financialRuleEngine.getReconciliationTolerance()).thenReturn(java.math.BigDecimal.ZERO);
         when(bankReconRepo.save(any(BankReconciliation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ReconcileBankRequest request = ReconcileBankRequest.builder()
