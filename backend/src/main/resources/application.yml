@@ -1,6 +1,8 @@
 spring:
   application:
     name: eagle-auctioner-backend
+  main:
+    allow-circular-references: true
   profiles:
     active: dev
   datasource:
@@ -17,7 +19,7 @@ spring:
     baseline-on-migrate: true
 
 server:
-  port: 8080
+  port: 3000
 
 application:
   cors:

@@ -5,10 +5,11 @@ spring:
     password: password
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
   flyway:
-    enabled: false # Disabled in dev if using ddl-auto: update
+    enabled: true
+
 
 logging:
   level:

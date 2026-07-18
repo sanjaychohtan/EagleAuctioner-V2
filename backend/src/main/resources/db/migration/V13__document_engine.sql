@@ -52,6 +52,12 @@ INSERT INTO document_sequences (tenant_id, branch_code, year, region_code, docum
 ON CONFLICT (tenant_id, branch_code, year, region_code, document_type) DO NOTHING;
 
 -- 3. Table: sale_confirmations
+ALTER TABLE sale_confirmations ADD COLUMN IF NOT EXISTS document_number VARCHAR(100);
+ALTER TABLE sale_confirmations ADD COLUMN IF NOT EXISTS winner_id UUID;
+ALTER TABLE sale_confirmations ADD COLUMN IF NOT EXISTS status VARCHAR(50);
+ALTER TABLE sale_confirmations ADD COLUMN IF NOT EXISTS sale_amount NUMERIC(18,2);
+ALTER TABLE sale_confirmations ADD COLUMN IF NOT EXISTS terms_and_conditions VARCHAR(2000);
+
 CREATE TABLE IF NOT EXISTS sale_confirmations (
     id UUID PRIMARY KEY,
     version BIGINT NOT NULL DEFAULT 0,

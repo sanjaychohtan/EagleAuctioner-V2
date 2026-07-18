@@ -8,6 +8,7 @@ import com.eagleauctioner.dto.SettlementRequest;
 import com.eagleauctioner.dto.SettlementResponse;
 import com.eagleauctioner.repository.ContractRepository;
 import com.eagleauctioner.repository.SettlementRepository;
+import com.eagleauctioner.repository.SettlementHistoryRepository;
 import com.eagleauctioner.service.SettlementService;
 import com.eagleauctioner.event.SettlementGeneratedEvent;
 import com.eagleauctioner.event.SettlementApprovedEvent;

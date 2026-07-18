@@ -1,0 +1,1 @@
+import{L as u}from"./finance-CakBPBrV.js";const l=(e,r=18)=>e<=0||r<0?0:Math.round(e*r/100),o=(e,r=1)=>e<=0||r<0?0:Math.round(e*r/100),f=(e,r,t,c=0)=>{if(e<=0)return 0;const n=e-r-t-c;return n>0?n:0},s=e=>!e||e.length===0?0:e.reduce((r,t)=>t.entryType===u.CREDIT?r+t.amount:t.entryType===u.DEBIT?r-t.amount:r,0);export{l as a,o as b,s as c,f as d};
