@@ -62,8 +62,8 @@ public class DocumentEngineTests {
                 .build();
         po.setId(UUID.randomUUID());
 
-        when(financialRuleEngine.getPlatformFeePercentage()).thenReturn(750L);
-        when(financialRuleEngine.getVatPercentage()).thenReturn(1500L);
+        when(financialRuleEngine.getPlatformFeePercentage()).thenReturn(new java.math.BigDecimal("7.50"));
+        when(financialRuleEngine.getVatPercentage()).thenReturn(new java.math.BigDecimal("15.00"));
         when(financialRuleEngine.getRoundingMode()).thenReturn(RoundingMode.HALF_UP);
         when(financialRuleEngine.getCurrencyPrecision()).thenReturn(2);
 
