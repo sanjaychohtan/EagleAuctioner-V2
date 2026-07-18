@@ -40,21 +40,34 @@ public class LedgerTests {
     @BeforeEach
     void setUp() {
         UUID sellerUserId = UUID.randomUUID();
-        User sellerUser = User.builder().id(sellerUserId).email("seller@example.com").build();
-        SellerProfile sellerProfile = SellerProfile.builder().id(UUID.randomUUID()).user(sellerUser).build();
-        Auction auction = Auction.builder().id(UUID.randomUUID()).sellerProfile(sellerProfile).build();
-        AuctionLot lot = AuctionLot.builder().id(UUID.randomUUID()).auction(auction).build();
-        AuctionWinner winner = AuctionWinner.builder().id(UUID.randomUUID()).auctionLot(lot).build();
-        Contract contract = Contract.builder().id(UUID.randomUUID()).winner(winner).build();
-        Settlement settlement = Settlement.builder().id(UUID.randomUUID()).contract(contract).documentNumber("SET-123").build();
+        User sellerUser = User.builder().email("seller@example.com").build();
+        sellerUser.setId(sellerUserId);
+
+        SellerProfile sellerProfile = SellerProfile.builder().user(sellerUser).build();
+        sellerProfile.setId(UUID.randomUUID());
+
+        Auction auction = Auction.builder().sellerProfile(sellerProfile).build();
+        auction.setId(UUID.randomUUID());
+
+        AuctionLot lot = AuctionLot.builder().auction(auction).build();
+        lot.setId(UUID.randomUUID());
+
+        AuctionWinner winner = AuctionWinner.builder().auctionLot(lot).build();
+        winner.setId(UUID.randomUUID());
+
+        Contract contract = Contract.builder().winner(winner).build();
+        contract.setId(UUID.randomUUID());
+
+        Settlement settlement = Settlement.builder().contract(contract).documentNumber("SET-123").build();
+        settlement.setId(UUID.randomUUID());
 
         payment = Payment.builder()
-                .id(UUID.randomUUID())
                 .paymentNumber("PAY-001")
                 .settlement(settlement)
                 .totalAmount(118000L)
                 .status(PaymentStatus.COMPLETED)
                 .build();
+        payment.setId(UUID.randomUUID());
 
         PaymentAllocation feeAlloc = PaymentAllocation.builder().allocatedAmount(10000L).allocationType(PaymentAllocationType.PLATFORM_FEE).build();
         PaymentAllocation taxAlloc = PaymentAllocation.builder().allocatedAmount(1800L).allocationType(PaymentAllocationType.TAX).build();
@@ -62,7 +75,8 @@ public class LedgerTests {
         
         payment.setAllocations(Arrays.asList(feeAlloc, taxAlloc, payoutAlloc));
 
-        sellerWallet = Wallet.builder().id(UUID.randomUUID()).userId(sellerUserId).availableBalance(0L).build();
+        sellerWallet = Wallet.builder().userId(sellerUserId).availableBalance(0L).build();
+        sellerWallet.setId(UUID.randomUUID());
     }
 
     @Test
