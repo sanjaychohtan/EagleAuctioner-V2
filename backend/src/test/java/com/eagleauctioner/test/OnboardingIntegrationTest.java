@@ -53,30 +53,33 @@ public class OnboardingIntegrationTest {
 
         testBidder = User.builder()
                 .email("bidder.test@eagle.com")
-                .passwordHash("hashedPwd")
+                .password("hashedPwd")
                 .firstName("John")
                 .lastName("Doe")
                 .mobile("9876543210")
+                .userType(UserType.BIDDER)
                 .isActive(true)
                 .build();
         userRepository.save(testBidder);
 
         testSeller = User.builder()
                 .email("seller.test@eagle.com")
-                .passwordHash("hashedPwd")
+                .password("hashedPwd")
                 .firstName("Jane")
                 .lastName("Doe")
                 .mobile("9876543211")
+                .userType(UserType.SELLER)
                 .isActive(true)
                 .build();
         userRepository.save(testSeller);
 
         testAdmin = User.builder()
                 .email("admin.test@eagle.com")
-                .passwordHash("hashedPwd")
+                .password("hashedPwd")
                 .firstName("Admin")
                 .lastName("User")
                 .mobile("9000000001")
+                .userType(UserType.ADMIN)
                 .isActive(true)
                 .roles(Set.of(adminRole))
                 .build();
@@ -116,11 +119,11 @@ public class OnboardingIntegrationTest {
         assertEquals(BidderState.UNDER_REVIEW, profileAfterDocs.getState());
 
         // 3. Verify Bank Account via simulated Penny Drop
-        assertFalse(profileAfterDocs.getBankAccount().isVerified());
+        assertFalse(profileAfterDocs.getBankAccounts().get(0).isVerified());
         bidderOnboardingService.verifyBankAccountPennyDrop(profileId, testBidder.getId());
         
         BidderProfile profileAfterBank = bidderProfileRepository.findById(profileId).orElseThrow();
-        assertTrue(profileAfterBank.getBankAccount().isVerified());
+        assertTrue(profileAfterBank.getBankAccounts().get(0).isVerified());
 
         // 4. Admin KYC Review Approval
         KycReviewRequest reviewRequest = new KycReviewRequest("APPROVED", "All KYC documents verified successfully.");
@@ -138,16 +141,10 @@ public class OnboardingIntegrationTest {
         SellerRegistrationRequest registerRequest = new SellerRegistrationRequest(
                 "CORPORATE",
                 "ABCDE1234F",
-                "ORG123",
                 "Test Corp",
-                "Private Limited",
-                "123 Business St",
+                "ORG123",
                 "27ABCDE1234F1Z5",
-                "John Doe",
-                "10009988776655",
-                "HDFC0000123",
-                "HDFC Bank",
-                "Mumbai Branch"
+                "123 Business St"
         );
 
         SellerProfileResponse profileResponse = sellerOnboardingService.registerSeller(testSeller.getId(), registerRequest);
