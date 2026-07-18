@@ -58,7 +58,7 @@ public class LedgerTests {
         Contract contract = Contract.builder().winner(winner).build();
         contract.setId(UUID.randomUUID());
 
-        Settlement settlement = Settlement.builder().contract(contract).documentNumber("SET-123").build();
+        Settlement settlement = Settlement.builder().contract(contract).contractNumber("SET-123").build();
         settlement.setId(UUID.randomUUID());
 
         payment = Payment.builder()
