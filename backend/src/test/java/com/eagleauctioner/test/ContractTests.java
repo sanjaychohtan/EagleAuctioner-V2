@@ -144,7 +144,8 @@ public class ContractTests {
         // Switch to an attacker security context
         Authentication attackerAuth = mock(Authentication.class);
         when(attackerAuth.getName()).thenReturn("attacker@example.com");
-        when(attackerAuth.getAuthorities()).thenReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")));
+        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")))
+                .when(attackerAuth).getAuthorities();
         SecurityContextHolder.getContext().getAuthentication();
         
         SecurityContext securityContext = mock(SecurityContext.class);
