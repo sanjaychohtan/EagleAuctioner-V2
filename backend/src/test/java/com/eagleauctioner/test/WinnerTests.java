@@ -80,13 +80,15 @@ public class WinnerTests {
         sellerProfile = new SellerProfile();
         sellerProfile.setId(UUID.randomUUID());
         sellerProfile.setUser(sellerUser);
-        sellerProfile.setCompanyName("Seller Corp");
+        SellerCompany company = SellerCompany.builder()
+                .companyName("Seller Corp")
+                .build();
+        sellerProfile.setCompany(company);
 
         auction = Auction.builder()
                 .sellerProfile(sellerProfile)
                 .reservePriceEnabled(true)
                 .currency("EUR")
-                .taxProfile("VAT_EU")
                 .build();
         auction.setState(AuctionState.ENDED);
 
@@ -98,17 +100,35 @@ public class WinnerTests {
         lot.setId(UUID.randomUUID());
         lot.setLotStatus(AuctionLotStatus.SOLD);
 
+        User user1 = User.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+        user1.setId(UUID.randomUUID());
+
+        Organization org1 = Organization.builder()
+                .organizationName("Bidder 1 Corp")
+                .build();
+
         bidder1 = new BidderProfile();
         bidder1.setId(UUID.randomUUID());
-        bidder1.setCompanyName("Bidder 1 Corp");
-        bidder1.setDisplayName("John Doe");
-        bidder1.setAnonymousCode("B-101");
+        bidder1.setUser(user1);
+        bidder1.setOrganization(org1);
+
+        User user2 = User.builder()
+                .firstName("Jane")
+                .lastName("Smith")
+                .build();
+        user2.setId(UUID.randomUUID());
+
+        Organization org2 = Organization.builder()
+                .organizationName("Bidder 2 Corp")
+                .build();
 
         bidder2 = new BidderProfile();
         bidder2.setId(UUID.randomUUID());
-        bidder2.setCompanyName("Bidder 2 Corp");
-        bidder2.setDisplayName("Jane Smith");
-        bidder2.setAnonymousCode("B-102");
+        bidder2.setUser(user2);
+        bidder2.setOrganization(org2);
     }
 
     @Test
@@ -304,7 +324,8 @@ public class WinnerTests {
         
         // Assert snapshot fields returned in Response DTO
         assertNotNull(response.getWinnerAnonymousCode());
-        assertEquals("B-102", response.getWinnerAnonymousCode());
+        String expectedStableCode = "BIDDER-" + bidder2.getId().toString().substring(0, 8).toUpperCase();
+        assertEquals(expectedStableCode, response.getWinnerAnonymousCode());
         assertEquals("EUR", response.getCurrencySnapshot());
         
         verify(winnerHistoryRepository, times(1)).save(any(WinnerHistory.class));
@@ -372,7 +393,6 @@ public class WinnerTests {
 
     @Test
     void testWinnerSnapshotFactory_StableAnonCode() {
-        bidder1.setAnonymousCode(null);
         lot.setLotStatus(AuctionLotStatus.SOLD);
         auction.setState(AuctionState.ENDED);
 
