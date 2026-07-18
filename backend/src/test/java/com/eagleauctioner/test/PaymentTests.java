@@ -94,9 +94,9 @@ public class PaymentTests {
 
         settlement = Settlement.builder()
                 .contract(contract)
-                .documentNumber("SET-001")
+                .contractNumber("SET-001")
                 .status(SettlementStatus.PAYMENT_PENDING)
-                .grossAmount(118000L)
+                .winningAmount(116200L)
                 .platformFee(10000L)
                 .taxAmount(1800L)
                 .payoutAmount(106200L)
@@ -161,7 +161,7 @@ public class PaymentTests {
     void testReceivePayment_InvalidState() {
         setupSecurityContext("buyer@example.com", "ROLE_BIDDER");
         
-        settlement.setStatus(SettlementStatus.CLOSED);
+        settlement.setStatus(SettlementStatus.COMPLETED);
         
         PaymentRequest request = PaymentRequest.builder()
                 .amount(118000L)
