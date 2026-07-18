@@ -150,10 +150,10 @@ public class SettlementTests {
     private void setupSecurityContext(String email, String role) {
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn(email);
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority(role)))
+        lenient().when(authentication.getName()).thenReturn(email);
+        lenient().doReturn(Collections.singletonList(new SimpleGrantedAuthority(role)))
                 .when(authentication).getAuthorities();
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
     }
 
