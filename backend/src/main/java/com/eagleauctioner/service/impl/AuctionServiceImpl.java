@@ -12,7 +12,9 @@ import com.eagleauctioner.repository.AuctionSettingsRepository;
 import com.eagleauctioner.repository.SellerProfileRepository;
 import com.eagleauctioner.service.AuctionService;
 import com.eagleauctioner.service.AuctionValidationService;
+import com.eagleauctioner.mapper.AuctionMapper;
 import com.eagleauctioner.service.AuctionPublishService;
+
 import com.eagleauctioner.service.DocumentNumberGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +41,9 @@ public class AuctionServiceImpl implements AuctionService {
     private final SellerProfileRepository sellerProfileRepository;
     private final DocumentNumberGeneratorService documentNumberGeneratorService;
     private final AuctionValidationService auctionValidationService;
+    private final AuctionMapper auctionMapper;
     private final AuctionPublishService auctionPublishService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

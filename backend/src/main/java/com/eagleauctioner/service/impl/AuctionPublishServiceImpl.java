@@ -7,7 +7,7 @@ import com.eagleauctioner.enums.AuctionLotStatus;
 import com.eagleauctioner.enums.AuctionState;
 import com.eagleauctioner.repository.AuctionRepository;
 import com.eagleauctioner.service.AuctionPublishService;
-import com.eagleauctioner.service.AuctionService;
+import com.eagleauctioner.mapper.AuctionMapper;
 import com.eagleauctioner.service.AuctionValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class AuctionPublishServiceImpl implements AuctionPublishService {
 
     private final AuctionRepository auctionRepository;
     private final AuctionValidationService auctionValidationService;
-    private final AuctionService auctionService;
+    private final AuctionMapper auctionMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -45,10 +45,6 @@ public class AuctionPublishServiceImpl implements AuctionPublishService {
         auction.setState(AuctionState.PUBLISHED);
         Auction saved = auctionRepository.save(auction);
         
-        // This is a bit circular, but we need to map to response. 
-        // Better to have the mapper in a separate component.
-        // For now, I'll use the one in AuctionService if it was public, 
-        // but I'll just use the existing logic.
-        return auctionService.getAuctionDetails(saved.getId());
+        return auctionMapper.mapToResponse(saved);
     }
 }
