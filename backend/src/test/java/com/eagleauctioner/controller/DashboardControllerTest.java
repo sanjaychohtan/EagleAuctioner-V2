@@ -23,8 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DashboardController.class)
-@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class DashboardControllerTest {
+
+    @org.springframework.boot.test.context.TestConfiguration
+    @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
+    static class SecurityTestConfig {}
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,6 +52,45 @@ public class DashboardControllerTest {
 
     @MockBean
     private IdempotencyFilter idempotencyFilter;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUpFilters() throws Exception {
+        org.mockito.Mockito.doAnswer(invocation -> {
+            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(jwtAuthenticationFilter).doFilterInternal(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any()
+        );
+
+        org.mockito.Mockito.doAnswer(invocation -> {
+            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(rateLimitingFilter).doFilterInternal(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any()
+        );
+
+        org.mockito.Mockito.doAnswer(invocation -> {
+            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.FilterChain chain = invocation.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(idempotencyFilter).doFilterInternal(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any()
+        );
+    }
 
     @Test
     @WithMockUser(roles = "EXECUTIVE")

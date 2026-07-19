@@ -171,6 +171,7 @@ public class ContractTests {
 
         when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(settlementService.detectRegion(any(Contract.class))).thenReturn("GLOBAL");
 
         ContractResponse response = contractService.acceptContract(contract.getId(), "Admin signature");
 
