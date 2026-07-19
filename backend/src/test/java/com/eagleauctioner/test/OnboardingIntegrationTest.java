@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,9 @@ public class OnboardingIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private User testBidder;
     private User testSeller;
     private User testAdmin;
@@ -52,9 +56,11 @@ public class OnboardingIntegrationTest {
         Role adminRole = Role.builder().name("ROLE_ADMIN").build();
         roleRepository.save(adminRole);
 
+        String encodedPassword = passwordEncoder.encode("hashedPwd");
+
         testBidder = User.builder()
                 .email("bidder.test@eagle.com")
-                .password("hashedPwd")
+                .password(encodedPassword)
                 .firstName("John")
                 .lastName("Doe")
                 .mobile("9876543210")
@@ -65,7 +71,7 @@ public class OnboardingIntegrationTest {
 
         testSeller = User.builder()
                 .email("seller.test@eagle.com")
-                .password("hashedPwd")
+                .password(encodedPassword)
                 .firstName("Jane")
                 .lastName("Doe")
                 .mobile("9876543211")
@@ -76,7 +82,7 @@ public class OnboardingIntegrationTest {
 
         testAdmin = User.builder()
                 .email("admin.test@eagle.com")
-                .password("hashedPwd")
+                .password(encodedPassword)
                 .firstName("Admin")
                 .lastName("User")
                 .mobile("9000000001")
