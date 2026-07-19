@@ -69,7 +69,7 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         }
 
         SellerProfile saved = sellerProfileRepository.save(profile);
-        logHistory(saved, null, SellerState.DRAFT, user, "Initial registration");
+        logHistory(saved, SellerState.DRAFT, SellerState.DRAFT, user, "Initial registration");
 
         // Publish Event and Outbox record
         com.eagleauctioner.event.SellerCreatedEvent createdEvent = 
