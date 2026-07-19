@@ -110,7 +110,7 @@ public class OnboardingIntegrationTest {
 
         // 2. Submit KYC Documents
         List<KycDocumentRequest> docs = List.of(
-                new KycDocumentRequest("PAN_CARD", "/s3/pan.jpg", "hash_pan_file_123", 1024, "image/jpeg", false),
+                new KycDocumentRequest("PAN", "/s3/pan.jpg", "hash_pan_file_123", 1024, "image/jpeg", false),
                 new KycDocumentRequest("AADHAAR_FRONT", "/s3/aadhaar.jpg", "hash_aadhaar_file_123", 1024, "image/jpeg", false)
         );
 
@@ -156,8 +156,8 @@ public class OnboardingIntegrationTest {
 
         // 2. Submit KYC Documents
         List<KycDocumentRequest> docs = List.of(
-                new KycDocumentRequest("PAN_CARD", "/s3/pan.jpg", "hash_pan_file_123", 1024, "image/jpeg", false),
-                new KycDocumentRequest("INCORPORATION_CERTIFICATE", "/s3/inc.jpg", "hash_inc_file_123", 1024, "image/jpeg", false)
+                new KycDocumentRequest("PAN", "/s3/pan.jpg", "hash_pan_file_123", 1024, "image/jpeg", false),
+                new KycDocumentRequest("OTHER", "/s3/inc.jpg", "hash_inc_file_123", 1024, "image/jpeg", false)
         );
 
         sellerOnboardingService.submitDocuments(profileId, testSeller.getId(), docs);

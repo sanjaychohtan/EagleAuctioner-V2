@@ -293,9 +293,12 @@ public class ContractTests {
 
     @Test
     void testCreateContractDraft_ConcurrentCreation_ReturnsExisting() {
+        when(documentNumberGenerator.generateNextNumber(DocumentType.CONTRACT)).thenReturn("CON-2026-00001");
         when(contractRepository.saveAndFlush(any(Contract.class)))
                 .thenThrow(new org.springframework.dao.DataIntegrityViolationException("Duplicate key"));
-        when(contractRepository.findByWinnerId(winner.getId())).thenReturn(Optional.of(contract));
+        when(contractRepository.findByWinnerId(winner.getId()))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(contract));
 
         Contract result = contractService.createContractDraft(winner);
 

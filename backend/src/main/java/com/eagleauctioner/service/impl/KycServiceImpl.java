@@ -72,7 +72,7 @@ public class KycServiceImpl implements KycService {
                 .newState(targetState)
                 .decision(decision)
                 .reviewNotes(request.reviewNotes())
-                .reviewerIp(AuditContext.get() != null ? AuditContext.get().getIpAddress() : null)
+                .reviewerIp(AuditContext.getOptional().map(AuditContext::getIpAddress).orElse(null))
                 .reviewDurationMs(Duration.between(startTime, Instant.now()).toMillis())
                 .reviewedAt(Instant.now())
                 .build();
