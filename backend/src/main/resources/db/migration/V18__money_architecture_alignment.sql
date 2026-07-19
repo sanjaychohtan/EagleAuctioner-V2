@@ -1,4 +1,8 @@
 -- Change all monetary fields from NUMERIC/DECIMAL to BIGINT (paise)
+
+DROP MATERIALIZED VIEW IF EXISTS mv_tenant_performance_kpis;
+DROP VIEW IF EXISTS vw_revenue_gst_ledger_reconciliation;
+
 -- V10
 ALTER TABLE payment_transactions ALTER COLUMN amount TYPE BIGINT USING (amount * 100)::BIGINT;
 ALTER TABLE payment_advices ALTER COLUMN amount_due TYPE BIGINT USING (amount_due * 100)::BIGINT;
@@ -24,11 +28,9 @@ ALTER TABLE fee_invoices ALTER COLUMN subtotal TYPE BIGINT USING (subtotal * 100
 ALTER TABLE fee_invoices ALTER COLUMN tax_amount TYPE BIGINT USING (tax_amount * 100)::BIGINT;
 ALTER TABLE fee_invoices ALTER COLUMN total_amount TYPE BIGINT USING (total_amount * 100)::BIGINT;
 ALTER TABLE fee_invoice_items ALTER COLUMN amount TYPE BIGINT USING (amount * 100)::BIGINT;
-
 ALTER TABLE gst_invoices ALTER COLUMN subtotal TYPE BIGINT USING (subtotal * 100)::BIGINT;
 ALTER TABLE gst_invoices ALTER COLUMN total_tax TYPE BIGINT USING (total_tax * 100)::BIGINT;
 ALTER TABLE gst_invoices ALTER COLUMN total_amount TYPE BIGINT USING (total_amount * 100)::BIGINT;
-
 ALTER TABLE gst_invoice_items ALTER COLUMN amount TYPE BIGINT USING (amount * 100)::BIGINT;
 ALTER TABLE gst_invoice_items ALTER COLUMN tax_amount TYPE BIGINT USING (tax_amount * 100)::BIGINT;
 ALTER TABLE gst_invoice_items ALTER COLUMN total_amount TYPE BIGINT USING (total_amount * 100)::BIGINT;
@@ -71,3 +73,49 @@ ALTER TABLE settlements ALTER COLUMN winning_amount TYPE BIGINT USING (winning_a
 ALTER TABLE payment_allocations ALTER COLUMN allocated_amount TYPE BIGINT USING (allocated_amount * 100)::BIGINT;
 
 ALTER TABLE financial_configurations ALTER COLUMN tolerance_value TYPE BIGINT USING (tolerance_value * 100)::BIGINT;
+
+
+-- Recreate Views and Materialized Views with updated underlying types
+
+CREATE OR REPLACE VIEW vw_revenue_gst_ledger_reconciliation AS
+SELECT 
+    cl.id AS contract_id,
+    cl.document_number AS contract_number,
+    b.id AS bidder_profile_id,
+    u.id AS user_id,
+    u.email AS user_email,
+    l.id AS ledger_entry_id,
+    l.account_type,
+    l.entry_type,
+    l.amount,
+    g.id AS gst_invoice_id,
+    g.total_tax,
+    cl.created_at AS transaction_time
+FROM contracts cl
+LEFT JOIN auction_winners aw ON cl.winner_id = aw.id
+LEFT JOIN bidder_profiles b ON aw.bidder_id = b.id
+LEFT JOIN users u ON b.user_id = u.id
+LEFT JOIN settlements s ON s.contract_id = cl.id
+LEFT JOIN ledger_transactions lt ON lt.settlement_id = s.id
+LEFT JOIN ledger_entries l ON l.ledger_transaction_id = lt.id
+LEFT JOIN gst_invoices g ON g.settlement_id = s.id;
+
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS mv_tenant_performance_kpis AS
+SELECT
+    COALESCE(u.id, '00000000-0000-0000-0000-000000000000'::uuid) AS tenant_id,
+    COUNT(DISTINCT a.id) AS total_auctions,
+    COUNT(DISTINCT CASE WHEN a.state IN ('ENDED', 'SETTLED') THEN a.id END) AS completed_auctions,
+    COUNT(DISTINCT CASE WHEN a.state = 'LIVE' THEN a.id END) AS active_auctions,
+    COALESCE(SUM(aw.winning_amount), 0) AS total_gmv,
+    COUNT(DISTINCT b.id) AS total_bids
+FROM users u
+LEFT JOIN seller_profiles sp ON sp.user_id = u.id
+LEFT JOIN auctions a ON a.seller_profile_id = sp.id
+LEFT JOIN auction_lots al ON al.auction_id = a.id
+LEFT JOIN auction_winners aw ON aw.auction_lot_id = al.id
+LEFT JOIN bids b ON b.auction_lot_id = al.id
+GROUP BY u.id;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_tenant_kpis_tenant ON mv_tenant_performance_kpis(tenant_id);
+
