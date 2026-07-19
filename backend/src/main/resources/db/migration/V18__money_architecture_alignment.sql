@@ -1,8 +1,6 @@
 -- Change all monetary fields from NUMERIC/DECIMAL to BIGINT (paise)
 -- V10
 ALTER TABLE payment_transactions ALTER COLUMN amount TYPE BIGINT USING (amount * 100)::BIGINT;
-ALTER TABLE payment_advices ALTER COLUMN total_amount TYPE BIGINT USING (total_amount * 100)::BIGINT;
-ALTER TABLE payment_advices ALTER COLUMN allocated_amount TYPE BIGINT USING (allocated_amount * 100)::BIGINT;
 ALTER TABLE payment_advices ALTER COLUMN amount_due TYPE BIGINT USING (amount_due * 100)::BIGINT;
 ALTER TABLE payments ALTER COLUMN total_amount TYPE BIGINT USING (total_amount * 100)::BIGINT;
 
