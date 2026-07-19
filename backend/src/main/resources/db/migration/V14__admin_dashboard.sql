@@ -76,10 +76,7 @@ SELECT
     l.entry_type,
     l.amount,
     g.id AS gst_invoice_id,
-    g.total_gst_amount,
-    g.cgst_amount,
-    g.sgst_amount,
-    g.igst_amount,
+    g.total_tax,
     cl.created_at AS transaction_time
 FROM contracts cl
 LEFT JOIN auction_winners aw ON cl.winner_id = aw.id
@@ -88,7 +85,7 @@ LEFT JOIN users u ON b.user_id = u.id
 LEFT JOIN settlements s ON s.contract_id = cl.id
 LEFT JOIN ledger_transactions lt ON lt.settlement_id = s.id
 LEFT JOIN ledger_entries l ON l.ledger_transaction_id = lt.id
-LEFT JOIN gst_invoices g ON g.contract_id = cl.id;
+LEFT JOIN gst_invoices g ON g.settlement_id = s.id;
 
 -- Materialized views for high-performance sub-second Analytics Dashboard KPIs
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_tenant_performance_kpis AS
@@ -111,7 +108,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_tenant_kpis_tenant ON mv_tenant_perform
 
 -- Composite Indexes for analytical performance optimization
 CREATE INDEX IF NOT EXISTS idx_ledger_entries_recon_lookup ON ledger_entries (account_type, entry_type, amount);
-CREATE INDEX IF NOT EXISTS idx_gst_invoice_recon_lookup ON gst_invoices (contract_id, total_gst_amount);
+CREATE INDEX IF NOT EXISTS idx_gst_invoice_recon_lookup ON gst_invoices (settlement_id, total_tax);
 CREATE INDEX IF NOT EXISTS idx_contracts_winning_bidder ON contracts (winner_id, status);
 
 -- Fast Refresh Function for Cron Scheduled execution
