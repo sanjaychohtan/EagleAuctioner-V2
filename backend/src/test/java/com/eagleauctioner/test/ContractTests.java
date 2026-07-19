@@ -100,17 +100,17 @@ public class ContractTests {
         // Standard context setup
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn("buyer@example.com");
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")))
+        lenient().when(authentication.getName()).thenReturn("buyer@example.com");
+        lenient().doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")))
                 .when(authentication).getAuthorities();
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
     void testCreateContractDraft_Success() {
         when(documentNumberGenerator.generateNextNumber(DocumentType.CONTRACT)).thenReturn("CON-2026-00001");
-        when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> {
+        when(contractRepository.saveAndFlush(any(Contract.class))).thenAnswer(invocation -> {
             Contract c = invocation.getArgument(0);
             c.setId(UUID.randomUUID());
             return c;
@@ -130,6 +130,7 @@ public class ContractTests {
     void testAcceptContract_Success_ByBuyer() {
         when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
         when(contractRepository.save(any(Contract.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(settlementService.detectRegion(any(Contract.class))).thenReturn("GLOBAL");
 
         ContractResponse response = contractService.acceptContract(contract.getId(), "Accepting standard terms");
 
@@ -143,13 +144,12 @@ public class ContractTests {
     void testAcceptContract_IDOR_Violation() {
         // Switch to an attacker security context
         Authentication attackerAuth = mock(Authentication.class);
-        when(attackerAuth.getName()).thenReturn("attacker@example.com");
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")))
+        lenient().when(attackerAuth.getName()).thenReturn("attacker@example.com");
+        lenient().doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_BIDDER")))
                 .when(attackerAuth).getAuthorities();
-        SecurityContextHolder.getContext().getAuthentication();
         
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(attackerAuth);
+        lenient().when(securityContext.getAuthentication()).thenReturn(attackerAuth);
         SecurityContextHolder.setContext(securityContext);
 
         when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
@@ -163,12 +163,12 @@ public class ContractTests {
     void testAcceptContract_AdminAccess_BypassesIDOR() {
         // Switch to admin context
         Authentication adminAuth = mock(Authentication.class);
-        when(adminAuth.getName()).thenReturn("admin@example.com");
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+        lenient().when(adminAuth.getName()).thenReturn("admin@example.com");
+        lenient().doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .when(adminAuth).getAuthorities();
         
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(adminAuth);
+        lenient().when(securityContext.getAuthentication()).thenReturn(adminAuth);
         SecurityContextHolder.setContext(securityContext);
 
         when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
@@ -258,11 +258,11 @@ public class ContractTests {
     void testTerminateContract_Success_ByAdmin() {
         // Admin context
         Authentication adminAuth = mock(Authentication.class);
-        when(adminAuth.getName()).thenReturn("admin@example.com");
-        doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+        lenient().when(adminAuth.getName()).thenReturn("admin@example.com");
+        lenient().doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .when(adminAuth).getAuthorities();
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(adminAuth);
+        lenient().when(securityContext.getAuthentication()).thenReturn(adminAuth);
         SecurityContextHolder.setContext(securityContext);
 
         when(contractRepository.findByIdWithRelations(contract.getId())).thenReturn(Optional.of(contract));
