@@ -56,36 +56,36 @@ public class DashboardControllerTest {
     @org.junit.jupiter.api.BeforeEach
     void setUpFilters() throws Exception {
         org.mockito.Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
-            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.ServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.ServletResponse res = invocation.getArgument(1);
             jakarta.servlet.FilterChain chain = invocation.getArgument(2);
             chain.doFilter(req, res);
             return null;
-        }).when(jwtAuthenticationFilter).doFilterInternal(
+        }).when(jwtAuthenticationFilter).doFilter(
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any()
         );
 
         org.mockito.Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
-            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.ServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.ServletResponse res = invocation.getArgument(1);
             jakarta.servlet.FilterChain chain = invocation.getArgument(2);
             chain.doFilter(req, res);
             return null;
-        }).when(rateLimitingFilter).doFilterInternal(
+        }).when(rateLimitingFilter).doFilter(
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any()
         );
 
         org.mockito.Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest req = invocation.getArgument(0);
-            jakarta.servlet.http.HttpServletResponse res = invocation.getArgument(1);
+            jakarta.servlet.ServletRequest req = invocation.getArgument(0);
+            jakarta.servlet.ServletResponse res = invocation.getArgument(1);
             jakarta.servlet.FilterChain chain = invocation.getArgument(2);
             chain.doFilter(req, res);
             return null;
-        }).when(idempotencyFilter).doFilterInternal(
+        }).when(idempotencyFilter).doFilter(
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.any()
