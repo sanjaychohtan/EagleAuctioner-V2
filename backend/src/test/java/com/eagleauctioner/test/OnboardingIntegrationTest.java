@@ -6,10 +6,13 @@ import com.eagleauctioner.enums.*;
 import com.eagleauctioner.repository.*;
 import com.eagleauctioner.service.BidderOnboardingService;
 import com.eagleauctioner.service.SellerOnboardingService;
+import com.eagleauctioner.service.KmsEncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,24 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 public class OnboardingIntegrationTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public KmsEncryptionService kmsEncryptionService() {
+            return new KmsEncryptionService() {
+                @Override
+                public String encrypt(String plainText) {
+                    return plainText;
+                }
+
+                @Override
+                public String decrypt(String cipherText) {
+                    return cipherText;
+                }
+            };
+        }
+    }
 
     @Autowired
     private BidderOnboardingService bidderOnboardingService;

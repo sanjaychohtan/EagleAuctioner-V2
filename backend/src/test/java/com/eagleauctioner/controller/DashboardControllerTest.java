@@ -3,6 +3,10 @@ package com.eagleauctioner.controller;
 import com.eagleauctioner.dto.DashboardDTOs.ExecutiveDashboardData;
 import com.eagleauctioner.service.DashboardService;
 import com.eagleauctioner.repository.UserRepository;
+import com.eagleauctioner.security.JwtAuthenticationFilter;
+import com.eagleauctioner.security.RateLimitingFilter;
+import com.eagleauctioner.security.CustomAuthenticationEntryPoint;
+import com.eagleauctioner.security.CustomAccessDeniedHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,6 +32,18 @@ public class DashboardControllerTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private RateLimitingFilter rateLimitingFilter;
+
+    @MockBean
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @MockBean
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Test
     @WithMockUser(roles = "EXECUTIVE")

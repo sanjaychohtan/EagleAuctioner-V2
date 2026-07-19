@@ -120,7 +120,7 @@ public class LedgerTests {
 
         sellerWallet.setAvailableBalance(106200L);
 
-        when(ledgerTransactionRepository.findByTransactionReference(tx.getTransactionReference())).thenReturn(Optional.of(tx));
+        when(ledgerTransactionRepository.findByTransactionReferenceForUpdate(tx.getTransactionReference())).thenReturn(Optional.of(tx));
         when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
         when(walletRepository.findByUserIdForUpdate(any(UUID.class))).thenReturn(Optional.of(sellerWallet));
 
