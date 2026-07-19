@@ -5,6 +5,7 @@ import com.eagleauctioner.enums.ReviewDecision;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -26,6 +27,7 @@ public class KycReview extends BaseEntity {
     @JoinColumn(name = "bidder_profile_id", nullable = false)
     private BidderProfile bidderProfile;
 
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_user_id", nullable = false)
     private User reviewer;
