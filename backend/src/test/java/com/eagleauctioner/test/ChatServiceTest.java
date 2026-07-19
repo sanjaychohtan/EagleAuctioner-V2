@@ -50,7 +50,7 @@ class ChatServiceTest {
         ChatMessage result = chatService.sendMessage(senderId, messageText);
 
         assertNotNull(result);
-        assertTrue(result.getMessageText().contains("&lt;Greetings&gt;"));
+        assertTrue(result.getMessageText().contains("&amp;lt;Greetings&amp;gt;"));
         verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
     }
 

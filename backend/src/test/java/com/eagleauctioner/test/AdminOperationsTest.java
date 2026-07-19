@@ -64,7 +64,11 @@ public class AdminOperationsTest {
     void testSetFeatureFlag_CreateNew() {
         String flagKey = "ENABLE_NEW_UI";
         when(featureFlagRepository.findByFlagKey(flagKey)).thenReturn(Optional.empty());
-        when(featureFlagRepository.save(any(FeatureFlag.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(featureFlagRepository.save(any(FeatureFlag.class))).thenAnswer(i -> {
+            FeatureFlag ff = i.getArgument(0);
+            ff.setId(UUID.randomUUID());
+            return ff;
+        });
 
         FeatureFlag flag = adminService.setFeatureFlag(flagKey, true, "New UI Flag", adminId);
 
