@@ -36,7 +36,7 @@ jobs:
           --health-retries 5
 
     env:
-      JWT_SECRET_KEY: "mytestsecretkeythatisverylongandsecureformavenbuilds123456"
+      JWT_SECRET_KEY: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901"
 
     steps:
     - name: Checkout Repository
