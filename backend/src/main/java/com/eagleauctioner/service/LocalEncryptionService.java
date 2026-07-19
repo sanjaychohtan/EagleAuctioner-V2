@@ -1,7 +1,6 @@
 package com.eagleauctioner.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -11,7 +10,6 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Service
-@Profile("local")
 public class LocalEncryptionService implements KmsEncryptionService {
 
     private static final String ALGORITHM = "AES/GCM/NoPadding";

@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DashboardController.class)
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class DashboardControllerTest {
 
     @Autowired

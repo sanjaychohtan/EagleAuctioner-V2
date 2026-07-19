@@ -96,6 +96,7 @@ public class WinnerTests {
                 .auction(auction)
                 .startingPrice(10000L)
                 .reservePrice(50000L)
+                .currency("EUR")
                 .build();
         lot.setId(UUID.randomUUID());
         lot.setLotStatus(AuctionLotStatus.SOLD);

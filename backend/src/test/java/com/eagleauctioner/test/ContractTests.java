@@ -6,7 +6,6 @@ import com.eagleauctioner.enums.DocumentType;
 import com.eagleauctioner.enums.WinnerStatus;
 import com.eagleauctioner.dto.ContractSettlementPaymentDTOs.*;
 import com.eagleauctioner.repository.ContractRepository;
-import com.eagleauctioner.repository.AuctionWinnerRepository;
 import com.eagleauctioner.service.ContractService;
 import com.eagleauctioner.service.DocumentNumberGeneratorService;
 import com.eagleauctioner.service.SettlementService;
@@ -40,7 +39,6 @@ public class ContractTests {
     @Mock private DocumentNumberGeneratorService documentNumberGenerator;
     @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private SettlementService settlementService;
-    @Mock private AuctionWinnerRepository auctionWinnerRepository;
 
     @InjectMocks private ContractService contractService;
 
