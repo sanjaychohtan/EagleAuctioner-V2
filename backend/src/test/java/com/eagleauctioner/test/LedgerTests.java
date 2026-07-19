@@ -159,6 +159,7 @@ public class LedgerTests {
     @Test
     void testWalletLocking_Verified() {
         when(paymentRepository.findByIdWithRelations(payment.getId())).thenReturn(Optional.of(payment));
+        when(ledgerTransactionRepository.findByPaymentId(payment.getId())).thenReturn(Optional.empty());
         when(walletRepository.findByUserIdForUpdate(any(UUID.class))).thenReturn(Optional.of(sellerWallet));
         when(ledgerTransactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(walletRepository.save(any())).thenAnswer(i -> i.getArgument(0));

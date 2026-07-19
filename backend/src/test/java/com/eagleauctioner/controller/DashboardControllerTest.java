@@ -7,6 +7,7 @@ import com.eagleauctioner.security.JwtAuthenticationFilter;
 import com.eagleauctioner.security.RateLimitingFilter;
 import com.eagleauctioner.security.CustomAuthenticationEntryPoint;
 import com.eagleauctioner.security.CustomAccessDeniedHandler;
+import com.eagleauctioner.filter.IdempotencyFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,6 +45,9 @@ public class DashboardControllerTest {
 
     @MockBean
     private CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    @MockBean
+    private IdempotencyFilter idempotencyFilter;
 
     @Test
     @WithMockUser(roles = "EXECUTIVE")
