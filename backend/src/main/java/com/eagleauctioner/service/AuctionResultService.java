@@ -22,6 +22,7 @@ import com.eagleauctioner.factory.WinnerSnapshotFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -53,9 +54,9 @@ public class AuctionResultService {
     private final BidRepository bidRepository;
     private final ReserveEvaluationPolicy reserveEvaluationPolicy;
 
-    @Transactional
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleLotClosed(AuctionEvent event) {
         if (event.getEventType() == AuctionEventType.LOT_ENDED) {
             log.info("Received LOT_ENDED event for lot {}, evaluating outcome.", event.getLotId());
