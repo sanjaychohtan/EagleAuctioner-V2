@@ -9,6 +9,7 @@ import lombok.*;
 import com.eagleauctioner.enums.ContractStatus;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class Contract extends BaseEntity {
     @JoinColumn(name = "winner_id", nullable = false)
     private AuctionWinner winner;
 
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sale_confirmation_id")
     private SaleConfirmation saleConfirmation;
