@@ -101,7 +101,7 @@ LEFT JOIN seller_profiles sp ON sp.user_id = u.id
 LEFT JOIN auctions a ON a.seller_profile_id = sp.id
 LEFT JOIN auction_lots al ON al.auction_id = a.id
 LEFT JOIN auction_winners aw ON aw.auction_lot_id = al.id
-LEFT JOIN bids b ON b.lot_id = al.id
+LEFT JOIN bids b ON b.auction_lot_id = al.id
 GROUP BY u.id;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_tenant_kpis_tenant ON mv_tenant_performance_kpis(tenant_id);
