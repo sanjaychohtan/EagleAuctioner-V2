@@ -85,7 +85,9 @@ FROM contracts cl
 LEFT JOIN auction_winners aw ON cl.winner_id = aw.id
 LEFT JOIN bidder_profiles b ON aw.bidder_id = b.id
 LEFT JOIN users u ON b.user_id = u.id
-LEFT JOIN ledgers l ON l.reference_id = cl.id
+LEFT JOIN settlements s ON s.contract_id = cl.id
+LEFT JOIN ledger_transactions lt ON lt.settlement_id = s.id
+LEFT JOIN ledger_entries l ON l.ledger_transaction_id = lt.id
 LEFT JOIN gst_invoices g ON g.contract_id = cl.id;
 
 -- Materialized views for high-performance sub-second Analytics Dashboard KPIs
@@ -108,7 +110,7 @@ GROUP BY u.id;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_tenant_kpis_tenant ON mv_tenant_performance_kpis(tenant_id);
 
 -- Composite Indexes for analytical performance optimization
-CREATE INDEX IF NOT EXISTS idx_ledgers_recon_lookup ON ledgers (account_type, entry_type, amount);
+CREATE INDEX IF NOT EXISTS idx_ledger_entries_recon_lookup ON ledger_entries (account_type, entry_type, amount);
 CREATE INDEX IF NOT EXISTS idx_gst_invoice_recon_lookup ON gst_invoices (contract_id, total_gst_amount);
 CREATE INDEX IF NOT EXISTS idx_contracts_winning_bidder ON contracts (winner_id, status);
 
