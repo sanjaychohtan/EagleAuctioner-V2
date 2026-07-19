@@ -107,12 +107,12 @@ public class PaymentTests {
     private void setupSecurityContext(String username, String role) {
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(authentication.getName()).thenReturn(username);
+        lenient().when(authentication.getName()).thenReturn(username);
         
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
-        doReturn(authorities).when(authentication).getAuthorities();
+        lenient().doReturn(authorities).when(authentication).getAuthorities();
     }
 
     @Test

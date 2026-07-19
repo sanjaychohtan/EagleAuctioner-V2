@@ -109,6 +109,7 @@ public class WebSocketSecurityTests {
     @Test
     void testConnectWithValidJwt() {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+        accessor.setLeaveMutable(true);
         accessor.addNativeHeader("Authorization", "Bearer valid-token");
         Message<?> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
 
