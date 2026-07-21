@@ -40,7 +40,7 @@ public class PaymentTransaction extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "amount", nullable = false, precision = 18, scale = 2, updatable = false)
+    @Column(name = "amount", nullable = false, updatable = false)
     private Long amount;
 
     @NotNull

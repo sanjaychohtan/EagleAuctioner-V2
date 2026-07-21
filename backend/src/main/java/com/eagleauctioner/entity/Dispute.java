@@ -24,7 +24,7 @@ public class Dispute extends BaseEntity {
     @Column(name = "contract_id")
     private UUID contractId;
 
-    @Column(name = "disputed_amount", precision = 19, scale = 2)
+    @Column(name = "disputed_amount")
     private Long disputedAmount;
 
     @Column(name = "status", nullable = false, length = 30)

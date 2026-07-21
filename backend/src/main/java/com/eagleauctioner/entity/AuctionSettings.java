@@ -47,7 +47,7 @@ public class AuctionSettings extends BaseEntity {
     @Column(name = "bid_increment_type", length = 50)
     private BidIncrementType bidIncrementType;
 
-    @Column(name = "minimum_increment", precision = 18, scale = 2)
+    @Column(name = "minimum_increment")
     private Long minimumIncrement;
 
     @Column(name = "reserve_price_enabled", nullable = false)

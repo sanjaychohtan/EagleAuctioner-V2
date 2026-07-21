@@ -9,7 +9,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -48,25 +47,25 @@ public class AuctionLot extends BaseEntity {
     private String materialCategory;
 
     @NotNull(message = "Quantity is required")
-    @Column(name = "quantity", nullable = false, precision = 18, scale = 4)
-    private BigDecimal quantity;
+    @Column(name = "quantity", nullable = false)
+    private Long quantity; // Stored as scaled integer (e.g., * 10000)
 
     @NotBlank(message = "Unit of measure is required")
     @Column(name = "unit_of_measure", nullable = false, length = 20)
     private String unitOfMeasure;
 
     @NotNull(message = "Starting price is required")
-    @Column(name = "starting_price", nullable = false, precision = 18, scale = 2)
+    @Column(name = "starting_price", nullable = false)
     private Long startingPrice;
 
-    @Column(name = "reserve_price", precision = 18, scale = 2)
+    @Column(name = "reserve_price")
     private Long reservePrice;
 
-    @Column(name = "current_highest_bid", precision = 18, scale = 2)
+    @Column(name = "current_highest_bid")
     private Long currentHighestBid;
 
     @NotNull(message = "Minimum increment is required")
-    @Column(name = "minimum_increment", nullable = false, precision = 18, scale = 2)
+    @Column(name = "minimum_increment", nullable = false)
     private Long minimumIncrement;
 
     @NotBlank(message = "Currency is required")
@@ -89,7 +88,7 @@ public class AuctionLot extends BaseEntity {
     @PrePersist
     @PreUpdate
     public void validateLotBusinessRules() {
-        if (quantity != null && quantity.compareTo(BigDecimal.ZERO) <= 0) {
+        if (quantity != null && quantity <= 0L) {
             throw new IllegalStateException("Quantity must be greater than zero");
         }
         if (startingPrice != null && startingPrice.compareTo(0L) < 0) {

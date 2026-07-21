@@ -26,7 +26,7 @@ public class FinancialConfiguration {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "tolerance_value", precision = 19, scale = 2)
+    @Column(name = "tolerance_value")
     private Long toleranceValue;
 
     @Column(name = "effective_from")

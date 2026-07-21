@@ -54,7 +54,7 @@ public class Payment extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "total_amount", nullable = false, precision = 18, scale = 2)
+    @Column(name = "total_amount", nullable = false)
     private Long totalAmount;
 
     public Long getAmount() {

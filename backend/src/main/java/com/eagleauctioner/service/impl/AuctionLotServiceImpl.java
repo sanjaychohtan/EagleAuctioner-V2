@@ -49,7 +49,7 @@ public class AuctionLotServiceImpl implements AuctionLotService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .materialCategory(request.getMaterialCategory())
-                .quantity(request.getQuantity() != null ? java.math.BigDecimal.valueOf(request.getQuantity()) : null)
+                .quantity(request.getQuantity())
                 .unitOfMeasure(request.getUnitOfMeasure())
                 .startingPrice(request.getStartingPrice())
                 .reservePrice(request.getReservePrice())
@@ -83,7 +83,7 @@ public class AuctionLotServiceImpl implements AuctionLotService {
         lot.setTitle(request.getTitle());
         lot.setDescription(request.getDescription());
         lot.setMaterialCategory(request.getMaterialCategory());
-        lot.setQuantity(request.getQuantity() != null ? java.math.BigDecimal.valueOf(request.getQuantity()) : null);
+        lot.setQuantity(request.getQuantity());
         lot.setUnitOfMeasure(request.getUnitOfMeasure());
         lot.setStartingPrice(request.getStartingPrice());
         lot.setReservePrice(request.getReservePrice());

@@ -8,7 +8,6 @@ import org.hibernate.envers.Audited;
 import com.eagleauctioner.enums.TaxType;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import java.math.BigDecimal;
 
 /**
  * Detailed calculations of various tax components applied to a Settlement.
@@ -40,8 +39,8 @@ public class TaxBreakup extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "tax_rate", nullable = false, precision = 5, scale = 2)
-    private BigDecimal taxRate;
+    @Column(name = "tax_rate", nullable = false)
+    private Long taxRate;
 
     @NotNull
     @PositiveOrZero

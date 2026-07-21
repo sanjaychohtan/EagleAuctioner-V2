@@ -57,7 +57,7 @@ public class AuctionWinner extends BaseEntity {
 
     @NotNull(message = "Winning amount is required")
     @DecimalMin(value = "0.0", message = "Winning amount must be non-negative")
-    @Column(name = "winning_amount", nullable = false, precision = 18, scale = 2)
+    @Column(name = "winning_amount", nullable = false)
     private Long winningAmount;
 
     @Column(name = "seller_decision_at")
@@ -81,7 +81,7 @@ public class AuctionWinner extends BaseEntity {
     @Column(name = "winner_anonymous_code", length = 100, updatable = false)
     private String winnerAnonymousCode;
 
-    @Column(name = "winner_bid_amount_snapshot", precision = 18, scale = 2, updatable = false)
+    @Column(name = "winner_bid_amount_snapshot", updatable = false)
     private Long winnerBidAmountSnapshot;
 
     @Column(name = "winner_bid_time_snapshot", updatable = false)
@@ -91,7 +91,7 @@ public class AuctionWinner extends BaseEntity {
     @Column(name = "seller_company_snapshot", length = 255, updatable = false)
     private String sellerCompanySnapshot;
 
-    @Column(name = "reserve_price_snapshot", precision = 18, scale = 2, updatable = false)
+    @Column(name = "reserve_price_snapshot", updatable = false)
     private Long reservePriceSnapshot;
 
     @Size(max = 10)

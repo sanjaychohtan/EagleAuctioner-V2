@@ -37,10 +37,10 @@ public class AuctionResult extends BaseEntity {
     @Column(name = "status", nullable = false, length = 50)
     private AuctionResultStatus status;
 
-    @Column(name = "highest_bid_amount", precision = 18, scale = 2)
+    @Column(name = "highest_bid_amount")
     private Long highestBidAmount;
 
-    @Column(name = "reserve_price", precision = 18, scale = 2)
+    @Column(name = "reserve_price")
     private Long reservePrice;
 
     @NotNull(message = "Reserve met status is required")

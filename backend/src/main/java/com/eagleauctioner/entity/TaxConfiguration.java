@@ -10,7 +10,6 @@ import org.hibernate.envers.Audited;
 import com.eagleauctioner.enums.TaxType;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import java.math.BigDecimal;
 
 /**
  * Region-specific and rule-specific tax configurations for configuration-driven tax calculation.
@@ -42,8 +41,8 @@ public class TaxConfiguration extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "rate", nullable = false, precision = 5, scale = 2)
-    private BigDecimal rate; // Percentage, e.g., 18.00%
+    @Column(name = "rate", nullable = false)
+    private Long rate; // Percentage as basis points, e.g., 18.00% -> 1800
 
     @NotNull
     @Column(name = "is_active", nullable = false)

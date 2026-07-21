@@ -49,6 +49,7 @@ public class GSTInvoiceService {
         // Basis for GST is the platform fee
         Long subtotal = settlement.getPlatformFee();
         BigDecimal gstRate = financialRuleEngine.getGstPercentage();
+        Long gstRateLong = gstRate.movePointRight(2).setScale(0, java.math.RoundingMode.HALF_UP).longValueExact();
         Long gstAmount = taxEngine.calculateTax(subtotal, gstRate);
         Long totalAmount = subtotal + gstAmount;
 
@@ -73,7 +74,7 @@ public class GSTInvoiceService {
                 .description("Platform facilitation fee for Lot: " + settlement.getContract().getWinner().getAuctionLot().getLotNumber())
                 .hsnSacCode("998311") // Management consulting and management services
                 .amount(subtotal)
-                .taxRate(gstRate)
+                .taxRate(gstRateLong)
                 .taxAmount(gstAmount)
                 .totalAmount(totalAmount)
                 .build();

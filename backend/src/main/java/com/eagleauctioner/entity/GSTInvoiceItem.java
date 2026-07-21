@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "gst_invoice_items")
 @Audited
@@ -26,15 +24,15 @@ public class GSTInvoiceItem extends BaseEntity {
     @Column(name = "hsn_sac_code", length = 20, updatable = false)
     private String hsnSacCode;
 
-    @Column(name = "amount", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "amount", nullable = false, updatable = false)
     private Long amount;
 
-    @Column(name = "tax_rate", nullable = false, updatable = false, precision = 5, scale = 2)
-    private BigDecimal taxRate;
+    @Column(name = "tax_rate", nullable = false, updatable = false)
+    private Long taxRate;
 
-    @Column(name = "tax_amount", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "tax_amount", nullable = false, updatable = false)
     private Long taxAmount;
 
-    @Column(name = "total_amount", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "total_amount", nullable = false, updatable = false)
     private Long totalAmount;
 }

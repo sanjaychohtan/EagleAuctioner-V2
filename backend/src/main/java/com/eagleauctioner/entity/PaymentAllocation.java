@@ -41,7 +41,7 @@ public class PaymentAllocation extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "allocated_amount", nullable = false, precision = 18, scale = 2, updatable = false)
+    @Column(name = "allocated_amount", nullable = false, updatable = false)
     private Long allocatedAmount;
 
     @NotNull

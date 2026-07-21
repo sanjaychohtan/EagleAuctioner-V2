@@ -118,13 +118,13 @@ public class BulkLotImportService {
                     throw new IllegalArgumentException("Validation Error at line " + lineNumber + ": Lot number '" + lotNumber + "' already exists in this auction in the system");
                 }
 
-                BigDecimal quantity;
+                Long quantity;
                 Long startingPrice;
                 Long reservePrice = null;
                 Long minimumIncrement;
 
                 try {
-                    quantity = new BigDecimal(quantityStr);
+                    quantity = new java.math.BigDecimal(quantityStr).movePointRight(4).setScale(0, java.math.RoundingMode.HALF_UP).longValueExact();
                     startingPrice = new java.math.BigDecimal(startingPriceStr).movePointRight(2).longValueExact();
                     minimumIncrement = new java.math.BigDecimal(minimumIncrementStr).movePointRight(2).longValueExact();
                     if (!reservePriceStr.isEmpty()) {

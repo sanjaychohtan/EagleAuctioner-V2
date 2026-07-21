@@ -45,7 +45,7 @@ public class ContractVersion extends BaseEntity {
 
     @NotNull
     @PositiveOrZero
-    @Column(name = "total_amount", nullable = false, precision = 18, scale = 2, updatable = false)
+    @Column(name = "total_amount", nullable = false, updatable = false)
     private Long totalAmount;
 
     @Size(max = 2000)

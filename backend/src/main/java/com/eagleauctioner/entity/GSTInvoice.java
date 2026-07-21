@@ -32,13 +32,13 @@ public class GSTInvoice extends BaseEntity {
     @Column(name = "buyer_id", nullable = false, updatable = false)
     private UUID buyerId;
 
-    @Column(name = "subtotal", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "subtotal", nullable = false, updatable = false)
     private Long subtotal;
 
-    @Column(name = "total_tax", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "total_tax", nullable = false, updatable = false)
     private Long totalTax;
 
-    @Column(name = "total_amount", nullable = false, updatable = false, precision = 19, scale = 2)
+    @Column(name = "total_amount", nullable = false, updatable = false)
     private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
