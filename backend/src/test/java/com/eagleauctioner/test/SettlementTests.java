@@ -104,7 +104,7 @@ public class SettlementTests {
                 .lotNumber("LOT-01")
                 .title("Heavy Melting Scrap")
                 .description("Grade A melting scrap")
-                .quantity(java.math.BigDecimal.valueOf(505))
+                .quantity(505L)
                 .unitOfMeasure("MT")
                 .build();
         lot.setId(UUID.randomUUID());

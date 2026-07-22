@@ -1,10 +1,22 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/eagleauctioner
+    url: jdbc:postgresql://localhost:5432/eagle_auctioner
     username: postgres
-    password: password
+    password: 123456
   jpa:
     hibernate:
       ddl-auto: update
   flyway:
     enabled: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.data.redis.RedisHealthContributorAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.data.redis.RedisReactiveHealthContributorAutoConfiguration
+
+management:
+  health:
+    redis:
+      enabled: false
+
