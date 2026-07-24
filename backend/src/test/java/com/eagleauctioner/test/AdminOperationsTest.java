@@ -1,7 +1,6 @@
 package com.eagleauctioner.test;
 
 import com.eagleauctioner.entity.*;
-import com.eagleauctioner.enums.Action;
 import com.eagleauctioner.repository.*;
 import com.eagleauctioner.service.impl.AdminOperationsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;

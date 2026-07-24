@@ -5,7 +5,6 @@ import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.SaleConfirmationStatus;
 import com.eagleauctioner.enums.DocumentType;
 import com.eagleauctioner.repository.SaleConfirmationRepository;
-import com.eagleauctioner.repository.AuctionWinnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

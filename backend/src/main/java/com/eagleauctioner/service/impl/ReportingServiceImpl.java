@@ -21,12 +21,6 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class ReportingServiceImpl implements ReportingService {
 
-    private final AuctionRepository auctionRepository;
-    private final BidRepository bidRepository;
-    private final LedgerRepository ledgerRepository;
-    private final SettlementRepository settlementRepository;
-    private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
     private final ReportScheduleRepository reportScheduleRepository;
 
     @Override

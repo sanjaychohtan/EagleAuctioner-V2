@@ -387,3 +387,5 @@ export function GlobalCommandPalette({
     </AnimatePresence>
   );
 }
+
+export default React.memo(GlobalCommandPalette);

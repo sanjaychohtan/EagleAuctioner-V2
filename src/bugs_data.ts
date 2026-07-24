@@ -1,5 +1,3 @@
-import { jsPDF } from "jspdf";
-
 export interface BugItem {
   id: number;
   category: string;
@@ -355,7 +353,8 @@ export const BUGS_LIST_DATA: BugItem[] = [
   }
 ];
 
-export const generateBugsReportPDF = () => {
+export const generateBugsReportPDF = async () => {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF("p", "mm", "a4");
   const bugs = BUGS_LIST_DATA;
   

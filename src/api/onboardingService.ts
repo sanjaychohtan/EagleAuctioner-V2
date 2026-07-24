@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { API_ENDPOINTS } from "../constants";
 
 export function generateUUID(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -129,10 +130,10 @@ export const OnboardingService = {
     // 1. Attempt real API request
     let apiResponse: BidderProfileResponse | null = null;
     try {
-      const res = await apiClient.post<BidderProfileResponse>("/onboarding/register", request);
+      const res = await apiClient.post<BidderProfileResponse>(API_ENDPOINTS.ONBOARDING.BIDDER_REGISTER, request);
       apiResponse = res.data;
     } catch (err) {
-      console.warn("[OnboardingService] Real API endpoint /onboarding/register not available. Falling back to Sandbox Local DB.", err);
+      console.warn("[OnboardingService] Real API endpoint not available. Falling back to Sandbox Local DB.", err);
     }
 
     // 2. Perform Sandbox Persistence
@@ -208,9 +209,9 @@ export const OnboardingService = {
     
     // 1. Attempt real API request
     try {
-      await apiClient.post(`/onboarding/${profileId}/documents`, documentRequests);
+      await apiClient.post(API_ENDPOINTS.ONBOARDING.BIDDER_DOCUMENTS(profileId), documentRequests);
     } catch (err) {
-      console.warn(`[OnboardingService] Real API endpoint /onboarding/${profileId}/documents not available. Falling back to Sandbox Local DB.`, err);
+      console.warn(`[OnboardingService] Real API endpoint not available. Falling back to Sandbox Local DB.`, err);
     }
 
     // 2. Perform Sandbox Persistence
@@ -244,9 +245,9 @@ export const OnboardingService = {
 
     // 1. Attempt real API request
     try {
-      await apiClient.post(`/onboarding/${profileId}/bank/verify`);
+      await apiClient.post(API_ENDPOINTS.ONBOARDING.BIDDER_BANK_VERIFY(profileId));
     } catch (err) {
-      console.warn(`[OnboardingService] Real API endpoint /onboarding/${profileId}/bank/verify not available. Falling back to Sandbox Local DB.`, err);
+      console.warn(`[OnboardingService] Real API endpoint not available. Falling back to Sandbox Local DB.`, err);
     }
 
     // 2. Perform Sandbox Persistence
@@ -306,7 +307,7 @@ export const OnboardingService = {
 
     // 1. Attempt real API request
     try {
-      await apiClient.post(`/onboarding/admin/review/${profileId}`, request);
+      await apiClient.post(API_ENDPOINTS.ONBOARDING.BIDDER_ADMIN_REVIEW(profileId), request);
     } catch (err) {
       console.warn(`[OnboardingService] Real API endpoint not available. Falling back to Sandbox Local DB.`, err);
     }
@@ -404,17 +405,14 @@ export const OnboardingService = {
     return profile || null;
   },
 
-  /**
-   * Fetches the entire pending verification queue for Admin users.
-   */
   async getAdminPendingQueue(): Promise<BidderProfileResponse[]> {
-    const db = getSandboxDB();
-    return db.filter((p) => 
-      p.state === BidderState.UNDER_REVIEW || 
-      p.state === BidderState.DRAFT || 
-      p.state === BidderState.REJECTED ||
-      p.state === BidderState.RETURNED_FOR_CORRECTION
-    );
+    try {
+      const res = await apiClient.get<any>(API_ENDPOINTS.ONBOARDING.SELLER_SEARCH);
+      return res.data?.data || res.data || [];
+    } catch (err) {
+      console.warn("[OnboardingService] Failed to fetch live admin pending queue", err);
+      return [];
+    }
   },
 
   /**

@@ -1,12 +1,6 @@
 package com.eagleauctioner.entity;
 
-import com.eagleauctioner.entity.BaseEntity;
-import com.eagleauctioner.entity.BidderProfile;
-import com.eagleauctioner.entity.AuctionLot;
 import com.eagleauctioner.enums.BidStatus;
-import com.eagleauctioner.enums.AuctionLotStatus;
-import com.eagleauctioner.enums.BidderState;
-import com.eagleauctioner.enums.AuctionState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import jakarta.validation.constraints.Min;

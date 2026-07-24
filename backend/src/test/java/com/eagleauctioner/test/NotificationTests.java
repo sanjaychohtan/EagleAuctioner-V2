@@ -1,6 +1,5 @@
 package com.eagleauctioner.test;
 
-import com.eagleauctioner.dto.NotificationDTOs.*;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.*;
 import com.eagleauctioner.notification.provider.EmailProvider;

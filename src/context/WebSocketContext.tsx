@@ -3,6 +3,7 @@ import { Client, StompSubscription } from "@stomp/stompjs";
 import { envConfig } from "../config/env";
 import { STORAGE_KEYS } from "../constants";
 import { useAuthStore } from "../store/useAuthStore";
+import { auditLogger } from "../utils/auditLogger";
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -17,13 +18,23 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   const stompClientRef = useRef<Client | null>(null);
   const subscriptionsRef = useRef<Map<string, StompSubscription>>(new Map());
   const accessToken = useAuthStore((state) => state.accessToken);
+  const accessTokenRef = useRef<string | null>(accessToken);
+
+  useEffect(() => {
+    accessTokenRef.current = accessToken;
+    if (stompClientRef.current && stompClientRef.current.connectHeaders) {
+      stompClientRef.current.connectHeaders["Authorization"] = `Bearer ${accessToken || ""}`;
+    }
+  }, [accessToken]);
+
+  const hasToken = !!accessToken;
 
   useEffect(() => {
     // Standard connection lifecycle matching Spring Boot Actuator/WebSockets configuration
     const stompClient = new Client({
       brokerURL: envConfig.wsBaseUrl,
       connectHeaders: {
-        Authorization: `Bearer ${accessToken || ""}`,
+        Authorization: `Bearer ${accessTokenRef.current || ""}`,
         "X-Tenant-Id": localStorage.getItem(STORAGE_KEYS.TENANT_ID) || "",
       },
       debug: (str) => {
@@ -51,6 +62,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     };
 
     stompClient.onStompError = (frame) => {
+      auditLogger.log("UNAUTHORIZED_ACCESS", { details: `STOMP Protocol Error: ${frame.headers["message"]}` });
       console.error("[STOMP Protocol Error]:", frame.headers["message"]);
       console.error("[STOMP Details]:", frame.body);
     };
@@ -69,7 +81,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       subscriptionsRef.current.clear();
       stompClient.deactivate();
     };
-  }, [accessToken]);
+  }, [hasToken]);
 
   const subscribe = (destination: string, callback: (message: any) => void): StompSubscription | null => {
     if (!stompClientRef.current || !isConnected) {
@@ -77,7 +89,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       return null;
     }
 
-    const subId = `${destination}-${Math.random()}`;
+    const uniqueId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    const subId = `${destination}-${uniqueId}`;
     try {
       const subscription = stompClientRef.current.subscribe(destination, (message) => {
         try {

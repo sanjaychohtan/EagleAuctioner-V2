@@ -153,10 +153,10 @@ export const AuctionService = {
    * Creates a new lot inside an auction.
    * Path: POST /api/v1/lots/auctions/{auctionId}
    */
-  async createLot(auctionId: string, request: CreateLotRequest): Promise<AuctionLotResponse> {
+  async createLot(auctionId: string, request: CreateLotRequest, sellerProfileId?: string): Promise<AuctionLotResponse> {
     console.log(`[AuctionService] Creating new lot for auction ID: ${auctionId}`);
     const response = await apiClient.post<ApiResponse<AuctionLotResponse>>(
-      API_ENDPOINTS.LOT.CREATE(auctionId),
+      API_ENDPOINTS.LOT.CREATE(auctionId, sellerProfileId),
       request
     );
     return response.data.data;
@@ -164,12 +164,12 @@ export const AuctionService = {
 
   /**
    * Updates an existing lot details.
-   * Path: PUT /api/v1/lots/{lotId}
+   * Path: PUT /api/v1/auctions/{auctionId}/lots/{lotId}
    */
-  async updateLot(lotId: string, request: UpdateLotRequest): Promise<AuctionLotResponse> {
+  async updateLot(auctionId: string, lotId: string, request: UpdateLotRequest, sellerProfileId?: string): Promise<AuctionLotResponse> {
     console.log(`[AuctionService] Updating existing lot ID: ${lotId}`);
     const response = await apiClient.put<ApiResponse<AuctionLotResponse>>(
-      API_ENDPOINTS.LOT.UPDATE(lotId),
+      API_ENDPOINTS.LOT.UPDATE(auctionId, lotId, sellerProfileId),
       request
     );
     return response.data.data;
@@ -177,35 +177,35 @@ export const AuctionService = {
 
   /**
    * Deletes a draft lot from an auction.
-   * Path: DELETE /api/v1/lots/{lotId}
+   * Path: DELETE /api/v1/auctions/{auctionId}/lots/{lotId}
    */
-  async deleteLot(lotId: string): Promise<void> {
+  async deleteLot(auctionId: string, lotId: string, sellerProfileId?: string): Promise<void> {
     console.log(`[AuctionService] Deleting draft lot ID: ${lotId}`);
     await apiClient.delete<ApiResponse<void>>(
-      API_ENDPOINTS.LOT.DELETE(lotId)
+      API_ENDPOINTS.LOT.DELETE(auctionId, lotId, sellerProfileId)
     );
   },
 
   /**
    * Publishes a draft lot inside an auction.
-   * Path: POST /api/v1/lots/{lotId}/publish
+   * Path: POST /api/v1/auctions/{auctionId}/lots/{lotId}/publish
    */
-  async publishLot(lotId: string): Promise<AuctionLotResponse> {
+  async publishLot(auctionId: string, lotId: string, sellerProfileId?: string): Promise<AuctionLotResponse> {
     console.log(`[AuctionService] Publishing draft lot ID: ${lotId}`);
     const response = await apiClient.post<ApiResponse<AuctionLotResponse>>(
-      API_ENDPOINTS.LOT.PUBLISH(lotId)
+      API_ENDPOINTS.LOT.PUBLISH(auctionId, lotId, sellerProfileId)
     );
     return response.data.data;
   },
 
   /**
    * Re-orders display order of lots inside an auction.
-   * Path: POST /api/v1/lots/auctions/{auctionId}/sort
+   * Path: POST /api/v1/auctions/{auctionId}/lots/sort
    */
-  async sortLots(auctionId: string, request: LotSortRequest): Promise<void> {
+  async sortLots(auctionId: string, request: LotSortRequest, sellerProfileId?: string): Promise<void> {
     console.log(`[AuctionService] Re-sorting display order of lots for auction ID: ${auctionId}`);
     await apiClient.post<ApiResponse<void>>(
-      API_ENDPOINTS.LOT.SORT(auctionId),
+      API_ENDPOINTS.LOT.SORT(auctionId, sellerProfileId),
       request
     );
   },

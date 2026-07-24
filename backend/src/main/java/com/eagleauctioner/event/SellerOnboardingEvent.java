@@ -1,6 +1,5 @@
 package com.eagleauctioner.event;
 
-import com.eagleauctioner.enums.SellerState;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

@@ -6,7 +6,6 @@ import com.eagleauctioner.repository.ClosingPeriodRepository;
 import com.eagleauctioner.entity.OutboxEvent;
 import com.eagleauctioner.repository.OutboxEventRepository;
 import com.eagleauctioner.exception.BusinessException;
-import com.eagleauctioner.dto.FinancialClosingDTOs.ClosePeriodRequest;
 import com.eagleauctioner.dto.FinancialClosingDTOs.ClosingPeriodResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

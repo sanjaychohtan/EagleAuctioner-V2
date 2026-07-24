@@ -1,6 +1,5 @@
 package com.eagleauctioner.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.UUID;

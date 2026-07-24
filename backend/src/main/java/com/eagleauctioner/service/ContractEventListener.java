@@ -24,7 +24,6 @@ public class ContractEventListener {
 
     private final ContractService contractService;
     private final AuctionWinnerRepository auctionWinnerRepository;
-    private final NotificationService notificationService;
     private final PaymentService paymentService;
     private final LedgerService ledgerService;
 

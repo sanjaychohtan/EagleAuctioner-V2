@@ -2,7 +2,6 @@ package com.eagleauctioner.mapper;
 
 import com.eagleauctioner.dto.AuctionDTOs.*;
 import com.eagleauctioner.entity.Auction;
-import com.eagleauctioner.enums.BidIncrementType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -11,7 +11,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
-import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
 

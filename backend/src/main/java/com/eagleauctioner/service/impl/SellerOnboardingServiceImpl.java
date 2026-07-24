@@ -26,7 +26,6 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
 
     private final SellerProfileRepository sellerProfileRepository;
     private final UserRepository userRepository;
-    private final SellerCompanyRepository sellerCompanyRepository;
     private final SellerDocumentRepository sellerDocumentRepository;
     private final SellerStateHistoryRepository sellerStateHistoryRepository;
     private final SellerReviewRepository sellerReviewRepository;

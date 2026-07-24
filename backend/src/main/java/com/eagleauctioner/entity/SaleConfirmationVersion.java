@@ -4,8 +4,6 @@ import com.eagleauctioner.enums.SaleConfirmationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "sale_confirmation_versions")
 @Getter

@@ -5,6 +5,7 @@ import { ThemeProvider } from "../theme/ThemeProvider";
 import { NotificationProvider } from "./NotificationProvider";
 import { AuthProvider } from "../context/AuthContext";
 import { WebSocketProvider } from "../context/WebSocketContext";
+import { OfflineBanner } from "../components/common/OfflineBanner";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -13,17 +14,18 @@ interface AppProvidersProps {
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <ErrorBoundary>
-      <QueryProvider>
-        <ThemeProvider>
-          <NotificationProvider>
-            <AuthProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <QueryProvider>
               <WebSocketProvider>
+                <OfflineBanner />
                 {children}
               </WebSocketProvider>
-            </AuthProvider>
-          </NotificationProvider>
-        </ThemeProvider>
-      </QueryProvider>
+            </QueryProvider>
+          </AuthProvider>
+        </NotificationProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 };

@@ -284,3 +284,5 @@ export const LiveAuctionDashboard: React.FC = () => {
     </div>
   );
 };
+
+export default LiveAuctionDashboard;

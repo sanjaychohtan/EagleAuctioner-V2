@@ -233,3 +233,5 @@ export function OperationsDashboard({
     </div>
   );
 }
+
+export default React.memo(OperationsDashboard);

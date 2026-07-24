@@ -1,0 +1,42 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "title": "Live Bidding Throughput (bids/sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(auction_bids_placed_total[1m]))", "legendFormat": "Bid Velocity" }]
+    },
+    {
+      "title": "Active WebSocket Bidding Subscriptions",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "websocket_active_sessions", "legendFormat": "Active Subscriptions" }]
+    },
+    {
+      "title": "Settlements Generated Volume",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 6 },
+      "targets": [{ "expr": "sum(settlement_amount_total)", "legendFormat": "Settled INR (paise)" }]
+    },
+    {
+      "title": "Pending KYC Verification Queue Size",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 6 },
+      "targets": [{ "expr": "kyc_pending_queue_count", "legendFormat": "Pending Dossiers" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["eagle-auctioner", "business-kpis", "auctions"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Eagle Auctioner — Business KPI & Live Bidding Dashboard",
+  "uid": "ea-business-kpis"
+}

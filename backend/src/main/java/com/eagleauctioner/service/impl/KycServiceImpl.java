@@ -84,7 +84,6 @@ public class KycServiceImpl implements KycService {
     @Override
     @Transactional
     public com.eagleauctioner.entity.SellerReview reviewSellerKyc(UUID profileId, UUID reviewerId, KycReviewRequest request) {
-        Instant startTime = Instant.now();
         SellerProfile profile = sellerProfileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Seller profile not found"));
 

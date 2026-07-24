@@ -6,7 +6,6 @@ import com.eagleauctioner.enums.*;
 import com.eagleauctioner.repository.*;
 import com.eagleauctioner.service.BidderOnboardingService;
 import com.eagleauctioner.service.SellerOnboardingService;
-import com.eagleauctioner.service.KmsEncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

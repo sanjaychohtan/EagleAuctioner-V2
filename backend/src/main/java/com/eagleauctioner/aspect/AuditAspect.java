@@ -13,10 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import com.eagleauctioner.enums.Action;
-import com.eagleauctioner.entity.User;
 import com.eagleauctioner.repository.UserRepository;
-
-import java.util.UUID;
 
 @Aspect
 @Component
@@ -51,7 +48,6 @@ public class AuditAspect {
         String ipAddress = request != null ? request.getRemoteAddr() : "UNKNOWN";
         String userAgent = request != null ? request.getHeader("User-Agent") : "UNKNOWN";
 
-        UUID userId = null; 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getName() != null) {
             String email = authentication.getName();

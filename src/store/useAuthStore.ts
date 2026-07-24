@@ -17,8 +17,8 @@ export interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: null,
-  refreshToken: null,
+  accessToken: localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
+  refreshToken: localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN),
   user: (() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
@@ -28,9 +28,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   })(),
   tenantId: localStorage.getItem(STORAGE_KEYS.TENANT_ID) || "05f9024c-9f0e-4361-bd87-35ff5e019a2b",
-  sessionStatus: "unauthenticated",
+  sessionStatus: localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) ? "authenticated" : "unauthenticated",
 
   setAuthData: (accessToken, refreshToken, user) => {
+    if (accessToken) {
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+    }
+    if (refreshToken) {
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    }
     localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(user));
     if (user.tenantId) {
       localStorage.setItem(STORAGE_KEYS.TENANT_ID, user.tenantId);
@@ -39,7 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       accessToken,
       refreshToken,
       user,
-      tenantId: user.tenantId || "05f9024c-9f0e-4361-bd87-35ff5e019a2b",
+      tenantId: user.tenantId || localStorage.getItem(STORAGE_KEYS.TENANT_ID) || "05f9024c-9f0e-4361-bd87-35ff5e019a2b",
       sessionStatus: "authenticated",
     });
   },
@@ -50,6 +56,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   clearAuthData: () => {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
     set({
       accessToken: null,
@@ -66,3 +74,4 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user });
   },
 }));
+

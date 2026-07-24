@@ -6,14 +6,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import com.eagleauctioner.enums.UserType;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -95,7 +93,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         // We generate the token and normally send it via email.
         // We DO NOT return it in the response payload for security.
-        String token = authService.forgotPassword(request.getEmail());
+        authService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(ApiResponse.success("Password reset instructions sent to email", null));
     }
 

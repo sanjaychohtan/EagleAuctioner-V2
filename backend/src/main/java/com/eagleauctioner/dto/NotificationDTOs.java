@@ -1,7 +1,6 @@
 package com.eagleauctioner.dto;
 
 import com.eagleauctioner.enums.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 

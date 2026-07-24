@@ -9,8 +9,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.util.UUID;
-
 /**
  * Entity representing an individual lot (asset) within an auction.
  */

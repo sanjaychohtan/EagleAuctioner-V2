@@ -13,8 +13,6 @@ export const useAdminKycQueue = () => {
   return useQuery({
     queryKey: ADMIN_KYC_KEYS.queue,
     queryFn: async () => {
-      // Ensure seed data is populated
-      OnboardingService.seedDemoProfiles();
       return await OnboardingService.getAdminPendingQueue();
     },
     staleTime: 1000 * 15, // Fresh for 15 seconds

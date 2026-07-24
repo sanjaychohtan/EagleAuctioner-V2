@@ -1,11 +1,28 @@
 import React, { createContext, useContext, useEffect, ReactNode } from "react";
 import { AuthService } from "../api/authService";
 import { useAuthStore } from "../store/useAuthStore";
-import { USER_ROLE, KYC_STATUS } from "../constants";
+import { USER_ROLE, STORAGE_KEYS } from "../constants";
 import { UserProfileDTO } from "../types/auth";
 import { apiClient } from "../api/client";
 import { useNotification } from "../providers/NotificationProvider";
 import { handleApiError } from "../api/errorHandler";
+import { auditLogger } from "../utils/auditLogger";
+import { useIdleTimer } from "../hooks/useIdleTimer";
+
+export function sanitizeRedirectUrl(url: string | undefined | null): string {
+  if (!url || typeof url !== "string") return "/monitoring";
+  // Trim leading/trailing whitespace
+  const clean = url.trim();
+  // Reject absolute URLs, protocol relative URLs (//), and javascript: URIs
+  if (clean.startsWith("//") || clean.includes(":") || clean.startsWith("\\")) {
+    return "/monitoring";
+  }
+  // Ensure it starts with /
+  if (!clean.startsWith("/")) {
+    return "/monitoring";
+  }
+  return clean;
+}
 
 interface AuthContextType {
   user: UserProfileDTO | null;
@@ -20,6 +37,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_CHANNEL_NAME = "ea_auth_channel";
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const {
     user,
@@ -33,42 +52,110 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const { showNotification } = useNotification();
 
+  const isAuthenticated = sessionStatus === "authenticated";
+  const isLoading = sessionStatus === "loading";
+
+  // Enterprise Idle Session Timeout: 15 mins total, 14 mins warning
+  useIdleTimer({
+    enabled: isAuthenticated,
+    timeoutMs: 15 * 60 * 1000,
+    warningMs: 14 * 60 * 1000,
+    onWarning: () => {
+      showNotification("Session Idle Warning: You will be logged out in 1 minute due to inactivity.", "warning");
+    },
+    onTimeout: () => {
+      auditLogger.log("IDLE_TIMEOUT", { userId: user?.id, username: user?.username, tenantId });
+      showNotification("Session Expired: Automatically logged out due to inactivity.", "error");
+      logout();
+    },
+  });
+
   useEffect(() => {
+    // Cross-tab Synchronization via BroadcastChannel & Storage Event
+    let channel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      try {
+        channel = new BroadcastChannel(AUTH_CHANNEL_NAME);
+        channel.onmessage = (event) => {
+          if (event.data?.type === "LOGOUT") {
+            auditLogger.log("CROSS_TAB_SYNC", { details: "Received multi-tab logout event" });
+            clearAuthData();
+            showNotification("Session terminated from another browser tab.", "info");
+          } else if (event.data?.type === "LOGIN") {
+            auditLogger.log("CROSS_TAB_SYNC", { details: "Received multi-tab login event" });
+            verifySession();
+          }
+        };
+      } catch (err) {
+        console.warn("BroadcastChannel not available:", err);
+      }
+    }
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.ACCESS_TOKEN && !e.newValue) {
+        auditLogger.log("CROSS_TAB_SYNC", { details: "Storage key purge detected" });
+        clearAuthData();
+      }
+    };
+
     const handleUnauthorized = () => {
+      auditLogger.log("SESSION_EXPIRED", { userId: user?.id, username: user?.username });
       clearAuthData();
       showNotification("Your active session has expired or been terminated. Please sign in.", "warning");
     };
 
     const handleForbidden = () => {
+      auditLogger.log("UNAUTHORIZED_ACCESS", { userId: user?.id, username: user?.username });
       showNotification("Access denied. Your role has insufficient permissions to execute this request.", "error");
     };
 
+    window.addEventListener("storage", handleStorageEvent);
     window.addEventListener("unauthorized_redirect", handleUnauthorized);
     window.addEventListener("forbidden_redirect", handleForbidden);
     verifySession();
 
     return () => {
+      if (channel) channel.close();
+      window.removeEventListener("storage", handleStorageEvent);
       window.removeEventListener("unauthorized_redirect", handleUnauthorized);
       window.removeEventListener("forbidden_redirect", handleForbidden);
     };
   }, []);
 
+  const broadcastAuthEvent = (type: "LOGIN" | "LOGOUT") => {
+    if (typeof BroadcastChannel !== "undefined") {
+      try {
+        const channel = new BroadcastChannel(AUTH_CHANNEL_NAME);
+        channel.postMessage({ type, timestamp: Date.now() });
+        channel.close();
+      } catch (err) {
+        console.warn("Failed to broadcast auth event:", err);
+      }
+    }
+  };
+
   const verifySession = async () => {
-    const token = useAuthStore.getState().accessToken;
-    if (!token) {
+    const token = useAuthStore.getState().accessToken || localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const refreshToken = useAuthStore.getState().refreshToken || localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+
+    if (!token && !refreshToken) {
       setSessionStatus("unauthenticated");
       return;
     }
 
     try {
       setSessionStatus("loading");
-      const profile = await AuthService.me();
+      const profile = await AuthService.getCurrentUser();
+      const currentAccessToken = useAuthStore.getState().accessToken || token || "";
+      const currentRefreshToken = useAuthStore.getState().refreshToken || refreshToken || "";
       setAuthData(
-        useAuthStore.getState().accessToken || "",
-        useAuthStore.getState().refreshToken || "",
+        currentAccessToken,
+        currentRefreshToken,
         profile
       );
+      auditLogger.log("TOKEN_REFRESH_SUCCESS", { userId: profile.id, username: profile.username, tenantId: profile.tenantId });
     } catch (err) {
+      auditLogger.log("TOKEN_REFRESH_FAILED", { details: "Session verification error" });
       console.warn("[Session Verification Error] Invalid session cookie/JWT. Flushing storage.", err);
       clearAuthData();
     }
@@ -76,6 +163,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (username: string, password: string): Promise<UserProfileDTO> => {
     setSessionStatus("loading");
+    auditLogger.log("LOGIN_ATTEMPT", { username, tenantId });
     try {
       const response = await AuthService.login({ username, password });
       
@@ -90,9 +178,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         apiClient.defaults.headers.common["X-Tenant-Id"] = response.user.tenantId;
       }
 
+      auditLogger.log("LOGIN_SUCCESS", { userId: response.user.id, username: response.user.username, tenantId: response.user.tenantId });
+      broadcastAuthEvent("LOGIN");
       showNotification("Session established. Welcome back!", "success");
       return response.user;
     } catch (err: any) {
+      auditLogger.log("LOGIN_FAILED", { username, details: err.message });
       setSessionStatus("unauthenticated");
       const friendlyErr = handleApiError(err);
       showNotification(friendlyErr.message, "error");
@@ -101,14 +192,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async () => {
+    auditLogger.log("LOGOUT", { userId: user?.id, username: user?.username, tenantId });
     try {
       await AuthService.logout();
     } finally {
       clearAuthData();
+      broadcastAuthEvent("LOGOUT");
     }
   };
 
   const updateTenantId = (id: string) => {
+    if (!id || typeof id !== "string") return;
+    auditLogger.log("TENANT_SWITCH", { userId: user?.id, tenantId: id });
     setTenantId(id);
     apiClient.defaults.headers.common["X-Tenant-Id"] = id;
   };
@@ -138,9 +233,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const isAuthenticated = sessionStatus === "authenticated";
-  const isLoading = sessionStatus === "loading";
-
   return (
     <AuthContext.Provider
       value={{
@@ -166,3 +258,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

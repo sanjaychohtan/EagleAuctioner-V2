@@ -264,7 +264,7 @@ export const useUpdateLotMutation = ({ auctionId }: { auctionId: string }) => {
 
   return useMutation({
     mutationFn: ({ lotId, request }: { lotId: string; request: UpdateLotRequest }) =>
-      AuctionService.updateLot(lotId, request),
+      AuctionService.updateLot(auctionId, lotId, request),
     onSuccess: (data) => {
       updateLotInCurrent(data);
       queryClient.invalidateQueries({ queryKey: AUCTION_KEYS.detail(auctionId) });
@@ -280,7 +280,7 @@ export const useDeleteLotMutation = ({ auctionId }: { auctionId: string }) => {
   const removeLotFromCurrent = useAuctionStore((state) => state.removeLotFromCurrent);
 
   return useMutation({
-    mutationFn: (lotId: string) => AuctionService.deleteLot(lotId),
+    mutationFn: (lotId: string) => AuctionService.deleteLot(auctionId, lotId),
     onSuccess: (_, lotId) => {
       removeLotFromCurrent(lotId);
       queryClient.invalidateQueries({ queryKey: AUCTION_KEYS.detail(auctionId) });
@@ -296,7 +296,7 @@ export const usePublishLotMutation = ({ auctionId }: { auctionId: string }) => {
   const updateLotInCurrent = useAuctionStore((state) => state.updateLotInCurrent);
 
   return useMutation({
-    mutationFn: (lotId: string) => AuctionService.publishLot(lotId),
+    mutationFn: (lotId: string) => AuctionService.publishLot(auctionId, lotId),
     onSuccess: (data) => {
       updateLotInCurrent(data);
       queryClient.invalidateQueries({ queryKey: AUCTION_KEYS.detail(auctionId) });

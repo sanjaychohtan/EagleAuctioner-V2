@@ -9,7 +9,6 @@ import com.eagleauctioner.repository.*;
 import com.eagleauctioner.service.*;
 import com.eagleauctioner.policy.ReserveEvaluationPolicy;
 import com.eagleauctioner.event.WinnerApprovedEvent;
-import com.eagleauctioner.event.WinnerRejectedEvent;
 import com.eagleauctioner.event.WinnerOverriddenEvent;
 import com.eagleauctioner.context.AuditContext;
 import org.junit.jupiter.api.BeforeEach;

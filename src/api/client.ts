@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 import { envConfig } from "../config/env";
 import { STORAGE_KEYS } from "../constants";
 import { useAuthStore } from "../store/useAuthStore";
+import { auditLogger } from "../utils/auditLogger";
 
 // Interface for managing the token refresh queue
 interface FailedRequest {
@@ -27,6 +28,7 @@ export const apiClient: AxiosInstance = axios.create({
   baseURL: envConfig.apiBaseUrl,
   headers: {
     "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
   withCredentials: true,
   timeout: 15000, // 15 seconds SLA
@@ -35,8 +37,8 @@ export const apiClient: AxiosInstance = axios.create({
 // Request interceptor: Inject Access Token & Tenant ID
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = useAuthStore.getState().accessToken;
-    const tenantId = localStorage.getItem(STORAGE_KEYS.TENANT_ID);
+    const token = useAuthStore.getState().accessToken || localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const tenantId = useAuthStore.getState().tenantId || localStorage.getItem(STORAGE_KEYS.TENANT_ID);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -57,16 +59,24 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Check if the error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const isAuthRoute = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/refresh");
+
+    // Check if the error is 401 and we haven't retried yet and it is not an auth route
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       if (isRefreshing) {
         // Queue the request while token is refreshing
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+              }
               resolve(apiClient(originalRequest));
             },
             reject: (err: any) => {
@@ -80,26 +90,44 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const storedRefreshToken = useAuthStore.getState().refreshToken || localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
         // Request token renewal from authentication controller
-        const response = await axios.post(`${envConfig.apiBaseUrl}/auth/refresh`, {}, {
-          withCredentials: true
-        });
+        const response = await axios.post(`${envConfig.apiBaseUrl}/v1/auth/refresh`, 
+          storedRefreshToken ? { refreshToken: storedRefreshToken } : {}, 
+          { withCredentials: true }
+        );
 
-        const { accessToken, newRefreshToken } = response.data;
+        const data = response.data?.data || response.data;
+        const accessToken = data.accessToken;
+        const newRefreshToken = data.refreshToken || data.newRefreshToken || storedRefreshToken;
 
-        useAuthStore.setState({
-          accessToken,
-          refreshToken: newRefreshToken || useAuthStore.getState().refreshToken,
-        });
+        if (!accessToken) {
+          throw new Error("Invalid token refresh payload received");
+        }
+
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser) {
+          useAuthStore.getState().setAuthData(accessToken, newRefreshToken, currentUser);
+        } else {
+          useAuthStore.setState({ accessToken, refreshToken: newRefreshToken });
+          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          if (newRefreshToken) {
+            localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+          }
+        }
 
         apiClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
 
+        auditLogger.log("TOKEN_REFRESH_SUCCESS", { details: `Refreshed token for route: ${originalRequest.url}` });
         processQueue(null, accessToken);
         isRefreshing = false;
 
         return apiClient(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
+        auditLogger.log("TOKEN_REFRESH_FAILED", { details: refreshError?.message || "Refresh request failed" });
         processQueue(refreshError, null);
         isRefreshing = false;
         clearAuthData();
@@ -108,6 +136,7 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 403) {
+      auditLogger.log("UNAUTHORIZED_ACCESS", { details: `Forbidden 403 response on ${originalRequest.url}` });
       window.dispatchEvent(new Event("forbidden_redirect"));
     }
 
@@ -117,6 +146,5 @@ apiClient.interceptors.response.use(
 
 const clearAuthData = () => {
   useAuthStore.getState().clearAuthData();
-  // Optional custom redirection or event trigger
   window.dispatchEvent(new Event("unauthorized_redirect"));
 };

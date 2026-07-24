@@ -1,8 +1,5 @@
 package com.eagleauctioner.entity;
 
-import com.eagleauctioner.entity.BaseEntity;
-import com.eagleauctioner.entity.BidderProfile;
-import com.eagleauctioner.entity.AuctionLot;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

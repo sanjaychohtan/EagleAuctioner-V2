@@ -19,7 +19,6 @@ import com.eagleauctioner.repository.BidRepository;
 import com.eagleauctioner.repository.BidderProfileRepository;
 import com.eagleauctioner.dto.WinnerDTOs.WinnerRequest;
 import com.eagleauctioner.dto.WinnerDTOs.WinnerResponse;
-import com.eagleauctioner.dto.WinnerDTOs.AuctionResultResponse;
 
 import com.eagleauctioner.event.WinnerApprovedEvent;
 import com.eagleauctioner.event.WinnerRejectedEvent;
@@ -34,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

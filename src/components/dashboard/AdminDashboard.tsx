@@ -333,3 +333,5 @@ export function AdminDashboard({
     </div>
   );
 }
+
+export default React.memo(AdminDashboard);

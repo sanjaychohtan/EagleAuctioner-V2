@@ -258,3 +258,5 @@ export function FinanceDashboard({
     </div>
   );
 }
+
+export default React.memo(FinanceDashboard);

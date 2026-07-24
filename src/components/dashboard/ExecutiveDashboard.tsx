@@ -419,3 +419,5 @@ export function ExecutiveDashboard({
     </div>
   );
 }
+
+export default React.memo(ExecutiveDashboard);

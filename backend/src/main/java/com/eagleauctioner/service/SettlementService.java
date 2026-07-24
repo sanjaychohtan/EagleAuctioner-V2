@@ -1,7 +1,6 @@
 package com.eagleauctioner.service;
 
 import com.eagleauctioner.dto.SettlementHistoryDto;
-import com.eagleauctioner.dto.SettlementRequest;
 import com.eagleauctioner.dto.SettlementResponse;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.ContractStatus;

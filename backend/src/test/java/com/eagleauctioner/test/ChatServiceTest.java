@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RRateLimiter;
-import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
 
 import java.util.UUID;

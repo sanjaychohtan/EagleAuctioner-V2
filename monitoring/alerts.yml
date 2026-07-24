@@ -1,0 +1,83 @@
+groups:
+  - name: eagle_auctioner_production_alerts
+    rules:
+      - alert: ApplicationDown
+        expr: up{job="eagle-auctioner-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Eagle Auctioner API Backend Instance Down"
+          description: "Backend service instance {{ $labels.instance }} is unreachable."
+
+      - alert: DatabaseDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL Database Connection Failure"
+          description: "PostgreSQL server is down or rejecting connection pools."
+
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis Service Failure"
+          description: "Redis master/sentinel cluster node is unavailable."
+
+      - alert: HighCpuUsage
+        expr: process_cpu_usage{job="eagle-auctioner-backend"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage Detected"
+          description: "API Process CPU utilization exceeded 85% for 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM Heap Memory Saturation"
+          description: "JVM Heap utilization is above 85%."
+
+      - alert: SlowApiResponse
+        expr: http_server_requests_seconds_sum / http_server_requests_seconds_count > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API Latency Degradation"
+          description: "Average API response latency exceeded 2.0 seconds."
+
+      - alert: ErrorRateSpike
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 5xx Error Rate Spike"
+          description: "5xx server error rate exceeded 5% over 3 minutes."
+
+      - alert: FailedAuthenticationSpike
+        expr: sum(rate(http_server_requests_seconds_count{uri="/api/v1/auth/login",status="401"}[5m])) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Failed Authentication Surge"
+          description: "High rate of 401 unauthorized login attempts detected."
+
+      - alert: WebSocketFailureSpike
+        expr: sum(rate(websocket_sessions_failed_total[5m])) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "WebSocket Session Disconnect Surge"
+          description: "High rate of STOMP WebSocket dropouts detected."

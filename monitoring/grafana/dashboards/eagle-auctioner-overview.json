@@ -1,0 +1,60 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "System Uptime & Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "up{job='eagle-auctioner-backend'}" }]
+    },
+    {
+      "title": "API Request Rate (req/sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count[1m]))" }]
+    },
+    {
+      "title": "p95 API Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) * 1000" }]
+    },
+    {
+      "title": "HTTP 5xx Error Rate (%)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "(sum(rate(http_server_requests_seconds_count{status=~'5..'}[5m])) / sum(rate(http_server_requests_seconds_count[5m]))) * 100" }]
+    },
+    {
+      "title": "JVM Heap Utilization (Bytes)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "jvm_memory_used_bytes{area='heap'}", "legendFormat": "Used Heap" },
+        { "expr": "jvm_memory_max_bytes{area='heap'}", "legendFormat": "Max Heap" }
+      ]
+    },
+    {
+      "title": "HikariCP Active DB Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "hikaricp_connections_active", "legendFormat": "Active Connections" },
+        { "expr": "hikaricp_connections_max", "legendFormat": "Max Pool Limit" }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["eagle-auctioner", "production", "sre"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Eagle Auctioner — Platform Overview & Health Dashboard",
+  "uid": "ea-platform-overview"
+}

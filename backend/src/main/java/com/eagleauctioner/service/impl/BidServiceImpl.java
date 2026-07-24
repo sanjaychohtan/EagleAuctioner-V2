@@ -7,11 +7,9 @@ import com.eagleauctioner.service.*;
 import com.eagleauctioner.dto.BidDTOs.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
 
@@ -29,9 +27,7 @@ public class BidServiceImpl implements BidService {
     private final AuctionAutoExtensionService auctionAutoExtensionService;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
-    private final KmsEncryptionService kmsEncryptionService;
     private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional

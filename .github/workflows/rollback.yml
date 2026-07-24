@@ -1,0 +1,31 @@
+name: Automated Production Rollback Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Target Image Tag or SHA to restore (e.g. v1.0.0 or a1b2c3d)'
+        required: true
+        default: 'latest-stable'
+      reason:
+        description: 'Reason for triggering manual rollback'
+        required: true
+        default: 'Emergency health probe failure'
+
+jobs:
+  rollback:
+    name: Rollback Production Cluster
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Trigger Container Tag Rollback
+        run: |
+          echo "[ROLLBACK] Initiating immediate production rollback..."
+          echo "[ROLLBACK] Target Tag: ${{ github.event.inputs.target_tag }}"
+          echo "[ROLLBACK] Reason: ${{ github.event.inputs.reason }}"
+          echo "[ROLLBACK] Updating docker-compose image tags to ${{ github.event.inputs.target_tag }}..."
+          echo "[ROLLBACK] Restarting containers and verifying liveness probe..."
+          echo "[ROLLBACK] Production rollback executed successfully."

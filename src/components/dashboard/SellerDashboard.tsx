@@ -271,3 +271,5 @@ export function SellerDashboard({
     </div>
   );
 }
+
+export default React.memo(SellerDashboard);

@@ -3,7 +3,6 @@ package com.eagleauctioner.service;
 import com.eagleauctioner.dto.*;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.*;
-import com.eagleauctioner.event.PaymentFailedEvent;
 import com.eagleauctioner.event.PaymentReceivedEvent;
 import com.eagleauctioner.event.SettlementCompletedEvent;
 import com.eagleauctioner.exception.ResourceNotFoundException;

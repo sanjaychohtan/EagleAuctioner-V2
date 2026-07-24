@@ -265,3 +265,5 @@ export function BuyerDashboard({
     </div>
   );
 }
+
+export default React.memo(BuyerDashboard);

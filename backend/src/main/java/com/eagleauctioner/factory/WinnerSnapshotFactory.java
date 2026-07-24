@@ -7,7 +7,6 @@ import com.eagleauctioner.entity.Bid;
 
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * Enterprise Factory pattern for centralizing snapshot creations to protect historical auction results.

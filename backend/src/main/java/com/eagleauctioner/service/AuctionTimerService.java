@@ -6,7 +6,6 @@ import com.eagleauctioner.repository.AuctionEventRepository;
 import com.eagleauctioner.repository.AuctionRepository;
 import com.eagleauctioner.repository.OutboxEventRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;

@@ -1,20 +1,69 @@
 spring:
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://db:5432/eagleauctioner}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:password}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: EagleHikariCP-Prod
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      timeout: 2000ms
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc.time_zone: UTC
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: true
 
 server:
   port: ${PORT:8080}
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+
+application:
+  cors:
+    allowed-origins: ${APPLICATION_CORS_ALLOWED_ORIGINS:https://app.eagleauctioner.com,https://admin.eagleauctioner.com}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration: 3600000 # 1 hour
+      refresh-token:
+        expiration: 604800000 # 7 days
+      issuer: "eagle-auctioner"
+      audience: "eagle-auctioner-app"
+  upload:
+    dir: ${UPLOAD_DIR:/app/uploads}
 
 logging:
   level:
     com.eagleauctioner: INFO
     org.springframework: WARN
+    org.hibernate: WARN

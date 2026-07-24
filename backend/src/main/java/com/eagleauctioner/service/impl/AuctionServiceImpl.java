@@ -6,13 +6,11 @@ import com.eagleauctioner.entity.AuctionLot;
 import com.eagleauctioner.entity.AuctionSettings;
 import com.eagleauctioner.entity.SellerProfile;
 import com.eagleauctioner.enums.*;
-import com.eagleauctioner.repository.AuctionLotRepository;
 import com.eagleauctioner.repository.AuctionRepository;
 import com.eagleauctioner.repository.AuctionSettingsRepository;
 import com.eagleauctioner.repository.SellerProfileRepository;
 import com.eagleauctioner.service.AuctionService;
 import com.eagleauctioner.service.AuctionValidationService;
-import com.eagleauctioner.mapper.AuctionMapper;
 import com.eagleauctioner.service.AuctionPublishService;
 
 import com.eagleauctioner.service.DocumentNumberGeneratorService;
@@ -37,11 +35,9 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final AuctionSettingsRepository auctionSettingsRepository;
-    private final AuctionLotRepository auctionLotRepository;
     private final SellerProfileRepository sellerProfileRepository;
     private final DocumentNumberGeneratorService documentNumberGeneratorService;
     private final AuctionValidationService auctionValidationService;
-    private final AuctionMapper auctionMapper;
     private final AuctionPublishService auctionPublishService;
 
 

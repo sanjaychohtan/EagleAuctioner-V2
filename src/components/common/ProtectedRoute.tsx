@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, sanitizeRedirectUrl } from "../../context/AuthContext";
 import { USER_ROLE } from "../../constants";
 
 interface ProtectedRouteProps {
@@ -26,7 +26,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && allowedRoles.length > 0 && !hasRole(allowedRoles as any)) {
+  if (allowedRoles && allowedRoles.length > 0 && !hasRole(allowedRoles)) {
     // Authenticated but does not possess the authorized roles: redirect to access-denied
     return <Navigate to="/unauthorized" replace />;
   }
@@ -52,9 +52,10 @@ export function PublicRoute({ children }: PublicRouteProps) {
   }
 
   if (isAuthenticated) {
-    // If authenticated, redirect back to home or referring page
-    const from = (location.state as any)?.from?.pathname || "/";
-    return <Navigate to={from} replace />;
+    // If authenticated, redirect back to home or referring page safely
+    const rawFrom = (location.state as any)?.from?.pathname;
+    const targetPath = sanitizeRedirectUrl(rawFrom);
+    return <Navigate to={targetPath} replace />;
   }
 
   return <>{children}</>;
@@ -69,7 +70,7 @@ interface RoleGuardProps {
 export function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) {
   const { hasRole } = useAuth();
 
-  if (!hasRole(allowedRoles as any)) {
+  if (!hasRole(allowedRoles)) {
     return <>{fallback || null}</>;
   }
 

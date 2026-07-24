@@ -4,7 +4,6 @@ import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.ContractStatus;
 import com.eagleauctioner.enums.SettlementStatus;
 import com.eagleauctioner.enums.WinnerStatus;
-import com.eagleauctioner.dto.SettlementRequest;
 import com.eagleauctioner.dto.SettlementResponse;
 import com.eagleauctioner.repository.ContractRepository;
 import com.eagleauctioner.repository.SettlementRepository;

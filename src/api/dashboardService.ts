@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { API_ENDPOINTS } from "../constants";
 import { KPICardData, ActivityLog, CalendarEvent } from "../components/dashboard/DashboardTypes";
 
 export interface DashboardKPIs {
@@ -108,51 +109,50 @@ export interface ExecutiveDashboardData {
 
 export const dashboardService = {
   exportReport: async (payload: { format: string; scope: string; columns: any }): Promise<{ message: string }> => {
-    const response = await apiClient.post("/v1/analytics/reports/export", payload);
+    const response = await apiClient.post(API_ENDPOINTS.DASHBOARD.EXPORT, payload);
     return response.data;
   },
   scheduleReport: async (payload: { scheduleCron: string; recipient: string; scope: string; format: string }): Promise<{ message: string }> => {
-    const response = await apiClient.post("/v1/analytics/reports/schedule", payload);
+    const response = await apiClient.post(API_ENDPOINTS.DASHBOARD.SCHEDULE, payload);
     return response.data;
   },
 
   getExecutiveDashboard: async (): Promise<ExecutiveDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/executive");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.EXECUTIVE);
     return response.data;
   },
   
   getAdminDashboard: async (): Promise<AdminDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/admin");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.ADMIN);
     return response.data;
   },
 
   getBuyerDashboard: async (): Promise<BuyerDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/buyer");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.BUYER);
     return response.data;
   },
 
   getSellerDashboard: async (): Promise<SellerDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/seller");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.SELLER);
     return response.data;
   },
 
   getOperationsDashboard: async (): Promise<OperationsDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/operations");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.OPERATIONS);
     return response.data;
   },
   
   getNotifications: async (): Promise<NotificationData[]> => {
-    // Just a mocked interceptor/endpoint fallback
     try {
-      const response = await apiClient.get("/v1/notifications");
-      return response.data;
+      const response = await apiClient.get(API_ENDPOINTS.NOTIFICATIONS.LIST);
+      return response.data?.data || response.data;
     } catch {
       return [];
     }
   },
   
   getFinanceDashboard: async (): Promise<FinanceDashboardData> => {
-    const response = await apiClient.get("/v1/analytics/dashboard/finance");
+    const response = await apiClient.get(API_ENDPOINTS.DASHBOARD.FINANCE);
     return response.data;
   }
 };

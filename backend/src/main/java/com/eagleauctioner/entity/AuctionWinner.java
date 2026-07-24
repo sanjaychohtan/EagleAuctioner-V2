@@ -1,9 +1,5 @@
 package com.eagleauctioner.entity;
 
-import com.eagleauctioner.entity.BaseEntity;
-import com.eagleauctioner.entity.AuctionLot;
-import com.eagleauctioner.entity.BidderProfile;
-import com.eagleauctioner.entity.Bid;
 import com.eagleauctioner.enums.WinnerStatus;
 import com.eagleauctioner.enums.WinnerSelectionType;
 import jakarta.persistence.*;

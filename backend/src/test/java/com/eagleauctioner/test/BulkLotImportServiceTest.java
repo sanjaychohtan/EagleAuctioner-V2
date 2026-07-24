@@ -1,7 +1,6 @@
 package com.eagleauctioner.test;
 
 import com.eagleauctioner.entity.Auction;
-import com.eagleauctioner.entity.AuctionLot;
 import com.eagleauctioner.entity.BulkImportJob;
 import com.eagleauctioner.repository.AuctionLotRepository;
 import com.eagleauctioner.repository.AuctionRepository;

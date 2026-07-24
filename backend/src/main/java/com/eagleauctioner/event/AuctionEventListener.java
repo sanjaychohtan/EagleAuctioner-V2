@@ -1,9 +1,7 @@
 package com.eagleauctioner.event;
 
 import com.eagleauctioner.entity.AuctionEvent;
-import com.eagleauctioner.repository.OutboxEventRepository;
 import com.eagleauctioner.service.AuctionWebSocketService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -22,8 +20,6 @@ import java.util.Map;
 public class AuctionEventListener {
 
     private final AuctionWebSocketService webSocketService;
-    private final OutboxEventRepository outboxEventRepository;
-    private final ObjectMapper objectMapper;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
