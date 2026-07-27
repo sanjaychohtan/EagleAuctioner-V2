@@ -15,7 +15,7 @@ spring:
       host: ${SPRING_DATA_REDIS_HOST:redis}
       port: ${SPRING_DATA_REDIS_PORT:6379}
       password: ${SPRING_DATA_REDIS_PASSWORD:}
-      timeout: 2000ms
+      timeout: 2000
   jpa:
     hibernate:
       ddl-auto: validate

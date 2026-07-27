@@ -1,6 +1,7 @@
 # Stage 1: Build static assets
 FROM node:20-alpine AS build
 WORKDIR /app
+ENV NODE_OPTIONS=--max-old-space-size=1536
 
 # Copy dependency manifests
 COPY package.json package-lock.json ./

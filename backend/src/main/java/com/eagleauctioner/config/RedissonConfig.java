@@ -22,16 +22,16 @@ public class RedissonConfig {
     @Value("${spring.redis.sentinel.nodes:}")
     private String[] sentinelNodes;
 
-    @Value("${spring.redis.host:127.0.0.1}")
+    @Value("${spring.data.redis.host:redis}")
     private String redisHost;
 
-    @Value("${spring.redis.port:6379}")
+    @Value("${spring.data.redis.port:6379}")
     private int redisPort;
 
-    @Value("${spring.redis.password:}")
+    @Value("${spring.data.redis.password:}")
     private String redisPassword;
 
-    @Value("${spring.redis.timeout:3000}")
+    @Value("${spring.data.redis.timeout:3000}")
     private int timeout;
 
     @Value("${redisson.lock.watchdog.timeout:30000}")
@@ -70,7 +70,6 @@ public class RedissonConfig {
                   .setRetryInterval(1500)
                   .setPingConnectionInterval(2000);
         }
-        
-        return Redisson.create(config);
+                return Redisson.create(config);
     }
 }
