@@ -3,7 +3,6 @@ package com.eagleauctioner.entity;
 import com.eagleauctioner.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.time.Instant;
@@ -12,7 +11,7 @@ import java.time.Instant;
 @Table(name = "kyc_documents")
 @SQLDelete(sql = "UPDATE kyc_documents SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

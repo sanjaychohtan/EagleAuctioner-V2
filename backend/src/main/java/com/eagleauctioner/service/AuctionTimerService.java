@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RequiredArgsConstructor
 public class AuctionTimerService {
-    private AuctionTimerService self;
+    @org.springframework.context.annotation.Lazy
     @org.springframework.beans.factory.annotation.Autowired
-    public void setSelf(org.springframework.context.ApplicationContext context) { this.self = context.getBean(AuctionTimerService.class); }
+    private AuctionTimerService self;
 
 
     private final AuctionRepository auctionRepository;

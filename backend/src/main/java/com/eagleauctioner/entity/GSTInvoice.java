@@ -3,7 +3,6 @@ package com.eagleauctioner.entity;
 import com.eagleauctioner.enums.GSTInvoiceStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "gst_invoices")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

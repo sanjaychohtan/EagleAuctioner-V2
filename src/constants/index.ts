@@ -97,17 +97,35 @@ export const API_ENDPOINTS = {
     SELLER_ADMIN_REVIEW: (profileId: string) => `/seller/admin/review/${profileId}`,
     SELLER_SEARCH: "/seller/admin/search",
   },
+  AUTHORIZATION: {
+    ROLES: "/v1/admin/authorization/roles",
+    ROLE_BY_ID: (id: string) => `/v1/admin/authorization/roles/${id}`,
+    PERMISSIONS: "/v1/admin/authorization/permissions",
+    PERMISSIONS_BY_MODULE: (module: string) => `/v1/admin/authorization/permissions/module/${module}`,
+    DEPARTMENTS: "/v1/admin/authorization/departments",
+    USER_SCOPES: (userId: string) => `/v1/admin/authorization/users/${userId}/scopes`,
+    SCOPES: "/v1/admin/authorization/scopes",
+    SCOPE_BY_ID: (id: string) => `/v1/admin/authorization/scopes/${id}`,
+  },
 };
 
 export enum USER_ROLE {
   SUPER_ADMIN = "ROLE_SUPER_ADMIN",
+  ADMIN = "ROLE_ADMIN",
+  OPS_HEAD = "ROLE_OPS_HEAD",
   OPERATIONS = "ROLE_OPERATIONS",
   SELLER = "ROLE_SELLER",
   BUYER = "ROLE_BUYER",
   COMPLIANCE = "ROLE_COMPLIANCE",
   FINANCE = "ROLE_FINANCE",
   ACCOUNTANT = "ROLE_ACCOUNTANT",
-  ADMIN = "ROLE_ADMIN",
+  KYC = "ROLE_KYC",
+  MARKETING = "ROLE_MARKETING",
+  SUPPORT = "ROLE_SUPPORT",
+  AUCTION = "ROLE_AUCTION",
+  REPORTS = "ROLE_REPORTS",
+  LEGAL = "ROLE_LEGAL",
+  IT = "ROLE_IT",
 }
 
 export enum KYC_STATUS {

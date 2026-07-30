@@ -4,7 +4,6 @@ import com.eagleauctioner.enums.ReportFormat;
 import com.eagleauctioner.enums.ReportType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import java.util.UUID;
 
 /**
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "report_schedules")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

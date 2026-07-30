@@ -1,5 +1,7 @@
 package com.eagleauctioner.controller;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
 import com.eagleauctioner.dto.AuctionDTOs.*;
 import com.eagleauctioner.entity.User;
 import com.eagleauctioner.repository.UserRepository;
@@ -31,13 +33,15 @@ public class AuctionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionResponse> createAuction(@Valid @RequestBody CreateAuctionRequest request) {
         return ResponseEntity.ok(auctionService.createAuction(request, getAuthenticatedUserId()));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionResponse> updateAuction(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateAuctionRequest request,
@@ -46,7 +50,7 @@ public class AuctionController {
     }
 
     @PutMapping("/{id}/settings")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
     public ResponseEntity<AuctionResponse> updateSettings(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateSettingsRequest request,
@@ -55,7 +59,7 @@ public class AuctionController {
     }
 
     @PostMapping("/{id}/submit")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
     public ResponseEntity<AuctionResponse> submitForReview(
             @PathVariable UUID id,
             @RequestParam UUID sellerProfileId) {
@@ -63,41 +67,43 @@ public class AuctionController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
     public ResponseEntity<AuctionResponse> approveAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.approveAuction(id, getAuthenticatedUserId().toString()));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
     public ResponseEntity<AuctionResponse> rejectAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.rejectAuction(id, getAuthenticatedUserId().toString()));
     }
 
     @PostMapping("/{id}/publish")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
     public ResponseEntity<AuctionResponse> publishAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.publishAuction(id, getAuthenticatedUserId().toString()));
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.cancel')")
     public ResponseEntity<AuctionResponse> cancelAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.cancelAuction(id, getAuthenticatedUserId().toString()));
     }
 
     @PostMapping("/{id}/archive")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('auction.cancel')")
     public ResponseEntity<AuctionResponse> archiveAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.archiveAuction(id, getAuthenticatedUserId().toString()));
     }
 
     @GetMapping("/{id}")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionResponse> getAuction(@PathVariable UUID id) {
         return ResponseEntity.ok(auctionService.getAuctionDetails(id));
     }
 
     @GetMapping
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<PaginatedAuctionResponse> listAuctions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

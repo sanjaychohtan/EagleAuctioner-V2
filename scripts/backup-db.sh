@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Automated PostgreSQL Backup Script for Eagle Auctioner
-set -e
+set -euo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 CONTAINER_NAME="${CONTAINER_NAME:-eagle-auctioner-prod-db}"

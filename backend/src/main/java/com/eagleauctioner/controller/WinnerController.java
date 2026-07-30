@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
 @RequestMapping("/api/v1/winners")
 @RequiredArgsConstructor
@@ -22,14 +25,15 @@ public class WinnerController {
     private final WinnerService winnerService;
 
     @PostMapping("/{winnerId}/approve")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<WinnerResponse>> approveWinner(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID winnerId,
             @RequestParam(required = false, defaultValue = "Approved under-reserve bid.") String remarks) {
 
         boolean isAdmin = currentUser.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN") || a.getAuthority().equals("auction.publish"));
 
         WinnerResponse response = winnerService.approveUnderReserveWinner(
                 winnerId, 
@@ -42,14 +46,15 @@ public class WinnerController {
     }
 
     @PostMapping("/{winnerId}/reject")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<WinnerResponse>> rejectWinner(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID winnerId,
             @RequestParam(required = false, defaultValue = "Rejected under-reserve bid.") String remarks) {
 
         boolean isAdmin = currentUser.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN") || a.getAuthority().equals("auction.publish"));
 
         WinnerResponse response = winnerService.rejectUnderReserveWinner(
                 winnerId, 
@@ -62,7 +67,8 @@ public class WinnerController {
     }
 
     @PostMapping("/override")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<WinnerResponse>> manualOverride(
             @CurrentUser UserPrincipal currentUser,
             @Valid @RequestBody WinnerRequest request) {

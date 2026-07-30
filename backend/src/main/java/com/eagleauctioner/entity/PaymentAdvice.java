@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import com.eagleauctioner.enums.PaymentAdviceStatus;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -24,7 +23,7 @@ import java.time.Instant;
 })
 @SQLDelete(sql = "UPDATE payment_advices SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

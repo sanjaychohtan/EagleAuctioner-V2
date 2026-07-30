@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import com.eagleauctioner.enums.TaxType;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -21,7 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 })
 @SQLDelete(sql = "UPDATE tax_configurations SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

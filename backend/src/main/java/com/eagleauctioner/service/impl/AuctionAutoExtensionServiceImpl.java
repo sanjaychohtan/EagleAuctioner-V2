@@ -16,8 +16,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.context.ApplicationContext;
-import jakarta.annotation.PostConstruct;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -36,13 +34,9 @@ public class AuctionAutoExtensionServiceImpl implements AuctionAutoExtensionServ
     private final RedissonClient redissonClient;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final ApplicationContext applicationContext;
+    @org.springframework.context.annotation.Lazy
+    @org.springframework.beans.factory.annotation.Autowired
     private AuctionAutoExtensionServiceImpl self;
-
-    @PostConstruct
-    public void init() {
-        this.self = applicationContext.getBean(AuctionAutoExtensionServiceImpl.class);
-    }
 
     @Override
     public boolean checkAndExtend(UUID auctionId, UUID lotId, Instant bidTime, String bidderCode) {

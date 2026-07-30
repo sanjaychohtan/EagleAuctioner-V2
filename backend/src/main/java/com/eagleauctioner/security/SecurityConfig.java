@@ -28,10 +28,18 @@ public class SecurityConfig {
     private final org.springframework.core.env.Environment env;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final EnterprisePermissionEvaluator permissionEvaluator;
     private final com.eagleauctioner.repository.UserRepository userRepository;
 
     @Value("${application.cors.allowed-origins}")
     private String[] allowedOrigins;
+
+    @Bean
+    public org.springframework.security.access.expression.method.MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+        org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler handler = new org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler();
+        handler.setPermissionEvaluator(permissionEvaluator);
+        return handler;
+    }
 
     @Bean
     public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {

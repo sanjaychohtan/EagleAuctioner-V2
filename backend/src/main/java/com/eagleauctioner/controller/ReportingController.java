@@ -12,15 +12,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/v1/reports")
+@RequestMapping({"/api/v1/reports", "/api/reports"})
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('reports.export') or hasAuthority('reports.view') or hasRole('ADMIN') or hasRole('FINANCE')")
 public class ReportingController {
 
     private final ReportingService reportingService;
 
     @PostMapping("/generate")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<byte[]> generateReport(
             @RequestParam ReportType type,
             @RequestParam ReportFormat format,
@@ -44,6 +48,7 @@ public class ReportingController {
     }
 
     @PostMapping("/schedule")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> scheduleReport(
             @RequestParam ReportType type,
             @RequestParam ReportFormat format,

@@ -30,6 +30,9 @@ public class Permission {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(name = "action_key", length = 100)
+    private String actionKey;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private Module module;

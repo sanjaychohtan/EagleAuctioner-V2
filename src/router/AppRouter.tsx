@@ -22,6 +22,7 @@ const LotDetailsView = lazy(() => import("../views/LotDetailsView"));
 const BulkLotImportView = lazy(() => import("../views/BulkLotImportView"));
 const LiveAuctionDashboard = lazy(() => import("../views/LiveAuctionDashboard"));
 const LiveBidConsole = lazy(() => import("../views/LiveBidConsole"));
+const RoleManagementView = lazy(() => import("../views/admin/RoleManagementView").then(m => ({ default: m.RoleManagementView })));
 
 // LAZY LOADED SECURE FINANCE OPERATIONS PORTALS
 const FinanceDashboardView = lazy(() => import("../views/FinanceDashboardView"));
@@ -93,9 +94,19 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/admin/kyc"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.OPERATIONS]}>
+              <ProtectedRoute requiredPermission={["kyc.review", "seller.review", USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.OPERATIONS]}>
                 <EnterpriseLayout>
                   <AdminKycQueueView />
+                </EnterpriseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRoute requiredPermission={["role.manage", USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN]}>
+                <EnterpriseLayout>
+                  <RoleManagementView />
                 </EnterpriseLayout>
               </ProtectedRoute>
             }
@@ -113,7 +124,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/auctions/create"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SELLER]}>
+              <ProtectedRoute requiredPermission="auction.create">
                 <EnterpriseLayout>
                   <CreateAuctionView />
                 </EnterpriseLayout>
@@ -133,7 +144,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/auctions/:id/edit"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SELLER]}>
+              <ProtectedRoute requiredPermission="auction.edit">
                 <EnterpriseLayout>
                   <EditAuctionView />
                 </EnterpriseLayout>
@@ -143,7 +154,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/auctions/:id/settings"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SELLER]}>
+              <ProtectedRoute requiredPermission="auction.edit">
                 <EnterpriseLayout>
                   <AuctionSettingsView />
                 </EnterpriseLayout>
@@ -225,7 +236,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["finance.wallet.view", "finance.ledger.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <FinanceDashboardView />
                 </EnterpriseLayout>
@@ -235,7 +246,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/settlements"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["settlement.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <SettlementListView />
                 </EnterpriseLayout>
@@ -245,7 +256,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/settlements/:settlementId"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["settlement.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <SettlementDetailsView />
                 </EnterpriseLayout>
@@ -255,7 +266,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/invoices"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["invoice.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <InvoiceListView />
                 </EnterpriseLayout>
@@ -265,7 +276,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/wallet"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["finance.wallet.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <WalletView />
                 </EnterpriseLayout>
@@ -275,7 +286,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/ledger"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["finance.ledger.view", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <LedgerView />
                 </EnterpriseLayout>
@@ -285,7 +296,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/refunds"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["refund.approve", "refund.create", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <RefundManagementView />
                 </EnterpriseLayout>
@@ -295,7 +306,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/payments"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["payment.view", "payment.create", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <PaymentApprovalView />
                 </EnterpriseLayout>
@@ -305,7 +316,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/finance/reconciliation"
             element={
-              <ProtectedRoute allowedRoles={[USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
+              <ProtectedRoute requiredPermission={["reconciliation.perform", USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT, USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]}>
                 <EnterpriseLayout>
                   <PaymentReconciliationView />
                 </EnterpriseLayout>

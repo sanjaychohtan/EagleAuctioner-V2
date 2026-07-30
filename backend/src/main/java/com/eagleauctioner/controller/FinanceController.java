@@ -17,10 +17,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/finance")
+@RequestMapping({"/api/v1/finance", "/api/finance"})
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -32,7 +35,8 @@ public class FinanceController {
     // --- WALLET ENDPOINTS ---
 
     @GetMapping("/wallet")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('finance.wallet.view') or hasAuthority('finance.wallet.approve') or hasRole('BIDDER') or hasRole('SELLER') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<WalletResponse> getWallet() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
@@ -50,14 +54,16 @@ public class FinanceController {
     // --- LEDGER ENDPOINTS ---
 
     @GetMapping("/ledger")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('finance.ledger.view') or hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<LedgerResponse>> getLedger() {
         log.info("Fetching ledger entries");
         return ResponseEntity.ok(ledgerService.getLedger());
     }
 
     @PostMapping("/ledger")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<LedgerResponse> addLedgerEntry(@Valid @RequestBody LedgerAdjustmentRequest request) {
         log.info("Adding manual ledger entry: {}", request);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

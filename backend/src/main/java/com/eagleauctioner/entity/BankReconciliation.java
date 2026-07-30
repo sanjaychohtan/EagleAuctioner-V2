@@ -3,14 +3,13 @@ package com.eagleauctioner.entity;
 import com.eagleauctioner.enums.ReconciliationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "bank_reconciliations")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

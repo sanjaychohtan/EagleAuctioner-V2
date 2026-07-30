@@ -126,11 +126,8 @@ public class KycServiceImpl implements KycService {
     }
 
     private void validateReviewer(User reviewer) {
-        boolean isAuthorized = reviewer.getRoles().stream().anyMatch(role -> 
-            "ADMIN".equals(role.getName()) || "OPS".equals(role.getName())
-        );
-        if (!isAuthorized) {
-            throw new AccessDeniedException("Unauthorized to perform reviews");
+        if (reviewer == null || reviewer.isLocked() || !reviewer.isActive()) {
+            throw new AccessDeniedException("Unauthorized reviewer context");
         }
     }
 

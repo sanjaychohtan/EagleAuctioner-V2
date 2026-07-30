@@ -1,8 +1,6 @@
 spring:
   application:
     name: eagle-auctioner-backend
-  main:
-    allow-circular-references: true
   profiles:
     active: dev
   datasource:

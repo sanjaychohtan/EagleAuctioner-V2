@@ -2,7 +2,6 @@ package com.eagleauctioner.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import java.util.UUID;
 
 /**
@@ -10,7 +9,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "support_tickets")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

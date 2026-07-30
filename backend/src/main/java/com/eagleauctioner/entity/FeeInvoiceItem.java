@@ -3,7 +3,6 @@ package com.eagleauctioner.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
 @Table(name = "fee_invoice_items")
 @Getter

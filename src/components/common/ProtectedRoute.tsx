@@ -6,10 +6,11 @@ import { USER_ROLE } from "../../constants";
 interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: (USER_ROLE | string)[];
+  requiredPermission?: string | string[];
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+export function ProtectedRoute({ children, allowedRoles, requiredPermission }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, hasRole, hasPermission } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -27,7 +28,10 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (allowedRoles && allowedRoles.length > 0 && !hasRole(allowedRoles)) {
-    // Authenticated but does not possess the authorized roles: redirect to access-denied
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

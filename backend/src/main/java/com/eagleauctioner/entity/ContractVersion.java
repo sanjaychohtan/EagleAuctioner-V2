@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import com.eagleauctioner.enums.ContractStatus;
-import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -21,7 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 })
 @SQLDelete(sql = "UPDATE contract_versions SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

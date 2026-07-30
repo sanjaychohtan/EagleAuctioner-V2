@@ -3,7 +3,6 @@ package com.eagleauctioner.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -11,7 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "auction_bidder_authorizations")
 @SQLDelete(sql = "UPDATE auction_bidder_authorizations SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

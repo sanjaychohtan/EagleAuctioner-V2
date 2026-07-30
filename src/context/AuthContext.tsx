@@ -33,6 +33,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateTenantId: (id: string) => void;
   hasRole: (roles: USER_ROLE | USER_ROLE[] | string | string[]) => boolean;
+  hasPermission: (permission: string | string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -233,6 +234,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const hasPermission = (permission: string | string[]): boolean => {
+    if (!user) return false;
+    if (user.roles?.some(r => r === USER_ROLE.SUPER_ADMIN || r.includes("SUPER_ADMIN"))) {
+      return true;
+    }
+    const reqPerms = Array.isArray(permission) ? permission : [permission];
+    if (user.permissions && Array.isArray(user.permissions)) {
+      if (reqPerms.some(p => user.permissions?.includes(p))) {
+        return true;
+      }
+    }
+    return hasRole(reqPerms as any);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -244,6 +259,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         updateTenantId,
         hasRole,
+        hasPermission,
       }}
     >
       {children}

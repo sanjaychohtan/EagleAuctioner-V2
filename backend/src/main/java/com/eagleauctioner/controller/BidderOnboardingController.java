@@ -14,15 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/onboarding")
+@RequestMapping({"/api/v1/onboarding", "/api/onboarding"})
 @RequiredArgsConstructor
 public class BidderOnboardingController {
 
     private final BidderOnboardingService onboardingService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('buyer.create') or hasRole('BIDDER')")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<BidderProfileResponse> registerBidder(
             @CurrentUser UserPrincipal currentUser,
             @Valid @RequestBody BidderRegistrationRequest request) {
@@ -32,7 +36,8 @@ public class BidderOnboardingController {
     }
 
     @PostMapping("/{profileId}/documents")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('kyc.submit') or hasRole('BIDDER')")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> submitDocuments(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,
@@ -43,7 +48,8 @@ public class BidderOnboardingController {
     }
 
     @PostMapping("/{profileId}/bank/verify")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('bidder.manage') or hasRole('BIDDER')")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> verifyBankAccount(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId) {
@@ -52,7 +58,8 @@ public class BidderOnboardingController {
     }
 
     @PostMapping("/admin/review/{profileId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewKyc(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,

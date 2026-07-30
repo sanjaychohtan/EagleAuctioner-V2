@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/v1/analytics/dashboard")
+@RequestMapping({"/api/v1/analytics/dashboard", "/api/analytics/dashboard"})
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -39,7 +42,8 @@ public class DashboardController {
     }
 
     @GetMapping("/executive")
-    @PreAuthorize("hasAnyRole('EXECUTIVE', 'ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('dashboard.admin') or hasRole('EXECUTIVE') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ExecutiveDashboardData> getExecutiveDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID tenantId = getTenantId(tenantHeader);
@@ -48,7 +52,8 @@ public class DashboardController {
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<AdminDashboardData> getAdminDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID tenantId = getTenantId(tenantHeader);
@@ -57,7 +62,8 @@ public class DashboardController {
     }
 
     @GetMapping("/buyer")
-    @PreAuthorize("hasRole('BUYER')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('BUYER') or hasRole('BIDDER')")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<BuyerDashboardData> getBuyerDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID buyerId = extractCurrentUserId(); 
@@ -67,7 +73,8 @@ public class DashboardController {
     }
 
     @GetMapping("/seller")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('SELLER')")
+    @EnforceDataScope(DataScopeType.SELLER)
     public ResponseEntity<SellerDashboardData> getSellerDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID sellerId = extractCurrentUserId();
@@ -77,7 +84,8 @@ public class DashboardController {
     }
 
     @GetMapping("/finance")
-    @PreAuthorize("hasAnyRole('FINANCE', 'ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('finance.wallet.view') or hasRole('FINANCE') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<FinanceDashboardData> getFinanceDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID tenantId = getTenantId(tenantHeader);
@@ -86,7 +94,8 @@ public class DashboardController {
     }
 
     @GetMapping("/operations")
-    @PreAuthorize("hasAnyRole('OPERATIONS', 'ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('OPERATIONS') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<OperationsDashboardData> getOperationsDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
         UUID tenantId = getTenantId(tenantHeader);
@@ -95,21 +104,24 @@ public class DashboardController {
     }
     
     @PostMapping("/export")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXECUTIVE', 'FINANCE', 'OPERATIONS')")
+    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ExportResponse> exportReport(@Valid @RequestBody ExportRequest request) {
         log.info("Exporting report with format: {}, scope: {}", request.getFormat(), request.getScope());
         return ResponseEntity.ok(dashboardService.exportReport(request));
     }
     
     @PostMapping("/schedule")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXECUTIVE', 'FINANCE', 'OPERATIONS')")
+    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ScheduleResponse> scheduleReport(@Valid @RequestBody ScheduleRequest request) {
         log.info("Scheduling report to: {} with cron: {}", request.getRecipient(), request.getScheduleCron());
         return ResponseEntity.ok(dashboardService.scheduleReport(request));
     }
 
     @PostMapping("/invalidate-cache")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> invalidateDashboardCache() {
         log.info("Invalidating dashboard cache manually");
         dashboardService.invalidateDashboardCache();

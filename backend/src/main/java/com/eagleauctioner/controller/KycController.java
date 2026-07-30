@@ -12,15 +12,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/kyc")
+@RequestMapping({"/api/v1/kyc", "/api/kyc"})
 @RequiredArgsConstructor
 public class KycController {
 
     private final KycService kycService;
 
     @PostMapping("/bidder/{profileId}/review")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('OPS')")
+    @PreAuthorize("hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewBidderKyc(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,
@@ -30,7 +34,8 @@ public class KycController {
     }
 
     @PostMapping("/seller/{profileId}/review")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('OPS')")
+    @PreAuthorize("hasAuthority('kyc.review') or hasAuthority('seller.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewSellerKyc(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,

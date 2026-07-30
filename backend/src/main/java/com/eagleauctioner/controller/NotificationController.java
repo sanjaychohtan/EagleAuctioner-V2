@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping({"/api/v1/notifications", "/api/notifications"})
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationController {
@@ -29,7 +32,8 @@ public class NotificationController {
     private final UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.view') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<List<NotificationResponse>> getMyNotifications(
             @RequestParam(required = false) NotificationChannel channel,
             @RequestParam(required = false) NotificationStatus status) {
@@ -38,40 +42,46 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.view') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Long> getUnreadCount() {
         return ResponseEntity.ok(notificationService.getUnreadCount(getCurrentUserId()));
     }
 
     @PostMapping("/{id}/read")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.view') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> markAsRead(@PathVariable UUID id) {
         notificationService.markAsRead(id, getCurrentUserId());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/archive")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.manage') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> archive(@PathVariable UUID id) {
         notificationService.archiveNotification(id, getCurrentUserId());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.manage') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> softDelete(@PathVariable UUID id) {
         notificationService.softDeleteNotification(id, getCurrentUserId());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/preferences")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.view') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<List<NotificationPreferenceResponse>> getMyPreferences() {
         return ResponseEntity.ok(notificationService.getUserPreferences(getCurrentUserId()));
     }
 
     @PutMapping("/preferences")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('notification.manage') or isAuthenticated()")
+    @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> updatePreference(@Valid @RequestBody NotificationPreferenceRequest request) {
         notificationService.updatePreference(getCurrentUserId(), request);
         return ResponseEntity.ok().build();

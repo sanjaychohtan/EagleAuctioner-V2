@@ -14,8 +14,9 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Create non-root application group and user
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# Create non-root application group and user & install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appgroup && useradd -r -g appgroup appuser
 
 # Create upload directory with proper permissions
 RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app

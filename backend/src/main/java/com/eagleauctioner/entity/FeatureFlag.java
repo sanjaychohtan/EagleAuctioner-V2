@@ -2,14 +2,13 @@ package com.eagleauctioner.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 /**
  * Entity for system feature toggles.
  */
 @Entity
 @Table(name = "feature_flags")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

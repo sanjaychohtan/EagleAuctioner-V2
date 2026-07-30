@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 /**
  * Enterprise controller for Platform Fee Invoice document lifecycle.
  */
 @RestController
-@RequestMapping("/api/v1/fee-invoices")
+@RequestMapping({"/api/v1/fee-invoices", "/api/fee-invoices"})
 @RequiredArgsConstructor
 public class InvoiceController {
 
@@ -26,21 +29,24 @@ public class InvoiceController {
     private final PdfGenerationService pdfGenerationService;
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('BIDDER', 'ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('invoice.view') or hasAuthority('finance.wallet.view') or hasRole('BIDDER') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ApiResponse<FeeInvoiceResponse>> getById(@PathVariable UUID id) {
         FeeInvoiceResponse response = invoiceService.getById(id);
         return ResponseEntity.ok(ApiResponse.success("Fee Invoice retrieved", response));
     }
 
     @PostMapping("/{id}/pay")
-    @PreAuthorize("hasAnyRole('BIDDER', 'ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('invoice.pay') or hasAuthority('payment.create') or hasRole('BIDDER') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ApiResponse<FeeInvoiceResponse>> payInvoice(@PathVariable UUID id) {
         FeeInvoiceResponse response = invoiceService.payInvoice(id);
         return ResponseEntity.ok(ApiResponse.success("Invoice paid", response));
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAnyRole('BIDDER', 'ADMIN', 'FINANCE')")
+    @PreAuthorize("hasAuthority('invoice.view') or hasRole('BIDDER') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID id) {
         FeeInvoice fi = feeInvoiceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Fee Invoice not found: " + id));

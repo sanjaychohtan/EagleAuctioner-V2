@@ -47,9 +47,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
     }
 
-    // IP-based rate limiters
+    // IP-based rate limiters with eviction tracking
     private final ConcurrentHashMap<String, TokenBucket> authLimiters = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, TokenBucket> bidLimiters = new ConcurrentHashMap<>();
+    private static final int MAX_BUCKETS = 10_000;
 
     @Override
     protected void doFilterInternal(
@@ -59,6 +60,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String uri = request.getRequestURI();
         String ip = request.getRemoteAddr();
+
+        evictIfNecessary(authLimiters);
+        evictIfNecessary(bidLimiters);
 
         if (uri.contains("/api/v1/auth/") || uri.contains("/api/auth/")) {
             TokenBucket bucket = authLimiters.computeIfAbsent(ip, k -> new TokenBucket(10.0, 10.0)); // 10 requests per minute
@@ -81,5 +85,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void evictIfNecessary(ConcurrentHashMap<String, TokenBucket> map) {
+        if (map.size() > MAX_BUCKETS) {
+            long now = System.nanoTime();
+            map.entrySet().removeIf(entry -> (now - entry.getValue().lastRefillTime) > 600_000_000_000L); // Evict after 10 min idle
+        }
     }
 }

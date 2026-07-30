@@ -74,7 +74,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Frontend Dependency Vulnerability Audit
-        run: npm audit --audit-level=high --production || true
+        run: npm audit --audit-level=high --production
 
       - name: Build Local Frontend Container Image
         run: docker build -t eagle-auctioner-frontend:ci -f Dockerfile .

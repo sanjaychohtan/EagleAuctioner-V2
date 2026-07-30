@@ -20,7 +20,7 @@ import { motion } from "motion/react";
 
 export const AuctionListView: React.FC = () => {
   const navigate = useNavigate();
-  const { user, hasRole } = useAuth();
+  const { user, hasPermission } = useAuth();
   
   // Fetch auctions using React Query
   const { data: auctions = [], isLoading, isError, error, refetch, isRefetching } = useAuctions();
@@ -42,7 +42,7 @@ export const AuctionListView: React.FC = () => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const isSeller = hasRole("SELLER");
+  const canCreateAuction = hasPermission("auction.create");
 
   return (
     <div className="space-y-6 animate-fadeIn" id="auction-list-view-root">
@@ -65,7 +65,7 @@ export const AuctionListView: React.FC = () => {
           >
             <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin text-indigo-400" : ""}`} />
           </button>
-          {isSeller && (
+          {canCreateAuction && (
             <button
               onClick={() => navigate("/auctions/create")}
               className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/15 cursor-pointer transition-all"
@@ -154,7 +154,7 @@ export const AuctionListView: React.FC = () => {
               Adjust search parameters or initiate a new campaign draft from the command bar.
             </p>
           </div>
-          {isSeller && (
+          {canCreateAuction && (
             <button
               onClick={() => navigate("/auctions/create")}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow"

@@ -5,8 +5,6 @@ import com.eagleauctioner.enums.BidderType;
 import com.eagleauctioner.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -18,7 +16,7 @@ import java.util.ArrayList;
 @Table(name = "bidder_profiles")
 @SQLDelete(sql = "UPDATE bidder_profiles SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +26,7 @@ public class BidderProfile extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    
     private User user;
 
     @Enumerated(EnumType.STRING)

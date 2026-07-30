@@ -4,17 +4,15 @@ import com.eagleauctioner.enums.LedgerAccountType;
 import com.eagleauctioner.enums.LedgerEntryType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 
 @Entity
 @Table(name = "ledger_entries")
 @SQLDelete(sql = "UPDATE ledger_entries SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

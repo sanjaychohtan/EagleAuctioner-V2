@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users", indexes = {
@@ -95,6 +94,14 @@ public class User implements UserDetails {
     @Column(name = "last_password_change_at")
     private Instant lastPasswordChangeAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<DataScope> dataScopes = new HashSet<>();
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_roles",
@@ -145,11 +152,14 @@ public class User implements UserDetails {
         Set<GrantedAuthority> authorities = new HashSet<>();
         if (roles != null) {
             for (Role role : roles) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+                authorities.add(new SimpleGrantedAuthority(role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName()));
                 if (role.getPermissions() != null) {
-                    authorities.addAll(role.getPermissions().stream()
-                        .map(p -> new SimpleGrantedAuthority(p.getName()))
-                        .collect(Collectors.toSet()));
+                    for (Permission p : role.getPermissions()) {
+                        authorities.add(new SimpleGrantedAuthority(p.getName()));
+                        if (p.getActionKey() != null && !p.getActionKey().isBlank()) {
+                            authorities.add(new SimpleGrantedAuthority(p.getActionKey()));
+                        }
+                    }
                 }
             }
         }

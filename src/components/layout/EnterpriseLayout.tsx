@@ -16,7 +16,8 @@ import {
   EyeOff,
   Check,
   AlertTriangle,
-  X
+  X,
+  Shield
 } from "lucide-react";
 import { EnterpriseHeaderNav } from "./EnterpriseHeaderNav";
 import { AuthService } from "../../api/authService";
@@ -28,7 +29,7 @@ interface EnterpriseLayoutProps {
 }
 
 export function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
-  const { user, logout, tenantId, updateTenantId } = useAuth();
+  const { user, logout, tenantId, updateTenantId, hasPermission } = useAuth();
   const { themeMode, toggleThemeMode, sidebarExpanded, setSidebarExpanded } = useAppStore();
   const { showNotification } = useNotification();
   const location = useLocation();
@@ -86,14 +87,17 @@ export function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
     }
   };
 
-  const navLinks = [
-    { name: "Monitoring Telemetry", path: "/monitoring", icon: LayoutDashboard },
-    { name: "PostgreSQL Schema", path: "/schema", icon: Database },
-    { name: "KYC Onboarding", path: "/onboarding", icon: UserCheck },
-    { name: "Admin KYC Queue", path: "/admin/kyc", icon: Layers },
-    { name: "Live Auctions", path: "/auctions", icon: TrendingUp },
-    { name: "Finance Hub", path: "/finance", icon: FileSpreadsheet },
+  const allNavLinks = [
+    { name: "Monitoring Telemetry", path: "/monitoring", icon: LayoutDashboard, permission: "AUTH" },
+    { name: "PostgreSQL Schema", path: "/schema", icon: Database, permission: "AUTH" },
+    { name: "Role & Access Studio", path: "/admin/roles", icon: Shield, permission: "role.manage" },
+    { name: "KYC Onboarding", path: "/onboarding", icon: UserCheck, permission: "AUTH" },
+    { name: "Admin KYC Queue", path: "/admin/kyc", icon: Layers, permission: "kyc.review" },
+    { name: "Live Auctions", path: "/auctions", icon: TrendingUp, permission: "AUTH" },
+    { name: "Finance Hub", path: "/finance", icon: FileSpreadsheet, permission: "finance.wallet.view" },
   ];
+
+  const navLinks = allNavLinks.filter((link) => link.permission === "AUTH" || hasPermission(link.permission));
 
   return (
     <div className={`min-h-screen font-sans ${themeMode === "dark" ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}>

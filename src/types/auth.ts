@@ -5,6 +5,7 @@ export interface UserProfileDTO {
   username: string;
   email: string;
   roles: USER_ROLE[];
+  permissions?: string[];
   kycStatus: KYC_STATUS;
   tenantId: string;
 }

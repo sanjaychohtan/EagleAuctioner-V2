@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
 @RequestMapping("/api/v1/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('admin.access') or hasAuthority('role.manage') or hasAuthority('kyc.review') or hasAuthority('seller.review') or hasRole('ADMIN')")
 @Validated
 @RequiredArgsConstructor
 public class AdminOperationsController {
@@ -42,7 +45,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/users/{userId}/status")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('user.disable') or hasAuthority('user.manage') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<User> updateUserStatus(
             @PathVariable UUID userId,
             @RequestParam boolean active,
@@ -51,7 +55,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/users/{userId}/roles")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_ROLES')")
+    @PreAuthorize("hasAuthority('role.manage') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<User> assignRoles(
             @PathVariable UUID userId,
             @RequestBody @NotEmpty(message = "Role IDs are required") List<UUID> roleIds) {
@@ -59,7 +64,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/roles")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_ROLES')")
+    @PreAuthorize("hasAuthority('role.manage') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Role> createRole(
             @RequestParam @NotBlank(message = "Role name is required") @Size(min = 3, max = 50, message = "Role name must be between 3 and 50 characters") String roleName,
             @RequestParam @Size(max = 255, message = "Description must not exceed 255 characters") String description,
@@ -68,7 +74,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/permissions")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_PERMISSIONS')")
+    @PreAuthorize("hasAuthority('role.manage') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Permission> createPermission(
             @RequestParam @NotBlank(message = "Permission name is required") @Size(min = 3, max = 100, message = "Permission name must be between 3 and 100 characters") String name,
             @RequestParam @NotNull(message = "Module is required") Module module,
@@ -77,7 +84,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/kyc/{profileId}/review")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('PERFORM_REVIEWS')")
+    @PreAuthorize("hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<KycReview> reviewKyc(
             @PathVariable UUID profileId,
             @RequestParam @NotBlank(message = "Decision is required") @Pattern(regexp = "^(APPROVED|REJECTED)$", message = "Decision must be APPROVED or REJECTED") String decision,
@@ -86,7 +94,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/seller/{profileId}/review")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('PERFORM_REVIEWS')")
+    @PreAuthorize("hasAuthority('seller.review') or hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SellerReview> reviewSeller(
             @PathVariable UUID profileId,
             @RequestParam @NotBlank(message = "Decision is required") @Pattern(regexp = "^(APPROVED|REJECTED)$", message = "Decision must be APPROVED or REJECTED") String decision,
@@ -95,7 +104,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/auction-lots/{lotId}/override")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('OVERRIDE_WINNER')")
+    @PreAuthorize("hasAuthority('winner.override') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<AuctionLot> overrideWinner(
             @PathVariable UUID lotId,
             @RequestParam UUID targetBidderProfileId,
@@ -104,7 +114,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/tickets/{ticketId}/status")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('UPDATE_TICKETS')")
+    @PreAuthorize("hasAuthority('support.ticket.update') or hasAuthority('support.ticket.close') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SupportTicket> updateTicketStatus(
             @PathVariable UUID ticketId,
             @RequestParam @NotBlank(message = "Status is required") @Pattern(regexp = "^(OPEN|IN_PROGRESS|RESOLVED|CLOSED)$", message = "Invalid support ticket status") String status) {
@@ -112,7 +123,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/disputes/{disputeId}/resolve")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('RESOLVE_DISPUTES')")
+    @PreAuthorize("hasAuthority('support.dispute.resolve') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Dispute> resolveDispute(
             @PathVariable UUID disputeId,
             @RequestParam @NotBlank(message = "Status is required") @Pattern(regexp = "^(OPEN|UNDER_INVESTIGATION|SETTLED|DISMISSED)$", message = "Invalid dispute status") String status,
@@ -121,7 +133,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/templates")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_TEMPLATES')")
+    @PreAuthorize("hasAuthority('notification.manage') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<NotificationTemplate> createTemplate(
             @RequestParam @NotBlank(message = "Template name is required") @Size(max = 100, message = "Name must not exceed 100 characters") String name,
             @RequestParam @NotNull(message = "Notification type is required") NotificationType type,
@@ -132,7 +145,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/features")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_FEATURES')")
+    @PreAuthorize("hasAuthority('system.feature_flags.manage') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<FeatureFlag> setFeatureFlag(
             @RequestParam @NotBlank(message = "Flag key is required") @Size(max = 100, message = "Key must not exceed 100 characters") String flagKey,
             @RequestParam boolean enabled,
@@ -141,7 +155,8 @@ public class AdminOperationsController {
     }
 
     @PostMapping("/config")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_CONFIG')")
+    @PreAuthorize("hasAuthority('system.config.manage') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<FinancialConfiguration> setSystemConfig(
             @RequestParam @NotBlank(message = "Config key is required") @Size(max = 100, message = "Key must not exceed 100 characters") String configKey,
             @RequestParam @NotBlank(message = "Config value is required") @Size(max = 1000, message = "Value must not exceed 1000 characters") String configValue,
@@ -150,13 +165,15 @@ public class AdminOperationsController {
     }
 
     @GetMapping("/audit/user/{userId}")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('VIEW_AUDIT')")
+    @PreAuthorize("hasAuthority('audit.view') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<AuditLog>> getUserAudits(@PathVariable UUID userId) {
         return ResponseEntity.ok(adminService.getAuditLogsForUser(userId));
     }
 
     @GetMapping("/audit/entity/{entityType}/{entityId}")
-    @PreAuthorize("hasRole('ADMIN') and hasAuthority('VIEW_AUDIT')")
+    @PreAuthorize("hasAuthority('audit.view') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<AuditLog>> getEntityAudits(
             @PathVariable String entityType,
             @PathVariable String entityId) {

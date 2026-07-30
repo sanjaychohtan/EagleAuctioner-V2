@@ -2,11 +2,10 @@ package com.eagleauctioner.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "gst_invoice_items")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

@@ -4,10 +4,8 @@ import com.eagleauctioner.enums.AuctionResultStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 
 /**
  * Entity tracking the final post-auction evaluation outcome of a lot.
@@ -16,7 +14,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "auction_results")
 @SQLDelete(sql = "UPDATE auction_results SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

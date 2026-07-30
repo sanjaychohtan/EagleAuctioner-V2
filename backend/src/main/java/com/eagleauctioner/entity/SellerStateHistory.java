@@ -3,8 +3,6 @@ package com.eagleauctioner.entity;
 import com.eagleauctioner.enums.SellerState;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -14,7 +12,7 @@ import java.time.Instant;
 @Table(name = "seller_state_history")
 @SQLDelete(sql = "UPDATE seller_state_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,7 +32,7 @@ public class SellerStateHistory extends BaseEntity {
     @Column(name = "to_state", nullable = false, length = 50)
     private SellerState toState;
 
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by_user_id", nullable = false)
     private User changedBy;

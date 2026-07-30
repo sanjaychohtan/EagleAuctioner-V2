@@ -6,6 +6,7 @@ export const useExecutiveDashboard = () => {
     queryKey: ["dashboard", "executive"],
     queryFn: () => dashboardService.getExecutiveDashboard(),
     refetchInterval: 30000, // auto-refresh every 30s
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -14,6 +15,7 @@ export const useAdminDashboard = () => {
     queryKey: ["dashboard", "admin"],
     queryFn: () => dashboardService.getAdminDashboard(),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -22,6 +24,7 @@ export const useBuyerDashboard = () => {
     queryKey: ["dashboard", "buyer"],
     queryFn: () => dashboardService.getBuyerDashboard(),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -30,6 +33,7 @@ export const useSellerDashboard = () => {
     queryKey: ["dashboard", "seller"],
     queryFn: () => dashboardService.getSellerDashboard(),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -38,6 +42,7 @@ export const useOperationsDashboard = () => {
     queryKey: ["dashboard", "operations"],
     queryFn: () => dashboardService.getOperationsDashboard(),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -46,6 +51,7 @@ export const useFinanceDashboard = () => {
     queryKey: ["dashboard", "finance"],
     queryFn: () => dashboardService.getFinanceDashboard(),
     refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -54,6 +60,7 @@ export const useNotifications = () => {
     queryKey: ["notifications"],
     queryFn: () => dashboardService.getNotifications(),
     refetchInterval: 15000,
+    refetchIntervalInBackground: false,
   });
 };
 

@@ -25,9 +25,9 @@ public class RefundService {
 
     @Transactional
     public Refund initiateRefund(UUID initiatorId, String initiatorRole, Long amount) {
-        // Maker must be SELLER or ADMIN
-        if (!"SELLER".equals(initiatorRole) && !"ADMIN".equals(initiatorRole)) {
-            throw new org.springframework.security.access.AccessDeniedException("Unauthorized: Initiator must have SELLER or ADMIN role");
+        // Maker must be SELLER, ADMIN, or possess refund.create authority
+        if (!"SELLER".equals(initiatorRole) && !"ADMIN".equals(initiatorRole) && !"refund.create".equals(initiatorRole)) {
+            throw new org.springframework.security.access.AccessDeniedException("Unauthorized: Initiator must have SELLER or ADMIN role or refund.create permission");
         }
 
         if (amount == null || amount <= 0) {
@@ -60,8 +60,8 @@ public class RefundService {
         boolean fullyApproved = false;
 
         if ("PENDING_FIRST_APPROVAL".equals(refund.getStatus())) {
-            // First Level Approval: Require FINANCE or ADMIN roles
-            if (!"FINANCE".equals(approverRole) && !"ADMIN".equals(approverRole)) {
+            // First Level Approval: Require FINANCE, ADMIN, or refund.approve permission
+            if (!"FINANCE".equals(approverRole) && !"ADMIN".equals(approverRole) && !"refund.approve".equals(approverRole)) {
                 throw new org.springframework.security.access.AccessDeniedException("Unauthorized role for first level refund approval");
             }
 
@@ -81,8 +81,8 @@ public class RefundService {
             }
 
         } else if ("PENDING_SECOND_APPROVAL".equals(refund.getStatus())) {
-            // Dual Level Approval: Require FINANCE_DIRECTOR role
-            if (!"FINANCE_DIRECTOR".equals(approverRole)) {
+            // Dual Level Approval: Require FINANCE_DIRECTOR, ADMIN, or refund.approve permission
+            if (!"FINANCE_DIRECTOR".equals(approverRole) && !"ADMIN".equals(approverRole) && !"refund.approve".equals(approverRole)) {
                 throw new org.springframework.security.access.AccessDeniedException("Unauthorized role for dual-level refund approval");
             }
 

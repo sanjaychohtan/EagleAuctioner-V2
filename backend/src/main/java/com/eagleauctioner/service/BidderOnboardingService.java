@@ -244,14 +244,6 @@ public class BidderOnboardingService {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new IllegalArgumentException("Reviewer not found"));
 
-        boolean isAuthorizedReviewer = reviewer.getRoles().stream().anyMatch(role -> 
-            "ADMIN".equals(role.getName()) || "OPS".equals(role.getName()) ||
-            "ROLE_ADMIN".equals(role.getName()) || "ROLE_OPS".equals(role.getName())
-        );
-        if (!isAuthorizedReviewer) {
-            throw new AccessDeniedException("Access Denied: Only users with ROLE_ADMIN or ROLE_OPS can review KYC");
-        }
-
         if (bidderProfile.getState() != BidderState.UNDER_REVIEW) {
             throw new IllegalStateException("Profile is not under review. Current state: " + bidderProfile.getState());
         }

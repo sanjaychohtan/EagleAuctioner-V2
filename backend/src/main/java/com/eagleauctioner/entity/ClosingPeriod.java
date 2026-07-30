@@ -3,14 +3,13 @@ package com.eagleauctioner.entity;
 import com.eagleauctioner.enums.ClosingStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "closing_periods")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,5 +1,7 @@
 package com.eagleauctioner.controller;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
 import com.eagleauctioner.dto.AuctionDTOs.*;
 import com.eagleauctioner.security.CurrentUser;
 import com.eagleauctioner.security.UserPrincipal;
@@ -22,7 +24,8 @@ public class AuctionLotController {
     private final AuctionLotService auctionLotService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionLotResponse> createLot(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID auctionId,
@@ -32,7 +35,8 @@ public class AuctionLotController {
     }
 
     @PutMapping("/{lotId}")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionLotResponse> updateLot(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID auctionId,
@@ -43,7 +47,8 @@ public class AuctionLotController {
     }
 
     @DeleteMapping("/{lotId}")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.cancel')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<Void> deleteLot(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID auctionId,
@@ -54,7 +59,8 @@ public class AuctionLotController {
     }
 
     @PostMapping("/{lotId}/publish")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.publish')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<AuctionLotResponse> publishLot(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID auctionId,
@@ -64,7 +70,8 @@ public class AuctionLotController {
     }
 
     @PostMapping("/sort")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('auction.edit')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<Void> sortLots(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID auctionId,

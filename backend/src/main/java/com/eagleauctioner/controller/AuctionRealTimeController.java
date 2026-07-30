@@ -19,6 +19,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 /**
  * Controller exposing real-time session stats, active feeds, and lock-isolated status.
  */
@@ -33,7 +36,8 @@ public class AuctionRealTimeController {
     private final RedisService redisService;
 
     @GetMapping("/auction/{auctionId}/status")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.view') or hasAuthority('auction.create') or hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<AuctionTimerResponse>> getAuctionStatus(@PathVariable UUID auctionId) {
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
@@ -58,7 +62,8 @@ public class AuctionRealTimeController {
     }
 
     @GetMapping("/lot/{lotId}/highest-bid")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.view') or hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<LiveBidResponse>> getHighestBid(@PathVariable UUID lotId) {
         // Try live bid cache in Redis first
         LiveBidResponse liveBid = redisService.getHighestBid(lotId);
@@ -87,7 +92,8 @@ public class AuctionRealTimeController {
     }
 
     @GetMapping("/auction/{auctionId}/events")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.view') or hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<List<AuctionEventResponse>>> getLiveEventFeed(@PathVariable UUID auctionId) {
         List<AuctionEvent> events = auctionEventRepository.findByAuctionIdOrderByTimestampAsc(auctionId);
         

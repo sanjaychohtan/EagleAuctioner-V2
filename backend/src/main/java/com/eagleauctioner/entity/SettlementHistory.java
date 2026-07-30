@@ -4,7 +4,6 @@ import com.eagleauctioner.enums.SettlementStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import java.time.Instant;
 
@@ -12,7 +11,7 @@ import java.time.Instant;
 @Table(name = "settlement_histories", indexes = {
     @Index(name = "idx_settlement_histories_settlement", columnList = "settlement_id")
 })
-@Audited
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

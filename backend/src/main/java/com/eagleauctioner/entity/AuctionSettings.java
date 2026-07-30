@@ -4,10 +4,8 @@ import com.eagleauctioner.enums.BidIncrementType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.hibernate.envers.Audited;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 
 /**
  * Configuration entity holding specific rules and behaviors for an auction.
@@ -16,7 +14,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "auction_settings")
 @SQLDelete(sql = "UPDATE auction_settings SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?")
 @SQLRestriction("deleted_at IS NULL")
-@Audited
+
 @Getter
 @Setter
 @NoArgsConstructor

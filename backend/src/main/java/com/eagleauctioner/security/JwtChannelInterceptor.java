@@ -76,8 +76,17 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     
                     accessor.setUser(authentication);
                     log.info("WebSocket connection successfully authenticated for user: {}", username);
+                } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                    log.error("WebSocket connection rejected: Access token is expired", e);
+                    throw new MessageDeliveryException("Unauthorized: Access token is expired");
+                } catch (io.jsonwebtoken.MalformedJwtException | io.jsonwebtoken.security.SignatureException e) {
+                    log.error("WebSocket connection rejected: Invalid or malformed token signature", e);
+                    throw new MessageDeliveryException("Unauthorized: Invalid token signature");
+                } catch (io.jsonwebtoken.JwtException e) {
+                    log.error("WebSocket connection error during JWT parsing: {}", e.getMessage(), e);
+                    throw new MessageDeliveryException("Unauthorized: " + e.getMessage());
                 } catch (Exception e) {
-                    log.error("WebSocket connection error during authentication: {}", e.getMessage());
+                    log.error("WebSocket connection error during authentication", e);
                     throw new MessageDeliveryException("Unauthorized: " + e.getMessage());
                 }
             } else if (StompCommand.SUBSCRIBE.equals(command)) {

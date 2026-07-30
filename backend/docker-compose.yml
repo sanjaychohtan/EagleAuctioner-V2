@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: eagle-auctioner-db
     environment:
-      POSTGRES_DB: eagleauctioner
+      POSTGRES_DB: eagle_auctioner
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
@@ -18,7 +18,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: jdbc:postgresql://db:5432/eagleauctioner
+      DATABASE_URL: jdbc:postgresql://db:5432/eagle_auctioner
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: password
     depends_on:

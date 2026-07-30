@@ -13,15 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/seller")
+@RequestMapping({"/api/v1/sellers", "/api/seller"})
 @RequiredArgsConstructor
 public class SellerOnboardingController {
 
     private final SellerOnboardingService sellerService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('seller.create') or hasAuthority('seller.manage') or hasRole('SELLER')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SellerProfileResponse> registerSeller(
             @CurrentUser UserPrincipal currentUser,
             @Valid @RequestBody SellerRegistrationRequest request) {
@@ -29,7 +33,8 @@ public class SellerOnboardingController {
     }
 
     @PostMapping("/{profileId}/documents")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('seller.create') or hasAuthority('kyc.submit') or hasRole('SELLER')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> submitDocuments(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,
@@ -39,7 +44,8 @@ public class SellerOnboardingController {
     }
 
     @PostMapping("/admin/review/{profileId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('seller.review') or hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewSeller(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID profileId,
@@ -49,7 +55,8 @@ public class SellerOnboardingController {
     }
 
     @GetMapping("/admin/search")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('OPS')")
+    @PreAuthorize("hasAuthority('seller.view') or hasAuthority('kyc.review')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<SellerProfileResponse>> searchSellers(
             @RequestParam(required = false) com.eagleauctioner.enums.SellerState state,
             @RequestParam(required = false) String query) {

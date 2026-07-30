@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
-@RequestMapping("/api/financial-closing")
+@RequestMapping({"/api/v1/financial-closing", "/api/financial-closing"})
 @RequiredArgsConstructor
 public class FinancialClosingController {
 
@@ -25,7 +28,8 @@ public class FinancialClosingController {
     private final UserRepository userRepository;
 
     @PostMapping("/initiate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('financial.closing.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ClosingPeriodResponse> initiatePeriod(
             @RequestParam Integer year, 
             @RequestParam Integer month) {
@@ -34,7 +38,8 @@ public class FinancialClosingController {
     }
 
     @PostMapping("/{id}/close")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('financial.closing.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ClosingPeriodResponse> closePeriod(
             @PathVariable UUID id,
             @RequestBody ClosePeriodRequest request) {
@@ -43,7 +48,8 @@ public class FinancialClosingController {
     }
 
     @PostMapping("/{id}/transition")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('financial.closing.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN')")
+    @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ClosingPeriodResponse> transitionPeriod(
             @PathVariable UUID id,
             @RequestParam ClosingStatus targetStatus) {

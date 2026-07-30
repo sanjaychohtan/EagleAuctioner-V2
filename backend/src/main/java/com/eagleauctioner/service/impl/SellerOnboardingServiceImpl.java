@@ -143,15 +143,6 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new IllegalArgumentException("Reviewer not found"));
 
-        // Enforce RBAC validation on reviewer roles
-        boolean isAuthorizedReviewer = reviewer.getRoles().stream().anyMatch(role -> 
-            "ADMIN".equals(role.getName()) || "OPS".equals(role.getName()) ||
-            "ROLE_ADMIN".equals(role.getName()) || "ROLE_OPS".equals(role.getName())
-        );
-        if (!isAuthorizedReviewer) {
-            throw new AccessDeniedException("Access Denied: Only users with ROLE_ADMIN or ROLE_OPS can review Sellers");
-        }
-
         if (profile.getState() != SellerState.UNDER_REVIEW) {
             throw new IllegalStateException("Profile is not under review. Current state: " + profile.getState());
         }

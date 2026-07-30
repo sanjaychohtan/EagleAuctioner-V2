@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.eagleauctioner.aspect.EnforceDataScope;
+import com.eagleauctioner.enums.DataScopeType;
+
 @RestController
 @RequestMapping("/api/v1/lots")
 @RequiredArgsConstructor
@@ -29,7 +32,8 @@ public class BidController {
     private final BidderProfileRepository bidderProfileRepository;
 
     @PostMapping("/{lotId}/bid")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<BidResponse>> placeBid(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID lotId,
@@ -51,7 +55,8 @@ public class BidController {
     }
 
     @PostMapping("/{lotId}/bid/sealed")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<BidResponse>> placeSealedBid(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID lotId,
@@ -73,7 +78,8 @@ public class BidController {
     }
 
     @GetMapping("/{lotId}/highest")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('bid.create') or hasAuthority('auction.view')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<BidResponse>> getHighestBid(@PathVariable UUID lotId) {
         Bid bid = bidService.findHighestBid(lotId).orElse(null);
         BidResponse response = bid != null ? mapToBidResponse(bid) : null;
@@ -81,7 +87,8 @@ public class BidController {
     }
 
     @GetMapping("/{lotId}/history")
-    @PreAuthorize("hasAnyRole('BIDDER', 'SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('bid.create') or hasAuthority('auction.view')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<List<BidHistoryResponse>>> getBidHistory(@PathVariable UUID lotId) {
         List<BidHistory> history = bidService.getBidHistory(lotId);
         List<BidHistoryResponse> response = history.stream().map(this::mapToHistoryResponse).collect(Collectors.toList());
@@ -89,7 +96,8 @@ public class BidController {
     }
 
     @GetMapping("/{lotId}/rank")
-    @PreAuthorize("hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bid.create')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<RankStatusResponse>> getMyRank(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID lotId) {
@@ -99,7 +107,8 @@ public class BidController {
     }
 
     @PostMapping("/{lotId}/sealed/open")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasAuthority('auction.publish')")
+    @EnforceDataScope(DataScopeType.AUCTION)
     public ResponseEntity<ApiResponse<SealedBidOpeningResponse>> openSealedBids(
             @CurrentUser UserPrincipal currentUser,
             @PathVariable UUID lotId) {
