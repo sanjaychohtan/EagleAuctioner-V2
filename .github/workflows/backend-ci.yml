@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: eagleauctioner
+          POSTGRES_DB: eagle_auctioner
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
+          POSTGRES_PASSWORD: "123456"
         ports:
           - 5432:5432
         options: >-
