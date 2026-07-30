@@ -1,10 +1,12 @@
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://db:5432/eagle_auctioner}
     username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:password}
+    password: ${DATABASE_PASSWORD}
     hikari:
-      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:50}
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:10}
       minimum-idle: 5
       idle-timeout: 300000
       max-lifetime: 1800000
@@ -14,7 +16,7 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:redis}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
       timeout: 2000
   jpa:
     hibernate:
@@ -31,6 +33,12 @@ spring:
 
 server:
   port: ${PORT:8080}
+  shutdown: graceful
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+    min-response-size: 2048
   servlet:
     encoding:
       charset: UTF-8

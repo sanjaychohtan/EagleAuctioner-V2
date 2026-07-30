@@ -73,15 +73,26 @@ public class SecurityConfig {
                 .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
                 .ignoringRequestMatchers(
-                    "/api/v1/auth/**",
-                    "/actuator/health",
-                    "/ws/**"
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/health"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/ws/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui.html"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/webjars/**"),
+                    org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/error")
                 )
             )
             .headers(headers -> {
                 headers.frameOptions(frame -> frame.deny());
                 headers.xssProtection(xss -> xss.disable());
-                headers.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'"));
+                String cspDirectives = env.acceptsProfiles(org.springframework.core.env.Profiles.of("prod"))
+                        ? "default-src 'self'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'"
+                        : "default-src 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'";
+                headers.contentSecurityPolicy(csp -> csp.policyDirectives(cspDirectives));
                 headers.referrerPolicy(referrer -> referrer.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
                 headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000));
                 headers.permissionsPolicy(permissions -> permissions.policy("geolocation=(), camera=(), microphone=()"));
@@ -92,24 +103,50 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
             )
             .authorizeHttpRequests(req -> {
-                req.requestMatchers(
-                    "/api/v1/auth/**",
-                    "/actuator/health",
-                    "/ws/**"
-                ).permitAll();
-
                 if (env.acceptsProfiles(org.springframework.core.env.Profiles.of("prod"))) {
                     req.requestMatchers(
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/health"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/health/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/ws/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/error")
+                    ).permitAll();
+                    req.requestMatchers(
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/prometheus"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/metrics"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/metrics/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/info")
+                    ).hasAnyAuthority("ROLE_ADMIN", "ADMIN");
+                    req.requestMatchers(
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui.html"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/webjars/**")
                     ).denyAll();
                 } else {
                     req.requestMatchers(
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/health"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/health/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/ws/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui.html"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/swagger-resources/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/webjars/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/error")
                     ).permitAll();
+                    req.requestMatchers(
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/prometheus"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/metrics"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/metrics/**"),
+                        org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/actuator/info")
+                    ).hasAnyAuthority("ROLE_ADMIN", "ADMIN");
                 }
 
                 req.anyRequest().authenticated();
@@ -125,7 +162,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        java.util.List<String> sanitizedOrigins = Arrays.stream(allowedOrigins)
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty() && !origin.equals("*"))
+                .collect(java.util.stream.Collectors.toList());
+        configuration.setAllowedOrigins(sanitizedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         configuration.setAllowCredentials(true);

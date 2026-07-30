@@ -44,7 +44,9 @@ public class SettlementTests {
     @Mock private SettlementHistoryRepository settlementHistoryRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private FinancialRuleEngine financialRuleEngine;
-    @Spy private ObjectMapper objectMapper = new ObjectMapper();
+    @Spy private ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @InjectMocks private SettlementService settlementService;
 

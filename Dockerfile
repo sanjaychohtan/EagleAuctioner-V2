@@ -1,5 +1,5 @@
 # Stage 1: Build static assets
-FROM node:20-alpine AS build
+FROM node:20.11.1-alpine AS build
 WORKDIR /app
 ENV NODE_OPTIONS=--max-old-space-size=1536
 
@@ -12,8 +12,11 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production Nginx Server
-FROM nginx:1.25-alpine
+FROM nginx:1.25.4-alpine
 WORKDIR /usr/share/nginx/html
+
+# Install wget for healthcheck probe
+RUN apk add --no-cache wget
 
 # Remove default nginx static assets
 RUN rm -rf ./*

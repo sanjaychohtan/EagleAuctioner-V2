@@ -28,6 +28,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        String uri = request.getRequestURI();
+        return path.startsWith("/swagger-ui") || uri.startsWith("/swagger-ui")
+            || path.startsWith("/v3/api-docs") || uri.startsWith("/v3/api-docs")
+            || path.startsWith("/swagger-resources") || uri.startsWith("/swagger-resources")
+            || path.startsWith("/webjars") || uri.startsWith("/webjars")
+            || path.equals("/swagger-ui.html") || uri.equals("/swagger-ui.html")
+            || path.equals("/actuator/health") || uri.equals("/actuator/health")
+            || path.equals("/error") || uri.equals("/error")
+            || path.startsWith("/api/v1/auth") || uri.startsWith("/api/v1/auth");
+    }
+
+    @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
@@ -37,13 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
         
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
+        jwt = authHeader.substring(7);
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            
-            jwt = authHeader.substring(7);
             userEmail = jwtService.extractUsername(jwt);
             
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
