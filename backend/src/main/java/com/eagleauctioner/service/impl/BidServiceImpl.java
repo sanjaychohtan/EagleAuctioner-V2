@@ -28,6 +28,9 @@ public class BidServiceImpl implements BidService {
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
     private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
+    private final AuctionEventRepository auctionEventRepository;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -73,10 +76,17 @@ public class BidServiceImpl implements BidService {
             if (type != AuctionType.SEALED_BID) {
                 auctionAutoExtensionService.checkAndExtend(lot.getAuction().getId(), lot.getId(), result.getBidTime(), result.getAnonymousBidderCode());
             }
+
+            // Publish BID_PLACED event for the winning bid
+            publishBidEvent(lot, result.getAnonymousBidderCode(), result.getBidAmount(), result.getBidTime());
         } else if (result.getBidStatus() == BidStatus.OUTBID && lot.getCurrentHighestBid() != null && !lot.getCurrentHighestBid().equals(oldHighest)) {
             // A proxy bid was triggered and increased the highest bid. We must record history for the proxy bid.
             auctionLotRepository.save(lot);
             recordHistory(lot, oldHighest, lot.getCurrentHighestBid(), oldWinner, lot.getWinnerBidder());
+
+            // Publish BID_PLACED event representing the new highest proxy bid
+            String winnerAnonCode = "BIDDER-" + lot.getWinnerBidder().getId().toString().substring(0, 8).toUpperCase();
+            publishBidEvent(lot, winnerAnonCode, lot.getCurrentHighestBid(), Instant.now());
         } else if (type == AuctionType.SEALED_BID) {
             // Sealed bids don't update lot state until opened, but record history
             recordHistory(lot, oldHighest, amount, null, bidder);
@@ -291,5 +301,30 @@ public class BidServiceImpl implements BidService {
                 .winningAnonymousCode(winnerCode)
                 .openedAt(Instant.now())
                 .build();
+    }
+
+    private void publishBidEvent(AuctionLot lot, String bidderCode, Long bidAmount, Instant bidTime) {
+        try {
+            String payload = objectMapper.writeValueAsString(Map.of(
+                    "lotId", lot.getId().toString(),
+                    "bidAmount", bidAmount,
+                    "anonymousBidderCode", bidderCode,
+                    "bidTime", bidTime.toString()
+            ));
+
+            AuctionEvent event = AuctionEvent.builder()
+                    .auctionId(lot.getAuction().getId())
+                    .lotId(lot.getId())
+                    .eventType(AuctionEventType.BID_PLACED)
+                    .payload(payload)
+                    .timestamp(Instant.now())
+                    .triggeredBy(bidderCode)
+                    .build();
+            auctionEventRepository.save(event);
+            eventPublisher.publishEvent(event);
+            log.info("Published BID_PLACED event for lot {} with amount {}", lot.getId(), bidAmount);
+        } catch (Exception e) {
+            log.error("Failed to publish BID_PLACED event for lot {}", lot.getId(), e);
+        }
     }
 }
