@@ -1,8 +1,6 @@
 package com.eagleauctioner.controller;
 
-import com.eagleauctioner.dto.SettlementHistoryDto;
-import com.eagleauctioner.dto.SettlementRequest;
-import com.eagleauctioner.dto.SettlementResponse;
+import com.eagleauctioner.dto.SettlementDTOs.*;
 import com.eagleauctioner.enums.SettlementStatus;
 import com.eagleauctioner.service.SettlementService;
 import jakarta.validation.Valid;

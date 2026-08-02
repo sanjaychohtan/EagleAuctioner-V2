@@ -4,7 +4,7 @@ import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.ContractStatus;
 import com.eagleauctioner.enums.SettlementStatus;
 import com.eagleauctioner.enums.WinnerStatus;
-import com.eagleauctioner.dto.SettlementResponse;
+import com.eagleauctioner.dto.SettlementDTOs.*;
 import com.eagleauctioner.repository.ContractRepository;
 import com.eagleauctioner.repository.SettlementRepository;
 import com.eagleauctioner.repository.SettlementHistoryRepository;
@@ -432,7 +432,7 @@ public class SettlementTests {
         when(settlementHistoryRepository.findBySettlementIdOrderByActionTimestampAsc(settlement.getId()))
                 .thenReturn(Arrays.asList(history1, history2));
 
-        List<com.eagleauctioner.dto.SettlementHistoryDto> historyList = settlementService.getHistory(settlement.getId());
+        List<SettlementHistoryDto> historyList = settlementService.getHistory(settlement.getId());
 
         assertEquals(2, historyList.size());
         assertEquals(SettlementStatus.DRAFT, historyList.get(0).getCurrentStatus());
@@ -440,7 +440,7 @@ public class SettlementTests {
         assertEquals("buyer@example.com", historyList.get(1).getActor());
 
         // Chronological timeline matches history
-        List<com.eagleauctioner.dto.SettlementHistoryDto> timelineList = settlementService.getTimeline(settlement.getId());
+        List<SettlementHistoryDto> timelineList = settlementService.getTimeline(settlement.getId());
         assertEquals(2, timelineList.size());
     }
 

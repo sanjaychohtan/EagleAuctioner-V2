@@ -55,4 +55,32 @@ public final class RolePermissionDTOs {
         @NotEmpty(message = "At least one permission ID is required")
         private List<UUID> permissionIds;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class DataScopeDTO {
+        private UUID id;
+        private com.eagleauctioner.enums.DataScopeType scopeType;
+        private UUID scopeValueId;
+        private String name;
+        private UUID userId;
+        private UUID roleId;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class DepartmentDTO {
+        private UUID id;
+        private String code;
+        private String name;
+        private String description;
+        private UUID parentId;
+        private List<DepartmentDTO> subDepartments;
+    }
 }
