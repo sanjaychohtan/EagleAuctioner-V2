@@ -23,7 +23,10 @@ public class WebSocketSecurityConfig {
             .simpDestMatchers("/application/**").authenticated()
             .simpTypeMatchers(
                 org.springframework.messaging.simp.SimpMessageType.CONNECT, 
-                org.springframework.messaging.simp.SimpMessageType.DISCONNECT, 
+                org.springframework.messaging.simp.SimpMessageType.DISCONNECT,
+                org.springframework.messaging.simp.SimpMessageType.OTHER
+            ).permitAll()
+            .simpTypeMatchers(
                 org.springframework.messaging.simp.SimpMessageType.SUBSCRIBE, 
                 org.springframework.messaging.simp.SimpMessageType.MESSAGE
             ).authenticated()
