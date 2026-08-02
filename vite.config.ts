@@ -17,29 +17,41 @@ export default defineConfig(() => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (
-                id.includes('react') ||
-                id.includes('react-dom') ||
-                id.includes('react-router-dom') ||
-                id.includes('@mui') ||
-                id.includes('@emotion')
-              ) {
-                return 'vendor-framework';
-              }
-              if (id.includes('recharts')) {
-                return 'vendor-recharts';
-              }
-              if (id.includes('jspdf')) {
-                return 'vendor-jspdf';
-              }
-              if (id.includes('lucide-react')) {
-                return 'vendor-icons';
-              }
-              if (id.includes('motion')) {
+              // 1. Group motion library together first to avoid circular chunks
+              if (id.includes('node_modules/motion') || id.includes('node_modules/@motion')) {
                 return 'vendor-motion';
               }
-              if (id.includes('@tanstack') || id.includes('zustand') || id.includes('axios')) {
+              // 2. Group icons
+              if (id.includes('node_modules/lucide-react')) {
+                return 'vendor-icons';
+              }
+              // 3. Group recharts
+              if (id.includes('node_modules/recharts')) {
+                return 'vendor-recharts';
+              }
+              // 4. Group jspdf
+              if (id.includes('node_modules/jspdf')) {
+                return 'vendor-jspdf';
+              }
+              // 5. Group state management & query
+              if (
+                id.includes('node_modules/@tanstack') ||
+                id.includes('node_modules/zustand') ||
+                id.includes('node_modules/axios')
+              ) {
                 return 'vendor-state-query';
+              }
+              // 6. Core React & UI framework (strict directory matches)
+              if (
+                id.includes('node_modules/react/') ||
+                id.includes('node_modules/react-dom/') ||
+                id.includes('node_modules/react-router/') ||
+                id.includes('node_modules/react-router-dom/') ||
+                id.includes('node_modules/@mui/') ||
+                id.includes('node_modules/@emotion/') ||
+                id.includes('node_modules/react-hook-form/')
+              ) {
+                return 'vendor-framework';
               }
             }
           },
