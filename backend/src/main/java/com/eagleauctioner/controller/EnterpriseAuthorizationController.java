@@ -1,6 +1,7 @@
 package com.eagleauctioner.controller;
 
 import com.eagleauctioner.dto.*;
+import com.eagleauctioner.dto.RolePermissionDTOs.*;
 import com.eagleauctioner.entity.User;
 import com.eagleauctioner.enums.Module;
 import com.eagleauctioner.exception.BusinessException;

@@ -1,6 +1,7 @@
 package com.eagleauctioner.entity;
 
 import com.eagleauctioner.enums.AuctionLotStatus;
+import com.eagleauctioner.enums.AuctionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -96,6 +97,24 @@ public class AuctionLot extends BaseEntity {
         }
         if (minimumIncrement != null && minimumIncrement.compareTo(0L) <= 0) {
             throw new IllegalStateException("Minimum increment must be greater than zero");
+        }
+    }
+
+    public void validateBidAmount(Long bidAmount, AuctionType auctionType) {
+        if (auctionType == AuctionType.SEALED_BID) {
+            if (bidAmount < startingPrice) {
+                throw new IllegalArgumentException("Bid amount must be at least the starting price " + startingPrice);
+            }
+        } else if (auctionType == AuctionType.REVERSE) {
+            Long maxRequired = currentHighestBid == null ? startingPrice : Math.subtractExact(currentHighestBid, minimumIncrement);
+            if (bidAmount > maxRequired) {
+                throw new IllegalArgumentException("For reverse auctions, bid amount must be less than or equal to " + maxRequired);
+            }
+        } else {
+            Long minRequired = currentHighestBid == null ? startingPrice : Math.addExact(currentHighestBid, minimumIncrement);
+            if (bidAmount < minRequired) {
+                throw new IllegalArgumentException("Bid amount must be at least " + minRequired);
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.eagleauctioner.controller;
 
-import com.eagleauctioner.dto.PaymentRequest;
-import com.eagleauctioner.dto.PaymentResponse;
+import com.eagleauctioner.dto.PaymentDTOs.*;
 import com.eagleauctioner.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

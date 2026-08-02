@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useKycStore } from "../store/useKycStore";
 import { useAppStore } from "../store/useAppStore";
-import { BuyerRegistrationScreen } from "./BuyerRegistrationScreen";
-import { SellerRegistrationScreen } from "./SellerRegistrationScreen";
+import { RegistrationScreen } from "./RegistrationScreen";
 import { RefreshCw, ShieldAlert, ArrowRight, User, Building, Landmark } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { USER_ROLE } from "../constants";
@@ -39,11 +38,11 @@ export const KycOnboardingView: React.FC = () => {
 
   // Render chosen flow
   if (selectedFlow === "BUYER") {
-    return <BuyerRegistrationScreen />;
+    return <RegistrationScreen role="BUYER" />;
   }
 
   if (selectedFlow === "SELLER") {
-    return <SellerRegistrationScreen />;
+    return <RegistrationScreen role="SELLER" />;
   }
 
   const isDark = themeMode === "dark";

@@ -1,6 +1,6 @@
 package com.eagleauctioner.service;
 
-import com.eagleauctioner.dto.KycReviewRequest;
+import com.eagleauctioner.dto.OnboardingDTOs.*;
 import com.eagleauctioner.entity.KycReview;
 import com.eagleauctioner.entity.SellerReview;
 import java.util.UUID;

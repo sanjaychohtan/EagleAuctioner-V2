@@ -1,6 +1,7 @@
 package com.eagleauctioner.test;
 
 import com.eagleauctioner.dto.*;
+import com.eagleauctioner.dto.PaymentDTOs.*;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.*;
 import com.eagleauctioner.event.*;

@@ -25,13 +25,11 @@ public class BidEngineServiceImpl implements BidEngineService {
 
     @Override
     public Bid processForwardBid(AuctionLot lot, BidderProfile bidder, Long bidAmount, String ipAddress, String userAgent) {
+        lot.validateBidAmount(bidAmount, lot.getAuction().getAuctionType());
+
         Long currentHighest = lot.getCurrentHighestBid();
         Long minIncrement = lot.getMinimumIncrement();
         Long minRequired = currentHighest == null ? lot.getStartingPrice() : Math.addExact(currentHighest, minIncrement);
-
-        if (bidAmount < minRequired) {
-            throw new IllegalArgumentException("Bid amount must be at least " + minRequired);
-        }
 
         Optional<Bid> prevWinningBidOpt = bidRepository.findWinningBid(lot.getId());
         
@@ -93,13 +91,7 @@ public class BidEngineServiceImpl implements BidEngineService {
 
     @Override
     public Bid processReverseBid(AuctionLot lot, BidderProfile bidder, Long bidAmount, String ipAddress, String userAgent) {
-        Long currentHighest = lot.getCurrentHighestBid();
-        Long minIncrement = lot.getMinimumIncrement();
-        Long maxRequired = currentHighest == null ? lot.getStartingPrice() : Math.subtractExact(currentHighest, minIncrement);
-
-        if (bidAmount > maxRequired) {
-            throw new IllegalArgumentException("For reverse auctions, bid amount must be less than or equal to " + maxRequired);
-        }
+        lot.validateBidAmount(bidAmount, lot.getAuction().getAuctionType());
 
         Optional<Bid> prevWinningBidOpt = bidRepository.findWinningBid(lot.getId());
         
@@ -124,10 +116,7 @@ public class BidEngineServiceImpl implements BidEngineService {
 
     @Override
     public Bid processSealedBid(AuctionLot lot, BidderProfile bidder, Long bidAmount, String ipAddress, String userAgent) {
-        Long minRequired = lot.getStartingPrice();
-        if (bidAmount < minRequired) {
-            throw new IllegalArgumentException("Bid amount must be at least the starting price " + minRequired);
-        }
+        lot.validateBidAmount(bidAmount, lot.getAuction().getAuctionType());
         
         List<Bid> existingBids = bidRepository.findByLotIdAndBidderId(lot.getId(), bidder.getId());
         if (!existingBids.isEmpty()) {

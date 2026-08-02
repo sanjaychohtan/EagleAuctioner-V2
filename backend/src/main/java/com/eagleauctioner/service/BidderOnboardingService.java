@@ -2,6 +2,7 @@ package com.eagleauctioner.service;
 
 import com.eagleauctioner.context.AuditContext;
 import com.eagleauctioner.dto.*;
+import com.eagleauctioner.dto.OnboardingDTOs.*;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.*;
 import com.eagleauctioner.event.*;

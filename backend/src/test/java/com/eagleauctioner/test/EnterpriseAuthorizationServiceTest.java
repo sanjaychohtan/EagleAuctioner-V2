@@ -1,8 +1,6 @@
 package com.eagleauctioner.test;
 
-import com.eagleauctioner.dto.PermissionDTO;
-import com.eagleauctioner.dto.RoleCreateRequestDTO;
-import com.eagleauctioner.dto.RoleDTO;
+import com.eagleauctioner.dto.RolePermissionDTOs.*;
 import com.eagleauctioner.entity.Permission;
 import com.eagleauctioner.entity.Role;
 import com.eagleauctioner.enums.Module;

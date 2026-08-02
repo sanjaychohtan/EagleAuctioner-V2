@@ -1,6 +1,7 @@
 package com.eagleauctioner.controller;
 
 import com.eagleauctioner.dto.*;
+import com.eagleauctioner.dto.OnboardingDTOs.*;
 import com.eagleauctioner.security.CurrentUser;
 import com.eagleauctioner.security.UserPrincipal;
 import com.eagleauctioner.service.BidderOnboardingService;

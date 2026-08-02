@@ -1,7 +1,7 @@
 package com.eagleauctioner.service.impl;
 
 import com.eagleauctioner.context.AuditContext;
-import com.eagleauctioner.dto.KycReviewRequest;
+import com.eagleauctioner.dto.OnboardingDTOs.*;
 import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.BidderState;
 import com.eagleauctioner.enums.ReviewDecision;
