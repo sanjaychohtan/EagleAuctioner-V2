@@ -42,7 +42,7 @@ public class DashboardController {
     }
 
     @GetMapping("/executive")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('dashboard.admin') or hasRole('EXECUTIVE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('dashboard.admin') or hasRole('EXECUTIVE') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ExecutiveDashboardData> getExecutiveDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -52,7 +52,7 @@ public class DashboardController {
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<AdminDashboardData> getAdminDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -62,7 +62,7 @@ public class DashboardController {
     }
 
     @GetMapping("/buyer")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('BUYER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('BUYER') or hasRole('BIDDER') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<BuyerDashboardData> getBuyerDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -73,7 +73,7 @@ public class DashboardController {
     }
 
     @GetMapping("/seller")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('SELLER') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.SELLER)
     public ResponseEntity<SellerDashboardData> getSellerDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -84,7 +84,7 @@ public class DashboardController {
     }
 
     @GetMapping("/finance")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('finance.wallet.view') or hasRole('FINANCE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasAuthority('finance.wallet.view') or hasRole('FINANCE') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<FinanceDashboardData> getFinanceDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -94,7 +94,7 @@ public class DashboardController {
     }
 
     @GetMapping("/operations")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('OPERATIONS') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('OPERATIONS') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<OperationsDashboardData> getOperationsDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
@@ -104,7 +104,7 @@ public class DashboardController {
     }
     
     @PostMapping("/export")
-    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS')")
+    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ExportResponse> exportReport(@Valid @RequestBody ExportRequest request) {
         log.info("Exporting report with format: {}, scope: {}", request.getFormat(), request.getScope());
@@ -112,7 +112,7 @@ public class DashboardController {
     }
     
     @PostMapping("/schedule")
-    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS')")
+    @PreAuthorize("hasAuthority('reports.export') or hasRole('ADMIN') or hasRole('EXECUTIVE') or hasRole('FINANCE') or hasRole('OPERATIONS') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ScheduleResponse> scheduleReport(@Valid @RequestBody ScheduleRequest request) {
         log.info("Scheduling report to: {} with cron: {}", request.getRecipient(), request.getScheduleCron());
@@ -120,7 +120,7 @@ public class DashboardController {
     }
 
     @PostMapping("/invalidate-cache")
-    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.admin') or hasAuthority('admin.access') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> invalidateDashboardCache() {
         log.info("Invalidating dashboard cache manually");
