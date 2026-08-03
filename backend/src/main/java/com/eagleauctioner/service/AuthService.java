@@ -125,6 +125,11 @@ public class AuthService {
                 .build();
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
     @Transactional
     public AuthResponse login(String email, String password) {
         User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)

@@ -41,6 +41,42 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> me() {
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() instanceof String) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Unauthorized", null));
+        }
+
+        Object principal = authentication.getPrincipal();
+        com.eagleauctioner.entity.User user = null;
+        if (principal instanceof com.eagleauctioner.entity.User) {
+            user = (com.eagleauctioner.entity.User) principal;
+        } else if (principal instanceof com.eagleauctioner.security.UserPrincipal) {
+            String email = ((com.eagleauctioner.security.UserPrincipal) principal).getUsername();
+            user = authService.getUserByEmail(email);
+        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            String email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+            user = authService.getUserByEmail(email);
+        }
+
+        if (user == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Unauthorized", null));
+        }
+
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getEmail());
+        response.setEmail(user.getEmail());
+        response.setRoles(user.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet()));
+        response.setKycStatus("APPROVED");
+        response.setTenantId("default");
+
+        return ResponseEntity.ok(ApiResponse.success("User profile retrieved successfully", response));
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthService.AuthResponse>> refresh(
             @CookieValue(name = "ea_refresh_token", required = false) String cookieRefreshToken,
@@ -152,5 +188,15 @@ public class AuthController {
         @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", 
                  message = "Password must be at least 8 characters long, contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character")
         private String newPassword;
+    }
+
+    @Data
+    public static class UserResponse {
+        private java.util.UUID id;
+        private String username;
+        private String email;
+        private java.util.Set<String> roles;
+        private String kycStatus;
+        private String tenantId;
     }
 }
