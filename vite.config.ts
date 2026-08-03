@@ -60,7 +60,21 @@ export default defineConfig(() => {
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      watch: process.env.DISABLE_HMR === 'true' ? null : {
+        ignored: ['**/backend/**']
+      },
+      port: 3000,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/ws': {
+          target: 'http://localhost:8080',
+          ws: true,
+          changeOrigin: true,
+        }
+      }
     },
   };
 });
