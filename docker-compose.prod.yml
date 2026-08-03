@@ -69,13 +69,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: eagle-auctioner-prod-api
     restart: always
     stop_grace_period: 30s
     security_opt:
       - "no-new-privileges:true"
-    ports:
-      - "8080:8080"
     environment:
       TZ: UTC
       SPRING_PROFILES_ACTIVE: prod
@@ -102,6 +99,7 @@ services:
     volumes:
       - upload_prod_data:/app/uploads
     deploy:
+      replicas: 2
       resources:
         limits:
           cpus: '1.50'
@@ -117,7 +115,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: eagle-auctioner-prod-frontend
     restart: always
     stop_grace_period: 30s
     security_opt:
@@ -150,9 +147,11 @@ services:
 
 networks:
   eagle_network:
+    name: eagle_network
     driver: bridge
 
 volumes:
   postgres_prod_data:
   redis_prod_data:
   upload_prod_data:
+

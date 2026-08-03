@@ -6,11 +6,22 @@ set -euo pipefail
 
 DB_CONTAINER="${DB_CONTAINER:-eagle-auctioner-prod-db}"
 REDIS_CONTAINER="${REDIS_CONTAINER:-eagle-auctioner-prod-redis}"
-API_CONTAINER="${API_CONTAINER:-eagle-auctioner-prod-api}"
-FRONTEND_CONTAINER="${FRONTEND_CONTAINER:-eagle-auctioner-prod-frontend}"
+
+# Dynamically discover active API and Frontend containers if Docker Compose is running
+COMPOSE_FILE="docker-compose.prod.yml"
+RESOLVED_API=""
+RESOLVED_FE=""
+if docker compose -f "$COMPOSE_FILE" ps >/dev/null 2>&1; then
+    RESOLVED_API=$(docker compose -f "$COMPOSE_FILE" ps -q api | head -n 1 || true)
+    RESOLVED_FE=$(docker compose -f "$COMPOSE_FILE" ps -q frontend | head -n 1 || true)
+fi
+
+API_CONTAINER="${API_CONTAINER:-${RESOLVED_API:-eagle-auctioner-prod-api}}"
+FRONTEND_CONTAINER="${FRONTEND_CONTAINER:-${RESOLVED_FE:-eagle-auctioner-prod-frontend}}"
 
 DB_USER="${DATABASE_USERNAME:-postgres}"
 DB_NAME="${POSTGRES_DB:-eagle_auctioner}"
+
 
 echo "======================================================================"
 echo " Running Eagle Auctioner Production Stack Health Verification"
