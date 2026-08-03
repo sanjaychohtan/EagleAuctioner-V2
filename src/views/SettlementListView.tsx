@@ -20,6 +20,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { motion } from "motion/react";
+import { ExportUtility } from "../utils/exportUtility";
 
 const DEMO_SETTLEMENTS = [
   { settlementId: "STL-2026-001", referenceNo: "REF-99211", auctionId: "AUC-101", lotId: "LOT-202", sellerId: "SEL_MUMBAI_01", buyerId: "BYR_INDORE_89", grossAmount: 150000, platformFee: 7500, taxAmount: 1350, netAmount: 141150, currency: "INR", status: "PENDING", createdAt: "2026-06-30T01:00:00Z" },
@@ -84,41 +85,46 @@ export const SettlementListView: React.FC = () => {
     }
   };
 
-  const handleExport = () => {
-    try {
-      const headers = ["Settlement ID", "Auction ID", "Seller", "Buyer", "Gross Amount", "Platform Fee", "GST (18%)", "TDS (1%)", "Net Settlement Payout", "Status", "Date"];
-      const rows = filteredSettlements.map(s => {
-        const gst = calculateGST(s.platformFee);
-        const tds = calculateTDS(s.grossAmount);
-        const net = calculateNetSettlement(s.grossAmount, s.platformFee, gst + tds);
-        return [
-          s.settlementId,
-          s.auctionId,
-          s.sellerId,
-          s.buyerId,
-          s.grossAmount,
-          s.platformFee,
-          gst,
-          tds,
-          net,
-          s.status,
-          new Date(s.createdAt).toLocaleDateString()
-        ];
-      });
+  const getExportData = () => {
+    const headers = ["Settlement ID", "Auction ID", "Seller", "Buyer", "Gross Amount", "Platform Fee", "GST (18%)", "TDS (1%)", "Net Settlement Payout", "Status", "Date"];
+    const rows = filteredSettlements.map(s => {
+      const gst = calculateGST(s.platformFee);
+      const tds = calculateTDS(s.grossAmount);
+      const net = calculateNetSettlement(s.grossAmount, s.platformFee, gst + tds);
+      return [
+        s.settlementId,
+        s.auctionId,
+        s.sellerId,
+        s.buyerId,
+        s.grossAmount,
+        s.platformFee,
+        gst,
+        tds,
+        net,
+        s.status,
+        new Date(s.createdAt).toLocaleDateString()
+      ];
+    });
+    return { headers, rows };
+  };
 
-      const csvContent = "data:text/csv;charset=utf-8," 
-        + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-      
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Eagle_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showNotification("Escrow Settlement Ledger sheet compiled and downloaded.", "success");
+  const handleExportCSV = () => {
+    try {
+      const { headers, rows } = getExportData();
+      ExportUtility.exportCSV(headers, rows, `Eagle_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.csv`);
+      showNotification("Escrow Settlement Ledger CSV downloaded.", "success");
     } catch (err) {
-      showNotification("Failed to generate csv download", "error");
+      showNotification("Failed to generate CSV export", "error");
+    }
+  };
+
+  const handleExportPDF = () => {
+    try {
+      const { headers, rows } = getExportData();
+      ExportUtility.exportPDF("Eagle Escrow Settlement Ledger", headers, rows, `Eagle_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.pdf`);
+      showNotification("Escrow Settlement Ledger PDF downloaded.", "success");
+    } catch (err) {
+      showNotification("Failed to generate PDF export", "error");
     }
   };
 
@@ -143,10 +149,16 @@ export const SettlementListView: React.FC = () => {
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} /> Refresh Table
           </button>
           <button 
-            onClick={handleExport}
+            onClick={handleExportCSV}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] uppercase font-bold transition-all cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" /> Export CSV
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] uppercase font-bold transition-all cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5" /> Export PDF
           </button>
         </div>
       </div>

@@ -19,6 +19,9 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   const subscriptionsRef = useRef<Map<string, StompSubscription>>(new Map());
   const accessToken = useAuthStore((state) => state.accessToken);
   const accessTokenRef = useRef<string | null>(accessToken);
+  
+  const reconnectAttemptsRef = useRef<number>(0);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     accessTokenRef.current = accessToken;
@@ -42,7 +45,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
           console.debug("[STOMP Debug]:", str);
         }
       },
-      reconnectDelay: 5000, // Reconnect retry interval
+      reconnectDelay: 0, // Disabled auto-reconnection to enforce manual exponential backoff policy
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
@@ -52,6 +55,11 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
         console.log("[STOMP Connected]:", frame);
       }
       setIsConnected(true);
+      reconnectAttemptsRef.current = 0;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
 
     stompClient.onWebSocketClose = () => {
@@ -59,6 +67,22 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
         console.warn("[STOMP Closed]");
       }
       setIsConnected(false);
+
+      if (hasToken) {
+        const attempt = reconnectAttemptsRef.current;
+        const delay = Math.min(2000 * Math.pow(2, attempt), 60000);
+        console.warn(`[STOMP Closed] Reconnecting in ${delay}ms (attempt ${attempt + 1})`);
+        reconnectAttemptsRef.current = attempt + 1;
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+        reconnectTimeoutRef.current = setTimeout(() => {
+          if (accessTokenRef.current) {
+            stompClient.activate();
+          }
+        }, delay);
+      }
     };
 
     stompClient.onStompError = (frame) => {
@@ -71,6 +95,10 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     stompClient.activate();
 
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
       subscriptionsRef.current.forEach((sub, subId) => {
         try {
           sub.unsubscribe();

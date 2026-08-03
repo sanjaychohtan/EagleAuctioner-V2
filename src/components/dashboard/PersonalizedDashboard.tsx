@@ -8,6 +8,7 @@ import { SystemHealth } from "./SystemHealth";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { ExportCenter } from "./ExportCenter";
 import { WidgetPreferencesDrawer } from "./personalized/WidgetPreferencesDrawer";
+import { useAppStore } from "../../store/useAppStore";
 
 export interface PersonalizedDashboardProps {
   simulationMode?: "normal" | "loading" | "empty" | "error";
@@ -23,19 +24,7 @@ export function PersonalizedDashboard({
   onTriggerAction = () => {}
 }: PersonalizedDashboardProps) {
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
-  const [widgets, setWidgets] = useState([
-    { id: "w-quick", name: "Quick Commands", category: "Actions", enabled: true },
-    { id: "w-wallet", name: "EMR Wallet Pool", category: "Finance", enabled: true },
-    { id: "w-ai", name: "AI Analytics Insights", category: "Intelligence", enabled: true },
-    { id: "w-calendar", name: "Auction Calendar", category: "Schedule", enabled: true },
-    { id: "w-system", name: "System Telemetry", category: "SRE", enabled: true },
-    { id: "w-timeline", name: "Activity Feed", category: "Audit", enabled: true },
-    { id: "w-export", name: "Reports Export Center", category: "Reports", enabled: true }
-  ]);
-
-  const handleToggleWidget = (id: string) => {
-    setWidgets((prev) => prev.map((w) => w.id === id ? { ...w, enabled: !w.enabled } : w));
-  };
+  const { widgets, toggleWidget, resetWidgets } = useAppStore();
 
   const isEnabled = (id: string) => widgets.find((w) => w.id === id)?.enabled ?? true;
 
@@ -110,8 +99,8 @@ export function PersonalizedDashboard({
         isOpen={isPreferencesOpen}
         onClose={() => setIsPreferencesOpen(false)}
         widgets={widgets}
-        onToggleWidget={handleToggleWidget}
-        onResetLayout={() => setWidgets((prev) => prev.map((w) => ({ ...w, enabled: true })))}
+        onToggleWidget={toggleWidget}
+        onResetLayout={resetWidgets}
       />
     </div>
   );

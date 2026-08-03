@@ -6,7 +6,7 @@ import { useHighestBid, useBidHistory, usePlaceBidMutation } from "../hooks/useB
 import { useWebSocket, useWebSocketSubscription } from "../context/WebSocketContext";
 import { useBidStore } from "../store/bidStore";
 import { STOMP_DESTINATIONS } from "../constants/bidConstants";
-import { calculateNextMinimumBid } from "../utils/bidUtils";
+import { calculateNextMinimumBid, formatCurrency } from "../utils/bidUtils";
 import { handleApiError } from "../api/errorHandler";
 import { useNotification } from "../providers/NotificationProvider";
 import { ArrowLeft, Wifi, WifiOff, Clock } from "lucide-react";
@@ -76,8 +76,12 @@ export const LiveBidConsole: React.FC = () => {
     return () => clearInterval(interval);
   }, [auction?.auctionEnd]);
 
-  const currentHighest = highestBidData?.bidAmount || auction?.lots?.[0]?.startingPrice || 10000;
-  const nextMinBid = calculateNextMinimumBid(currentHighest, 500);
+  const activeLot = auction?.lots?.find(l => l.id === lotId);
+  const currency = activeLot?.currency || auction?.currency || "INR";
+  const startingPriceRupees = (activeLot?.startingPrice || 10000) / 100;
+  const minIncrementRupees = (activeLot?.minimumIncrement || 500) / 100;
+  const currentHighest = highestBidData ? (highestBidData.bidAmount / 100) : startingPriceRupees;
+  const nextMinBid = currentHighest + minIncrementRupees;
 
   const handleQuickIncrement = (inc: number) => {
     setBidAmount((currentHighest + inc).toString());
@@ -87,13 +91,13 @@ export const LiveBidConsole: React.FC = () => {
     e.preventDefault();
     const val = parseFloat(bidAmount);
     if (isNaN(val) || val < nextMinBid) {
-      showNotification(`Bid must be at least ₹${nextMinBid.toLocaleString()}`, "warning");
+      showNotification(`Bid must be at least ${formatCurrency(nextMinBid, currency)}`, "warning");
       return;
     }
 
     try {
-      await placeBidMut.mutateAsync({ bidAmount: val });
-      showNotification(`Successfully submitted bid of ₹${val.toLocaleString()}`, "success");
+      await placeBidMut.mutateAsync({ bidAmount: Math.round(val * 100) });
+      showNotification(`Successfully submitted bid of ${formatCurrency(val, currency)}`, "success");
       setBidAmount("");
     } catch (err: any) {
       const friendly = handleApiError(err);
@@ -152,6 +156,7 @@ export const LiveBidConsole: React.FC = () => {
             isSubmitting={placeBidMut.isPending}
             onPlaceBid={handlePlaceBid}
             onQuickIncrement={handleQuickIncrement}
+            currency={currency}
           />
         </div>
 
@@ -161,6 +166,7 @@ export const LiveBidConsole: React.FC = () => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             historyEndRef={historyEndRef}
+            currency={currency}
           />
         </div>
       </div>

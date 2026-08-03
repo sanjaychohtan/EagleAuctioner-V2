@@ -14,8 +14,10 @@ import {
   GripVertical,
   Loader2,
   AlertTriangle,
-  Gavel
+  Gavel,
+  Download
 } from "lucide-react";
+import { ExportUtility } from "../utils/exportUtility";
 import { AuctionState, AuctionLotResponse } from "../types/auction";
 
 export const LotListView: React.FC = () => {
@@ -154,6 +156,42 @@ export const LotListView: React.FC = () => {
     }
   };
 
+  const getExportData = () => {
+    const headers = ["Lot Number", "Title", "Category", "Quantity", "UoM", "Starting Price", "Reserve Price", "Min Increment", "Status"];
+    const rows = localLots.map(l => [
+      l.lotNumber,
+      l.title,
+      l.materialCategory,
+      l.quantity,
+      l.unitOfMeasure,
+      (l.startingPrice / 100).toFixed(2),
+      l.reservePrice ? (l.reservePrice / 100).toFixed(2) : "-",
+      (l.minimumIncrement / 100).toFixed(2),
+      l.lotStatus
+    ]);
+    return { headers, rows };
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const { headers, rows } = getExportData();
+      ExportUtility.exportCSV(headers, rows, `Lots_Manifest_${auction.auctionNumber}_${new Date().toISOString().split("T")[0]}.csv`);
+      showNotification("Lots manifest CSV downloaded.", "success");
+    } catch (err) {
+      showNotification("Failed to generate CSV export", "error");
+    }
+  };
+
+  const handleExportPDF = () => {
+    try {
+      const { headers, rows } = getExportData();
+      ExportUtility.exportPDF(`Lots Manifest: ${auction.auctionNumber}`, headers, rows, `Lots_Manifest_${auction.auctionNumber}_${new Date().toISOString().split("T")[0]}.pdf`);
+      showNotification("Lots manifest PDF downloaded.", "success");
+    } catch (err) {
+      showNotification("Failed to generate PDF export", "error");
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto font-mono text-xs">
       {/* Back Header & Actions */}
@@ -171,24 +209,42 @@ export const LotListView: React.FC = () => {
           </div>
         </div>
 
-        {isDraft && (
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => navigate(`/auctions/${auctionId}/lots/import`)}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl font-bold transition-all cursor-pointer"
-            >
-              <Upload className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Bulk Import</span>
-            </button>
-            <button
-              onClick={() => navigate(`/auctions/${auctionId}/lots/create`)}
-              className="flex items-center gap-1.5 px-4.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase tracking-wider shadow shadow-indigo-600/10 cursor-pointer transition-all"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add New Lot</span>
-            </button>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {isDraft && (
+            <>
+              <button
+                onClick={() => navigate(`/auctions/${auctionId}/lots/import`)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl font-bold transition-all cursor-pointer"
+              >
+                <Upload className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Bulk Import</span>
+              </button>
+              <button
+                onClick={() => navigate(`/auctions/${auctionId}/lots/create`)}
+                className="flex items-center gap-1.5 px-4.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase tracking-wider shadow shadow-indigo-600/10 cursor-pointer transition-all"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add New Lot</span>
+              </button>
+            </>
+          )}
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl font-bold transition-all cursor-pointer"
+            title="Export to CSV"
+          >
+            <Download className="h-3.5 w-3.5 text-emerald-400" />
+            <span>CSV</span>
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl font-bold transition-all cursor-pointer"
+            title="Export to PDF"
+          >
+            <Download className="h-3.5 w-3.5 text-blue-400" />
+            <span>PDF</span>
+          </button>
+        </div>
       </div>
 
       {!isDraft && (

@@ -13,6 +13,7 @@ interface BidControlsPanelProps {
   isSubmitting: boolean;
   onPlaceBid: (e: React.FormEvent) => void;
   onQuickIncrement: (increment: number) => void;
+  currency?: string;
 }
 
 export const BidControlsPanel: React.FC<BidControlsPanelProps> = memo(({
@@ -25,14 +26,15 @@ export const BidControlsPanel: React.FC<BidControlsPanelProps> = memo(({
   isClosed,
   isSubmitting,
   onPlaceBid,
-  onQuickIncrement
+  onQuickIncrement,
+  currency
 }) => {
   return (
     <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl font-mono space-y-6">
       <div className="flex items-center justify-between border-b border-slate-800 pb-4">
         <div>
           <span className="text-[10px] text-slate-500 uppercase font-bold">Minimum Next Valid Bid</span>
-          <div className="text-2xl font-bold text-emerald-400">{formatCurrency(nextMinBid)}</div>
+          <div className="text-2xl font-bold text-emerald-400">{formatCurrency(nextMinBid, currency)}</div>
         </div>
 
         <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">

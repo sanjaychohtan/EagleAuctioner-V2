@@ -7,13 +7,15 @@ interface BidActivityTimelineProps {
   activeTab: "TIMELINE" | "LEADERBOARD";
   setActiveTab: (tab: "TIMELINE" | "LEADERBOARD") => void;
   historyEndRef: React.RefObject<HTMLDivElement | null>;
+  currency?: string;
 }
 
 export const BidActivityTimeline: React.FC<BidActivityTimelineProps> = memo(({
   bidHistory,
   activeTab,
   setActiveTab,
-  historyEndRef
+  historyEndRef,
+  currency
 }) => {
   return (
     <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl font-mono space-y-4">
@@ -65,7 +67,7 @@ export const BidActivityTimeline: React.FC<BidActivityTimelineProps> = memo(({
                   <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                 )}
                 <div>
-                  <span className="font-bold text-white block">{formatCurrency(item.bidAmount)}</span>
+                  <span className="font-bold text-white block">{formatCurrency(item.bidAmount / 100, currency)}</span>
                   <span className="text-[10px] text-slate-400">{item.bidderName || "Anonymous Bidder"}</span>
                 </div>
               </div>
