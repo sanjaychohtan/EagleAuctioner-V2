@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import com.eagleauctioner.aspect.EnforceDataScope;
 import com.eagleauctioner.enums.DataScopeType;
+import java.util.List;
 
 /**
  * Enterprise REST Controller governing billing transactions, allocations, and receipts.
@@ -25,11 +26,19 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('payment.view') or hasAuthority('finance.wallet.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
+    public ResponseEntity<List<PaymentResponse>> getAllPayments() {
+        log.info("REST API Request: Fetch all payments");
+        return ResponseEntity.ok(paymentService.getAllPayments());
+    }
+
     /**
      * Retrieves a payment by its ID. Includes IDOR safety barriers.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('payment.view') or hasAuthority('finance.wallet.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('payment.view') or hasAuthority('finance.wallet.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<PaymentResponse> getById(@PathVariable("id") UUID id) {
         log.info("REST API Request: Fetch Payment by ID: {}", id);
@@ -40,7 +49,7 @@ public class PaymentController {
      * Records a received cash payment against an approved settlement. Allocates funds.
      */
     @PostMapping("/settlement/{settlementId}")
-    @PreAuthorize("hasAuthority('payment.create') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('payment.create') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<PaymentResponse> receivePayment(
             @PathVariable("settlementId") UUID settlementId,

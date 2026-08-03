@@ -98,6 +98,14 @@ public class SettlementService {
         return mapToResponse(settlement);
     }
 
+    @Transactional(readOnly = true)
+    public List<SettlementResponse> getAllSettlements() {
+        log.info("Fetching all settlements");
+        return settlementRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private Settlement generateInternal(Contract contract, String region) {
         String buyerSnapshot = buildBuyerSnapshot(contract);
         String sellerSnapshot = buildSellerSnapshot(contract);

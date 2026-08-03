@@ -35,7 +35,7 @@ public class FinanceController {
     // --- WALLET ENDPOINTS ---
 
     @GetMapping("/wallet")
-    @PreAuthorize("hasAuthority('finance.wallet.view') or hasAuthority('finance.wallet.approve') or hasRole('BIDDER') or hasRole('SELLER') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @PreAuthorize("hasAuthority('finance.wallet.view') or hasAuthority('finance.wallet.approve') or hasRole('BIDDER') or hasRole('SELLER') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE')")
     @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<WalletResponse> getWallet() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -54,7 +54,7 @@ public class FinanceController {
     // --- LEDGER ENDPOINTS ---
 
     @GetMapping("/ledger")
-    @PreAuthorize("hasAuthority('finance.ledger.view') or hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @PreAuthorize("hasAuthority('finance.ledger.view') or hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<LedgerResponse>> getLedger() {
         log.info("Fetching ledger entries");
@@ -62,7 +62,7 @@ public class FinanceController {
     }
 
     @PostMapping("/ledger")
-    @PreAuthorize("hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE')")
+    @PreAuthorize("hasAuthority('finance.ledger.manage') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<LedgerResponse> addLedgerEntry(@Valid @RequestBody LedgerAdjustmentRequest request) {
         log.info("Adding manual ledger entry: {}", request);

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -126,5 +127,10 @@ public class RefundService {
         log.warn("[REFUND_REJECTED] Refund request {} was rejected by {}. Reason: {}", refundId, approverId, reason);
 
         return refundRepository.save(refund);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Refund> getAllRefunds() {
+        return refundRepository.findAll();
     }
 }

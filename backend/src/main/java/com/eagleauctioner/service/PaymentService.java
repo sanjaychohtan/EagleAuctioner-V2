@@ -233,6 +233,12 @@ public class PaymentService {
         return mapToResponse(savedPayment);
     }
 
+    public List<PaymentResponse> getAllPayments() {
+        return paymentRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public PaymentResponse getById(UUID id) {
         Payment payment = paymentRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + id));

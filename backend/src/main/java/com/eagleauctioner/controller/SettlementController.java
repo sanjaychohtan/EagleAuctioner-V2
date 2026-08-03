@@ -28,11 +28,19 @@ public class SettlementController {
 
     private final SettlementService settlementService;
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @EnforceDataScope(DataScopeType.COMPANY)
+    public ResponseEntity<List<SettlementResponse>> getAllSettlements() {
+        log.info("REST API Request: Fetch all settlements");
+        return ResponseEntity.ok(settlementService.getAllSettlements());
+    }
+
     /**
      * Generates a Settlement for an ACCEPTED Contract.
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('settlement.create') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.create') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> generateSettlement(@RequestBody @Valid SettlementRequest request) {
         log.info("REST API Request: Generate settlement for contract ID: {}", request.getContractId());
@@ -44,7 +52,7 @@ public class SettlementController {
      * Retrieves a Settlement by its ID.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> getById(@PathVariable("id") UUID id) {
         log.info("REST API Request: Fetch settlement by ID: {}", id);
@@ -55,7 +63,7 @@ public class SettlementController {
      * Retrieves a Settlement by associated Contract ID.
      */
     @GetMapping("/contract/{contractId}")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> getByContractId(@PathVariable("contractId") UUID contractId) {
         log.info("REST API Request: Fetch settlement by Contract ID: {}", contractId);
@@ -66,7 +74,7 @@ public class SettlementController {
      * Retrieves the status of a Settlement by its ID.
      */
     @GetMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementStatus> getStatus(@PathVariable("id") UUID id) {
         log.info("REST API Request: Fetch settlement status by ID: {}", id);
@@ -77,7 +85,7 @@ public class SettlementController {
      * Submits a Settlement for approval.
      */
     @PostMapping("/{id}/submit")
-    @PreAuthorize("hasAuthority('settlement.create') or hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.create') or hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> submitForApproval(@PathVariable("id") UUID id) {
         log.info("REST API Request: Submit settlement for approval ID: {}", id);
@@ -88,7 +96,7 @@ public class SettlementController {
      * Approves a Settlement.
      */
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> approveSettlement(@PathVariable("id") UUID id) {
         log.info("REST API Request: Approve settlement ID: {}", id);
@@ -99,7 +107,7 @@ public class SettlementController {
      * Transition from APPROVED to PAYMENT_PENDING.
      */
     @PostMapping("/{id}/payment-pending")
-    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> transitionToPaymentPending(@PathVariable("id") UUID id) {
         log.info("REST API Request: Transition settlement to PAYMENT_PENDING ID: {}", id);
@@ -110,7 +118,7 @@ public class SettlementController {
      * Transition from PAYMENT_PENDING to PAYMENT_RECEIVED.
      */
     @PostMapping("/{id}/receive-payment")
-    @PreAuthorize("hasAuthority('settlement.approve') or hasAuthority('payment.create') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.approve') or hasAuthority('payment.create') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> receivePayment(
             @PathVariable("id") UUID id,
@@ -124,7 +132,7 @@ public class SettlementController {
      * Rejects a Settlement.
      */
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAuthority('settlement.cancel') or hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.cancel') or hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> rejectSettlement(
             @PathVariable("id") UUID id,
@@ -134,11 +142,8 @@ public class SettlementController {
         return ResponseEntity.ok(settlementService.rejectSettlement(id, (reason != null && !reason.trim().isEmpty()) ? reason : "Rejected by counterparty."));
     }
 
-    /**
-     * Completes a Settlement.
-     */
     @PostMapping("/{id}/complete")
-    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> completeSettlement(
             @PathVariable("id") UUID id,
@@ -152,7 +157,7 @@ public class SettlementController {
      * Cancels a Settlement.
      */
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAuthority('settlement.cancel') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.cancel') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<SettlementResponse> cancelSettlement(
             @PathVariable("id") UUID id,
@@ -166,7 +171,7 @@ public class SettlementController {
      * Adds an operational remark to a Settlement.
      */
     @PostMapping("/{id}/remarks")
-    @PreAuthorize("hasAuthority('settlement.approve') or hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAuthority('settlement.approve') or hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> addRemark(
             @PathVariable("id") UUID id,
@@ -180,7 +185,7 @@ public class SettlementController {
      * Retrieves complete immutable history.
      */
     @GetMapping("/{id}/history")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<SettlementHistoryDto>> getHistory(@PathVariable("id") UUID id) {
         log.info("REST API Request: Get settlement history ID: {}", id);
@@ -191,7 +196,7 @@ public class SettlementController {
      * Retrieves chronological workflow timeline.
      */
     @GetMapping("/{id}/timeline")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<SettlementHistoryDto>> getTimeline(@PathVariable("id") UUID id) {
         log.info("REST API Request: Get settlement timeline ID: {}", id);
@@ -202,7 +207,7 @@ public class SettlementController {
      * Retrieves operational remarks.
      */
     @GetMapping("/{id}/remarks")
-    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('settlement.view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('SELLER') or hasRole('BIDDER')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<String>> getRemarks(@PathVariable("id") UUID id) {
         log.info("REST API Request: Get settlement remarks ID: {}", id);

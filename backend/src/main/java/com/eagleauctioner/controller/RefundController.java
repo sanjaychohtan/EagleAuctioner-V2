@@ -8,19 +8,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
+import java.util.List;
 
 import com.eagleauctioner.aspect.EnforceDataScope;
 import com.eagleauctioner.enums.DataScopeType;
 
 @RestController
-@RequestMapping({"/api/v1/refunds", "/api/refunds"})
+@RequestMapping({"/api/v1/finance/refunds", "/api/v1/refunds", "/api/refunds"})
 @RequiredArgsConstructor
 public class RefundController {
 
     private final RefundService refundService;
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('refund.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE')")
+    @EnforceDataScope(DataScopeType.COMPANY)
+    public ResponseEntity<ApiResponse<List<Refund>>> getAllRefunds() {
+        log.info("REST API Request: Fetch all refunds");
+        return ResponseEntity.ok(ApiResponse.success("Refunds list retrieved successfully", refundService.getAllRefunds()));
+    }
+
     @PostMapping("/initiate")
-    @PreAuthorize("hasAuthority('refund.create') or hasRole('SELLER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('refund.create') or hasRole('SELLER') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ApiResponse<Refund>> initiateRefund(
             @RequestParam("initiatorId") UUID initiatorId,
@@ -32,7 +41,7 @@ public class RefundController {
     }
 
     @PostMapping("/{refundId}/approve")
-    @PreAuthorize("hasAuthority('refund.approve') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE') or hasRole('FINANCE_DIRECTOR')")
+    @PreAuthorize("hasAuthority('refund.approve') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE') or hasRole('FINANCE_DIRECTOR')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ApiResponse<Refund>> approveRefund(
             @PathVariable UUID refundId,
@@ -44,7 +53,7 @@ public class RefundController {
     }
 
     @PostMapping("/{refundId}/reject")
-    @PreAuthorize("hasAuthority('refund.approve') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('FINANCE') or hasRole('FINANCE_DIRECTOR')")
+    @PreAuthorize("hasAuthority('refund.approve') or hasAuthority('finance.wallet.approve') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('FINANCE') or hasRole('FINANCE_DIRECTOR')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<ApiResponse<Refund>> rejectRefund(
             @PathVariable UUID refundId,
