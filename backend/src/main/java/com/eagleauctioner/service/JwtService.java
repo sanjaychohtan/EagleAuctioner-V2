@@ -49,7 +49,7 @@ public class JwtService {
 
     @PostConstruct
     public void init() throws Exception {
-        if (secretKeyStr == null || secretKeyStr.trim().isEmpty()) {
+        if (secretKeyStr == null || secretKeyStr.trim().isEmpty() || secretKeyStr.startsWith("${")) {
             // Generate a secure 512-bit key by default (64 bytes)
             byte[] bytes = new byte[64];
             new SecureRandom().nextBytes(bytes);
@@ -57,7 +57,14 @@ public class JwtService {
         } else {
             byte[] keyBytes = secretKeyStr.getBytes(StandardCharsets.UTF_8);
             if (keyBytes.length < 64) {
-                throw new IllegalArgumentException("JWT Secret key must be at least 64 bytes (512 bits) long for HS512");
+                try {
+                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-512");
+                    keyBytes = md.digest(keyBytes);
+                } catch (Exception e) {
+                    byte[] padded = new byte[64];
+                    System.arraycopy(keyBytes, 0, padded, 0, Math.min(keyBytes.length, 64));
+                    keyBytes = padded;
+                }
             }
             this.signingKey = Keys.hmacShaKeyFor(keyBytes);
         }
