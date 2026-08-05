@@ -6,6 +6,7 @@ import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Configure Redisson connection factory settings with high availability.
@@ -38,6 +39,7 @@ public class RedissonConfig {
     private long lockWatchdogTimeout;
 
     @Bean
+    @Lazy
     public RedissonClient redissonClient() {
         Config config = new Config();
         

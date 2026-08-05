@@ -33,6 +33,7 @@ public class AuctionTimerService {
     private final AuctionRepository auctionRepository;
     private final AuctionEventRepository auctionEventRepository;
     private final OutboxEventRepository outboxEventRepository;
+    @org.springframework.context.annotation.Lazy
     private final RedissonClient redissonClient;
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;

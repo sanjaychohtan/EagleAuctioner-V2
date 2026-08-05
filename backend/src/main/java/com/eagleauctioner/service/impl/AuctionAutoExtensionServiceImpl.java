@@ -31,6 +31,7 @@ public class AuctionAutoExtensionServiceImpl implements AuctionAutoExtensionServ
     private final AuctionRepository auctionRepository;
     private final AuctionEventRepository auctionEventRepository;
     private final OutboxEventRepository outboxEventRepository;
+    @org.springframework.context.annotation.Lazy
     private final RedissonClient redissonClient;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;

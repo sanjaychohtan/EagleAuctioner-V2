@@ -22,6 +22,7 @@ import java.util.UUID;
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
+    @org.springframework.context.annotation.Lazy
     private final RedissonClient redissonClient;
 
     @Transactional
