@@ -5,7 +5,7 @@ import com.eagleauctioner.entity.User;
 import com.eagleauctioner.enums.UserType;
 import com.eagleauctioner.repository.RoleRepository;
 import com.eagleauctioner.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class SuperAdminBootstrapInitializer implements ApplicationRunner {
 
@@ -29,9 +28,24 @@ public class SuperAdminBootstrapInitializer implements ApplicationRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public SuperAdminBootstrapInitializer(UserRepository userRepository,
+                                          RoleRepository roleRepository,
+                                          PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        log.info("SuperAdminBootstrapInitializer constructor executed.");
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("SuperAdminBootstrapInitializer bean creation completed (@PostConstruct).");
+    }
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        log.info("Entering SuperAdminBootstrapInitializer.run() execution...");
         try {
             long userCount = userRepository.count();
             if (userCount > 0) {
@@ -61,10 +75,14 @@ public class SuperAdminBootstrapInitializer implements ApplicationRunner {
                     .roles(new HashSet<>(Set.of(superAdminRole)))
                     .build();
 
+            log.info("Before saving default Super Admin user ({})", DEFAULT_ADMIN_EMAIL);
             userRepository.save(superAdmin);
+            log.info("After saving default Super Admin user ({})", DEFAULT_ADMIN_EMAIL);
             log.info("Successfully bootstrapped default Super Admin user ({})", DEFAULT_ADMIN_EMAIL);
         } catch (Exception e) {
+            log.info("Catch block entered in SuperAdminBootstrapInitializer: {}", e.getMessage());
             log.error("Failed to bootstrap default Super Admin user: {}", e.getMessage(), e);
         }
     }
 }
+
