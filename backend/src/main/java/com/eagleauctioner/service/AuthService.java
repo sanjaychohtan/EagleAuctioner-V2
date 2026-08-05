@@ -8,6 +8,7 @@ import com.eagleauctioner.repository.RoleRepository;
 import com.eagleauctioner.repository.UserRepository;
 import com.eagleauctioner.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -132,8 +134,12 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(String email, String password) {
+        log.info("LOGIN START {}", email);
+
         User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+        log.info("USER FOUND {}", user.getEmail());
 
         if (user.isLocked()) {
             throw new LockedException("Account is locked due to too many failed attempts");
@@ -154,8 +160,12 @@ public class AuthService {
             userRepository.save(user);
 
         } catch (AuthenticationException e) {
+            log.error("Authentication failed", e);
             handleFailedLogin(user);
             throw new BadCredentialsException("Invalid email or password");
+        } catch (Exception e) {
+            log.error("Authentication failed", e);
+            throw e;
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
