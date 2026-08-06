@@ -30,14 +30,23 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [accessToken]);
 
-  const hasToken = !!accessToken;
-
   useEffect(() => {
-    // Standard connection lifecycle matching Spring Boot Actuator/WebSockets configuration
+    // If no valid access token exists, DO NOT create or activate STOMP client
+    if (!accessToken) {
+      setIsConnected(false);
+      if (stompClientRef.current) {
+        try {
+          stompClientRef.current.deactivate();
+        } catch (err) {}
+        stompClientRef.current = null;
+      }
+      return;
+    }
+
     const stompClient = new Client({
       brokerURL: envConfig.wsBaseUrl,
       connectHeaders: {
-        Authorization: `Bearer ${accessTokenRef.current || ""}`,
+        Authorization: `Bearer ${accessToken}`,
         "X-Tenant-Id": localStorage.getItem(STORAGE_KEYS.TENANT_ID) || "",
       },
       debug: (str) => {
@@ -45,7 +54,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
           console.debug("[STOMP Debug]:", str);
         }
       },
-      reconnectDelay: 0, // Disabled auto-reconnection to enforce manual exponential backoff policy
+      reconnectDelay: 0,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
@@ -68,7 +77,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       }
       setIsConnected(false);
 
-      if (hasToken) {
+      if (accessTokenRef.current) {
         const attempt = reconnectAttemptsRef.current;
         const delay = Math.min(2000 * Math.pow(2, attempt), 60000);
         console.warn(`[STOMP Closed] Reconnecting in ${delay}ms (attempt ${attempt + 1})`);
@@ -78,7 +87,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
           clearTimeout(reconnectTimeoutRef.current);
         }
         reconnectTimeoutRef.current = setTimeout(() => {
-          if (accessTokenRef.current) {
+          if (accessTokenRef.current && stompClientRef.current) {
             stompClient.activate();
           }
         }, delay);
@@ -102,14 +111,12 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       subscriptionsRef.current.forEach((sub, subId) => {
         try {
           sub.unsubscribe();
-        } catch (err) {
-          console.warn(`Failed to unsubscribe ${subId} during teardown:`, err);
-        }
+        } catch (err) {}
       });
       subscriptionsRef.current.clear();
       stompClient.deactivate();
     };
-  }, [hasToken]);
+  }, [accessToken]);
 
   const subscribe = (destination: string, callback: (message: any) => void): StompSubscription | null => {
     if (!stompClientRef.current || !isConnected) {
@@ -134,9 +141,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       subscription.unsubscribe = () => {
         try {
           originalUnsubscribe();
-        } catch (err) {
-          console.warn("Error calling original unsubscribe:", err);
-        }
+        } catch (err) {}
         subscriptionsRef.current.delete(subId);
         if (envConfig.isDevelopment) {
           console.log(`[STOMP Unsubscribed]: Tracked subscription removed for ${destination}`);
@@ -200,7 +205,7 @@ export const useWebSocketSubscription = (
     let subscription: StompSubscription | null = null;
 
     if (envConfig.isDevelopment) {
-      console.log(`[useWebSocketSubscription] Initiating subscription to \${destination}`);
+      console.log(`[useWebSocketSubscription] Initiating subscription to ${destination}`);
     }
 
     subscription = subscribe(destination, (msg) => {
@@ -213,7 +218,7 @@ export const useWebSocketSubscription = (
       active = false;
       if (subscription) {
         if (envConfig.isDevelopment) {
-          console.log(`[useWebSocketSubscription] Cleaning up subscription to \${destination}`);
+          console.log(`[useWebSocketSubscription] Cleaning up subscription to ${destination}`);
         }
         subscription.unsubscribe();
       }

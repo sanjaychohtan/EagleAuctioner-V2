@@ -24,7 +24,7 @@ export const SessionExpiryModal: React.FC<SessionExpiryModalProps> = memo(({
     setErrorMsg("");
     try {
       // Re-authenticate session smoothly
-      await login("admin@eagleauctioner.com", password || "Password123!");
+      await login("admin@eagleauctioner.com", password || "Admin@123");
       onClose();
     } catch (err: any) {
       setErrorMsg("Re-authentication failed. Please verify credentials.");

@@ -16,7 +16,7 @@ export const LoginView: React.FC = () => {
   const { showNotification } = useNotification();
 
   const [username, setUsername] = useState("admin@eagleauctioner.com");
-  const [password, setPassword] = useState("Password123!");
+  const [password, setPassword] = useState("Admin@123");
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loginTab, setLoginTab] = useState<"PASSWORD" | "OTP">("PASSWORD");
