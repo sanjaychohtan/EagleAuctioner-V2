@@ -16,6 +16,9 @@ spring:
   flyway:
     enabled: true
 
+eagle:
+  demo-data:
+    enabled: true
 
 logging:
   level:

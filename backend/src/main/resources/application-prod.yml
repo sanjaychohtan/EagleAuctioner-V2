@@ -70,6 +70,10 @@ application:
   upload:
     dir: ${UPLOAD_DIR:/app/uploads}
 
+eagle:
+  demo-data:
+    enabled: false
+
 logging:
   level:
     com.eagleauctioner: INFO
