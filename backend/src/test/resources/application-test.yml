@@ -25,6 +25,7 @@ bootstrap:
   create-default-users: true
   repair-users: false
 
-app:
+eagle:
   demo-data:
     enabled: true
+
