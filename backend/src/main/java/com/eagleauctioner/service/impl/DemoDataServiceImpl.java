@@ -83,23 +83,6 @@ public class DemoDataServiceImpl implements DemoDataService {
             createdBuyers++;
         }
 
-        Optional<BidderProfile> existingBidderProfile = bidderProfileRepository.findByUserId(buyerUser.getId());
-        BidderProfile bidderProfile;
-        if (existingBidderProfile.isPresent()) {
-            bidderProfile = existingBidderProfile.get();
-        } else {
-            bidderProfile = bidderProfileRepository.save(BidderProfile.builder()
-                    .user(buyerUser)
-                    .state(BidderState.APPROVED)
-                    .bidderType(BidderType.INDIVIDUAL)
-                    .panNumber("FGHIJ5678K")
-                    .panHash("DEMOBUYERPANHASH123")
-                    .panVerificationStatus(VerificationStatus.VERIFIED)
-                    .aadhaarVerificationStatus(VerificationStatus.VERIFIED)
-                    .build());
-            createdBuyers++;
-        }
-
         // 3. Create Demo LIVE Auctions & Lots
         int createdAuctionsCount = 0;
         int createdLotsCount = 0;
