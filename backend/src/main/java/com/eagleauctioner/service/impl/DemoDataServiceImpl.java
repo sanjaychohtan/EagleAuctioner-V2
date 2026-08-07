@@ -20,6 +20,7 @@ import java.util.*;
 public class DemoDataServiceImpl implements DemoDataService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final SellerProfileRepository sellerProfileRepository;
     private final BidderProfileRepository bidderProfileRepository;
     private final AuctionRepository auctionRepository;
@@ -38,11 +39,29 @@ public class DemoDataServiceImpl implements DemoDataService {
         int createdSellers = 0;
         int createdBuyers = 0;
 
+        Role sellerRole = roleRepository.findByName("ROLE_SELLER")
+                .orElseGet(() -> roleRepository.findByName("SELLER").orElse(null));
+        Role bidderRole = roleRepository.findByName("ROLE_BIDDER")
+                .orElseGet(() -> roleRepository.findByName("BIDDER").orElse(null));
+
         // 1. Create or retrieve Demo Seller User & Profile
         Optional<User> existingSellerUser = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull("demo.seller@eagleauctioner.com");
         User sellerUser;
         if (existingSellerUser.isPresent()) {
             sellerUser = existingSellerUser.get();
+            boolean modified = false;
+            if (sellerRole != null) {
+                if (sellerUser.getRoles() == null) {
+                    sellerUser.setRoles(new HashSet<>(Set.of(sellerRole)));
+                    modified = true;
+                } else if (!sellerUser.getRoles().contains(sellerRole)) {
+                    sellerUser.getRoles().add(sellerRole);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                sellerUser = userRepository.save(sellerUser);
+            }
         } else {
             sellerUser = userRepository.save(User.builder()
                     .email("demo.seller@eagleauctioner.com")
@@ -50,6 +69,11 @@ public class DemoDataServiceImpl implements DemoDataService {
                     .userType(UserType.SELLER)
                     .isActive(true)
                     .emailVerified(true)
+                    .isLocked(false)
+                    .failedLoginAttempts(0)
+                    .firstName("Demo")
+                    .lastName("Seller")
+                    .roles(sellerRole != null ? new HashSet<>(Set.of(sellerRole)) : new HashSet<>())
                     .build());
             createdUsers++;
         }
@@ -76,6 +100,19 @@ public class DemoDataServiceImpl implements DemoDataService {
         User buyerUser;
         if (existingBuyerUser.isPresent()) {
             buyerUser = existingBuyerUser.get();
+            boolean modified = false;
+            if (bidderRole != null) {
+                if (buyerUser.getRoles() == null) {
+                    buyerUser.setRoles(new HashSet<>(Set.of(bidderRole)));
+                    modified = true;
+                } else if (!buyerUser.getRoles().contains(bidderRole)) {
+                    buyerUser.getRoles().add(bidderRole);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                buyerUser = userRepository.save(buyerUser);
+            }
         } else {
             buyerUser = userRepository.save(User.builder()
                     .email("demo.buyer@eagleauctioner.com")
@@ -83,6 +120,11 @@ public class DemoDataServiceImpl implements DemoDataService {
                     .userType(UserType.BIDDER)
                     .isActive(true)
                     .emailVerified(true)
+                    .isLocked(false)
+                    .failedLoginAttempts(0)
+                    .firstName("Demo")
+                    .lastName("Buyer")
+                    .roles(bidderRole != null ? new HashSet<>(Set.of(bidderRole)) : new HashSet<>())
                     .build());
             createdUsers++;
         }

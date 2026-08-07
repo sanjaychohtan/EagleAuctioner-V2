@@ -288,6 +288,17 @@ public class AuthService {
         redisTemplate.opsForValue().set("session_invalidated:" + email, String.valueOf(Instant.now().toEpochMilli()));
     }
 
+    @Transactional
+    public void repairUserPassword(String email, String newPassword) {
+        User user = userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(Instant.now());
+        userRepository.save(user);
+        log.info("Password repaired manually for user ({})", email);
+    }
+
     @lombok.Data
     @lombok.Builder
     public static class AuthResponse {

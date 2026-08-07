@@ -20,3 +20,11 @@ management:
     redis:
       enabled: false
 
+bootstrap:
+  enabled: true
+  create-default-users: true
+  repair-users: false
+
+app:
+  demo-data:
+    enabled: true

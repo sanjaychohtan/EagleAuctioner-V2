@@ -33,3 +33,13 @@ application:
         expiration: 604800000 # 7 days
       issuer: "eagle-auctioner"
       audience: "eagle-auctioner-app"
+
+bootstrap:
+  enabled: true
+  create-default-users: true
+  repair-users: false
+
+app:
+  demo-data:
+    enabled: false
+

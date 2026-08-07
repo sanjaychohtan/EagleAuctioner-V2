@@ -58,7 +58,7 @@ public class AuditAspect {
                                 .action(action)
                                 .entityType(entityType)
                                 .entityId(entityId)
-                                .newValue(details)
+                                .newValue("{\"message\":\"" + (details != null ? details.replace("\"", "\\\"") : "") + "\"}")
                                 .ipAddress(ipAddress)
                                 .userAgent(userAgent)
                                 .build();
@@ -73,7 +73,7 @@ public class AuditAspect {
                     .action(action)
                     .entityType(entityType)
                     .entityId(entityId)
-                    .newValue(details)
+                    .newValue("{\"message\":\"" + (details != null ? details.replace("\"", "\\\"") : "") + "\"}")
                     .ipAddress(ipAddress)
                     .userAgent(userAgent)
                     .build();
