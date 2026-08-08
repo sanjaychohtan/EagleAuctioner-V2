@@ -209,6 +209,24 @@ export const AuctionService = {
       request
     );
   },
+
+  /**
+   * Imports lots in bulk from an Excel or CSV file.
+   * Path: POST /api/v1/lots/import/auctions/{auctionId}
+   */
+  async importLots(auctionId: string, file: File): Promise<any> {
+    console.log(`[AuctionService] Importing bulk lots for auction ID: ${auctionId}`);
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<ApiResponse<any>>(
+      API_ENDPOINTS.LOT.IMPORT(auctionId),
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data.data;
+  },
 };
 
 export default AuctionService;

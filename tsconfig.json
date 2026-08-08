@@ -24,6 +24,9 @@
     "noEmit": true
   },
   "exclude": [
-    "backend"
+    "backend",
+    "dist",
+    "build",
+    "node_modules"
   ]
 }

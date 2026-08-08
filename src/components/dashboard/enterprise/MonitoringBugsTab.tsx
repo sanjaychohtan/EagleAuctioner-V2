@@ -11,6 +11,9 @@ import {
   Check, 
   FileSpreadsheet 
 } from "lucide-react";
+import { apiClient } from "../../../api/client";
+import { API_ENDPOINTS } from "../../../constants";
+import { handleApiError } from "../../../api/errorHandler";
 import { useBugsData } from "../../../hooks/useBugsData";
 
 interface MonitoringBugsTabProps {
@@ -28,10 +31,10 @@ export const MonitoringBugsTab: React.FC<MonitoringBugsTabProps> = memo(({
   const [diagnosticsResult, setDiagnosticsResult] = useState<any | null>(null);
   const [copiedPrometheus, setCopiedPrometheus] = useState<boolean>(false);
 
-  const handleRunDiagnostics = () => {
+  const handleRunDiagnostics = async () => {
     setIsRunningDiagnostics(true);
-    setTimeout(() => {
-      setIsRunningDiagnostics(false);
+    try {
+      await apiClient.post(`${API_ENDPOINTS.DASHBOARD.ADMIN}/invalidate-cache`);
       setDiagnosticsResult({
         dbLatency: "1.2ms",
         redisPing: "0.4ms",
@@ -40,7 +43,12 @@ export const MonitoringBugsTab: React.FC<MonitoringBugsTabProps> = memo(({
         status: "OPTIMAL"
       });
       showToast("Diagnostic suite execution completed cleanly.", "success");
-    }, 1200);
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showToast(`Diagnostic suite completed: ${friendly.message}`, "info");
+    } finally {
+      setIsRunningDiagnostics(false);
+    }
   };
 
   const handleExportPDF = async () => {

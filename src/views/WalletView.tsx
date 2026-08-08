@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useWallet, useLedger, useAddLedgerEntryMutation } from "../hooks/useFinanceQueries";
 import { useNotification } from "../providers/NotificationProvider";
+import { handleApiError } from "../api/errorHandler";
 import { formatCurrency } from "../utils/bidUtils";
 import { 
   Wallet as WalletIcon, 
@@ -43,18 +44,32 @@ export const WalletView: React.FC = () => {
 
   const wallet = serverWallet || { availableBalance: 12450000, lockedBalance: 3200000, currency: "INR" };
 
-  const handleDepositSubmit = (e: React.FormEvent) => {
+  const handleDepositSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (depositForm.amount <= 0 || !depositForm.referenceNo) {
       showNotification("Please provide complete transaction details.", "error");
       return;
     }
-    showNotification(`NEFT payment slip of ${formatCurrency(depositForm.amount, "INR")} registered. Status set to Pending Clearance.`, "success");
-    setShowDepositModal(false);
-    setDepositForm({ amount: 0, paymentMethod: "NEFT", referenceNo: "" });
+    try {
+      await addLedgerEntry.mutateAsync({
+        accountId: "ACC-BUYER-CURRENT",
+        amount: Math.round(depositForm.amount * 100),
+        entryType: "CREDIT" as any,
+        accountType: "BUYER_RECEIVABLE" as any,
+        currency: "INR",
+        description: `NEFT Deposit Ref: ${depositForm.referenceNo}`
+      });
+      showNotification(`NEFT payment slip of ${formatCurrency(depositForm.amount, "INR")} registered successfully.`, "success");
+      setShowDepositModal(false);
+      setDepositForm({ amount: 0, paymentMethod: "NEFT", referenceNo: "" });
+      refetch();
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showNotification(`Deposit registration failed: ${friendly.message}`, "error");
+    }
   };
 
-  const handleWithdrawalSubmit = (e: React.FormEvent) => {
+  const handleWithdrawalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (withdrawalForm.amount <= 0 || !withdrawalForm.bankAccount) {
       showNotification("Please complete banker allocation fields.", "error");
@@ -64,12 +79,26 @@ export const WalletView: React.FC = () => {
       showNotification("Insufficient balance for withdrawal.", "error");
       return;
     }
-    showNotification(`Payout ledger order for ${formatCurrency(withdrawalForm.amount, "INR")} scheduled. Awaiting compliance approval.`, "success");
-    setShowWithdrawalModal(false);
-    setWithdrawalForm({ amount: 0, bankAccount: "", branchCode: "" });
+    try {
+      await addLedgerEntry.mutateAsync({
+        accountId: withdrawalForm.bankAccount,
+        amount: Math.round(withdrawalForm.amount * 100),
+        entryType: "DEBIT" as any,
+        accountType: "SELLER_PAYOUT" as any,
+        currency: "INR",
+        description: `Withdrawal to Bank: ${withdrawalForm.bankAccount} IFSC: ${withdrawalForm.branchCode}`
+      });
+      showNotification(`Payout ledger order for ${formatCurrency(withdrawalForm.amount, "INR")} scheduled successfully.`, "success");
+      setShowWithdrawalModal(false);
+      setWithdrawalForm({ amount: 0, bankAccount: "", branchCode: "" });
+      refetch();
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showNotification(`Withdrawal request failed: ${friendly.message}`, "error");
+    }
   };
 
-  const handleLienSubmit = (e: React.FormEvent) => {
+  const handleLienSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lienForm.amount <= 0 || !lienForm.reason) {
       showNotification("Please specify the sum and lien reason.", "error");
@@ -83,8 +112,22 @@ export const WalletView: React.FC = () => {
       showNotification("Lien amount exceeds locked balance.", "error");
       return;
     }
-    showNotification(`Escrow funds ${lienForm.lock ? "locked" : "unlocked"} successfully: ${formatCurrency(lienForm.amount, "INR")}.`, "success");
-    setShowLienModal(false);
+    try {
+      await addLedgerEntry.mutateAsync({
+        accountId: "ACC-LIEN-HOLD",
+        amount: Math.round(lienForm.amount * 100),
+        entryType: lienForm.lock ? ("DEBIT" as any) : ("CREDIT" as any),
+        accountType: "BUYER_RECEIVABLE" as any,
+        currency: "INR",
+        description: `Lien ${lienForm.lock ? "Lock" : "Unlock"}: ${lienForm.reason}`
+      });
+      showNotification(`Escrow funds ${lienForm.lock ? "locked" : "unlocked"} successfully: ${formatCurrency(lienForm.amount, "INR")}.`, "success");
+      setShowLienModal(false);
+      refetch();
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showNotification(`Lien operation failed: ${friendly.message}`, "error");
+    }
   };
 
   return (

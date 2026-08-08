@@ -8,6 +8,7 @@ import { useNotification } from "../providers/NotificationProvider";
 import { useAuth } from "../context/AuthContext";
 import { BidderProfileResponse } from "../api/onboardingService";
 import { KycReviewSchemaType } from "../validation/kycSchema";
+import { handleApiError } from "../api/errorHandler";
 import { AdminKycQueueTable } from "../components/kyc/AdminKycQueueTable";
 import { AdminKycDecisionModal } from "../components/kyc/AdminKycDecisionModal";
 import { ShieldCheck, Search, RefreshCw } from "lucide-react";
@@ -40,7 +41,8 @@ export const AdminKycQueueView: React.FC = () => {
       showNotification(`Assigned case file ${profileId.substring(0, 8)} to your queue`, "success");
       refetch();
     } catch (err: any) {
-      showNotification("Self-assigned case file successfully", "success");
+      const friendly = handleApiError(err);
+      showNotification(`Assignment failed: ${friendly.message}`, "error");
     }
   };
 
@@ -58,8 +60,8 @@ export const AdminKycQueueView: React.FC = () => {
       setIsDecisionModalOpen(false);
       refetch();
     } catch (err: any) {
-      showNotification(`Decision ${data.decision} recorded cleanly`, "success");
-      setIsDecisionModalOpen(false);
+      const friendly = handleApiError(err);
+      showNotification(`Decision submit failed: ${friendly.message}`, "error");
     }
   };
 

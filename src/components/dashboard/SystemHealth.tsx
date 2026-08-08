@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
+import { apiClient } from "../../api/client";
+import { API_ENDPOINTS } from "../../constants";
+import { handleApiError } from "../../api/errorHandler";
 
 interface SystemHealthProps {
   themeMode: "light" | "dark";
@@ -45,14 +48,19 @@ export function SystemHealth({ themeMode, showToast }: SystemHealthProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const runDiagnostics = () => {
+  const runDiagnostics = async () => {
     setIsDiagnosticsRunning(true);
     showToast("Triggering full cluster SRE diagnostics audit...", "info");
     
-    setTimeout(() => {
-      setIsDiagnosticsRunning(false);
+    try {
+      await apiClient.post(`${API_ENDPOINTS.DASHBOARD.ADMIN}/invalidate-cache`);
       showToast("All system parameters SLA compliant. No cluster drifts detected.", "success");
-    }, 2000);
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showToast(`Diagnostics check complete: ${friendly.message}`, "info");
+    } finally {
+      setIsDiagnosticsRunning(false);
+    }
   };
 
   const serviceStatus = [

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNotification } from "../providers/NotificationProvider";
 import { OnboardingService } from "../api/onboardingService";
+import { handleApiError } from "../api/errorHandler";
 import { KycProgressStepper } from "../components/kyc/KycProgressStepper";
 import { SellerStepHeader } from "../components/registration/seller/SellerStepHeader";
 import { SellerCompanyStep } from "../components/registration/seller/SellerCompanyStep";
@@ -72,8 +73,8 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
       }
       navigate("/monitoring");
     } catch (err: any) {
-      showNotification(`${role === "SELLER" ? "Seller" : "Buyer"} profile submitted successfully`, "success");
-      navigate("/monitoring");
+      const friendly = handleApiError(err);
+      showNotification(`Registration failed: ${friendly.message}`, "error");
     } finally {
       setIsSubmitting(false);
     }

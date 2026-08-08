@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAuctionDetails } from "../hooks/useAuctionQueries";
 import { useNotification } from "../providers/NotificationProvider";
+import { AuctionService } from "../api/auctionService";
+import { handleApiError } from "../api/errorHandler";
 import { AuctionState } from "../types/auction";
 import {
   ArrowLeft,
@@ -80,16 +82,19 @@ export const BulkLotImportView: React.FC = () => {
     }
   };
 
-  const handleUpload = () => {
-    if (!selectedFile) return;
+  const handleUpload = async () => {
+    if (!selectedFile || !auctionId) return;
     setIsUploading(true);
-
-    // Simulate bulk upload latency
-    setTimeout(() => {
-      setIsUploading(false);
+    try {
+      await AuctionService.importLots(auctionId, selectedFile);
       setUploadSuccess(true);
-      showNotification("Bulk import successfully queued for processing.", "success");
-    }, 2000);
+      showNotification("Bulk import successfully uploaded and processed.", "success");
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showNotification(`Bulk import failed: ${friendly.message}`, "error");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (

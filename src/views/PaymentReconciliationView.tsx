@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNotification } from "../providers/NotificationProvider";
+import { financeService } from "../api/financeService";
+import { handleApiError } from "../api/errorHandler";
 import { 
   ArrowRightLeft, 
   Upload, 
@@ -25,7 +27,7 @@ export const PaymentReconciliationView: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [reconciling, setReconciling] = useState(false);
   const [reconciliationLogs, setReconciliationLogs] = useState(DEMO_MISMATCH_LOGS);
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState<string>("ALL");
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -50,36 +52,27 @@ export const PaymentReconciliationView: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
-      showNotification(`Statement file [${e.target.files[0].name}] parsed successfully.`, "success");
+      showNotification(`Statement file [${e.target.files[0].name}] loaded for reconciliation.`, "success");
     }
   };
 
-  const executeReconciliation = () => {
+  const executeReconciliation = async () => {
     if (!selectedFile) {
       showNotification("Please upload or drop a bank statement file (.csv, .xlsx, .txt) first.", "error");
       return;
     }
     setReconciling(true);
-    showNotification("Executing advanced transaction matching engine...", "info");
+    showNotification("Executing transaction matching engine...", "info");
     
-    setTimeout(() => {
+    try {
+      await financeService.reconcilePayments();
+      showNotification("Bank statement reconciled successfully against active ledger transactions.", "success");
+    } catch (err: any) {
+      const friendly = handleApiError(err);
+      showNotification(`Reconciliation notice: ${friendly.message}`, "warning");
+    } finally {
       setReconciling(false);
-      showNotification("Bank statement parsed. 1 new discrepancy reported.", "warning");
-      // Add a simulated mismatch
-      setReconciliationLogs(prev => [
-        {
-          logId: `MIS-${Date.now().toString().slice(-3)}`,
-          utr: "BARC91028112",
-          expectedAmount: 640000,
-          actualAmount: 635000,
-          status: "DISCREPANCY",
-          type: "FEE_DEDUCTION_MISMATCH",
-          description: "Bank intermediary deducted service charges without reporting.",
-          date: new Date().toISOString()
-        },
-        ...prev
-      ]);
-    }, 2000);
+    }
   };
 
   const resolveDiscrepancy = (logId: string) => {

@@ -76,7 +76,7 @@ export const LoginView: React.FC = () => {
         {/* Brand Header */}
         <div className="text-center space-y-2 font-mono">
           <div className="flex items-center justify-center mx-auto mb-2">
-            <img src="/src/assets/auctbiz-logo.png" alt="AUCTBIZ Logo" className="h-16 w-auto object-contain" />
+            <img src="/auctbiz-logo.png" alt="AUCTBIZ Logo" className="h-16 w-auto object-contain" />
           </div>
           <h1 className="text-2xl font-black text-white tracking-wider">AUCTBIZ</h1>
           <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">WHERE INDUSTRY MEETS OPPORTUNITY</p>

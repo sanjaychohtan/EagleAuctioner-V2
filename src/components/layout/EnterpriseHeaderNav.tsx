@@ -217,7 +217,7 @@ export const EnterpriseHeaderNav: React.FC<EnterpriseHeaderNavProps> = memo(({
               {sidebarExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <div className="flex items-center gap-2">
-              <img src="/src/assets/auctbiz-logo.png" alt="AUCTBIZ" className="h-6 w-auto object-contain" />
+              <img src="/auctbiz-logo.png" alt="AUCTBIZ" className="h-6 w-auto object-contain" />
               <span className="font-extrabold tracking-wider text-sm text-white">AUCTBIZ</span>
             </div>
           </div>

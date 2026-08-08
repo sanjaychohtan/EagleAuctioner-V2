@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
     DELETE: (auctionId: string, lotId: string, sellerProfileId?: string) => `/v1/auctions/${auctionId}/lots/${lotId}${sellerProfileId ? `?sellerProfileId=${sellerProfileId}` : ""}`,
     PUBLISH: (auctionId: string, lotId: string, sellerProfileId?: string) => `/v1/auctions/${auctionId}/lots/${lotId}/publish${sellerProfileId ? `?sellerProfileId=${sellerProfileId}` : ""}`,
     SORT: (auctionId: string, sellerProfileId?: string) => `/v1/auctions/${auctionId}/lots/sort${sellerProfileId ? `?sellerProfileId=${sellerProfileId}` : ""}`,
+    IMPORT: (auctionId: string) => `/v1/lots/import/auctions/${auctionId}`,
   },
   BID: {
     PLACE: (lotId: string) => `/v1/lots/${lotId}/bid`,
@@ -83,7 +84,7 @@ export const API_ENDPOINTS = {
     LEDGER: "/v1/finance/ledger",
     RECONCILIATION: "/v1/finance/reconciliation",
     GST_REPORT: "/v1/finance/gst-report",
-    INVOICES: "/v1/finance/invoices",
+    INVOICES: "/v1/fee-invoices",
     WALLET: "/v1/finance/wallet",
     REFUNDS: "/v1/finance/refunds",
   },
