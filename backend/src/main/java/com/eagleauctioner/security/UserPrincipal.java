@@ -26,9 +26,23 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+        java.util.Set<GrantedAuthority> authorities = new java.util.HashSet<>();
+        if (user.getRoles() != null) {
+            for (com.eagleauctioner.entity.Role role : user.getRoles()) {
+                authorities.add(new SimpleGrantedAuthority(role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName()));
+                authorities.add(new SimpleGrantedAuthority(role.getName()));
+                if (role.getPermissions() != null) {
+                    for (com.eagleauctioner.entity.Permission p : role.getPermissions()) {
+                        if (p.getName() != null && !p.getName().isBlank()) {
+                            authorities.add(new SimpleGrantedAuthority(p.getName()));
+                        }
+                        if (p.getActionKey() != null && !p.getActionKey().isBlank()) {
+                            authorities.add(new SimpleGrantedAuthority(p.getActionKey()));
+                        }
+                    }
+                }
+            }
+        }
 
         return new UserPrincipal(
                 user.getId(),

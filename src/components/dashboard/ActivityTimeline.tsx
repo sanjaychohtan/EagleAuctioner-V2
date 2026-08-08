@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useExecutiveDashboard } from "../../hooks/useDashboardQueries";
+import { useAuthStore } from "../../store/useAuthStore";
 
 interface AuditLogItem {
   id: string;
@@ -36,7 +37,17 @@ export function ActivityTimeline({ themeMode, showToast }: ActivityTimelineProps
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
-  const { data: dashboardData, isLoading } = useExecutiveDashboard();
+  const user = useAuthStore((state) => state.user);
+  const userRoles = new Set((user?.roles || []).map((r) => r.toUpperCase()));
+  const isExecutiveOrAdmin =
+    userRoles.has("ROLE_SUPER_ADMIN") ||
+    userRoles.has("SUPER_ADMIN") ||
+    userRoles.has("ROLE_ADMIN") ||
+    userRoles.has("ADMIN") ||
+    userRoles.has("ROLE_EXECUTIVE") ||
+    userRoles.has("EXECUTIVE");
+
+  const { data: dashboardData, isLoading } = useExecutiveDashboard({ enabled: isExecutiveOrAdmin });
   
   const logs: AuditLogItem[] = (dashboardData?.activities || []).map(a => ({
     id: a.id,

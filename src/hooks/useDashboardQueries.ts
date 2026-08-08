@@ -1,57 +1,63 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { dashboardService } from "../api/dashboardService";
 
-export const useExecutiveDashboard = () => {
+export const useExecutiveDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "executive"],
     queryFn: () => dashboardService.getExecutiveDashboard(),
     refetchInterval: 30000, // auto-refresh every 30s
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useAdminDashboard = () => {
+export const useAdminDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "admin"],
     queryFn: () => dashboardService.getAdminDashboard(),
     refetchInterval: 30000,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useBuyerDashboard = () => {
+export const useBuyerDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "buyer"],
     queryFn: () => dashboardService.getBuyerDashboard(),
     refetchInterval: 30000,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useSellerDashboard = () => {
+export const useSellerDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "seller"],
     queryFn: () => dashboardService.getSellerDashboard(),
     refetchInterval: 30000,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useOperationsDashboard = () => {
+export const useOperationsDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "operations"],
     queryFn: () => dashboardService.getOperationsDashboard(),
     refetchInterval: 30000,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useFinanceDashboard = () => {
+export const useFinanceDashboard = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["dashboard", "finance"],
     queryFn: () => dashboardService.getFinanceDashboard(),
     refetchInterval: 30000,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 

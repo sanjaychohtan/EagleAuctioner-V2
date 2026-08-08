@@ -4,7 +4,6 @@ import com.eagleauctioner.entity.*;
 import com.eagleauctioner.enums.*;
 import com.eagleauctioner.repository.*;
 import com.eagleauctioner.service.DemoDataService;
-import com.eagleauctioner.service.DocumentNumberGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +26,6 @@ public class DemoDataServiceImpl implements DemoDataService {
     private final AuctionLotRepository auctionLotRepository;
     private final BidRepository bidRepository;
     private final AuctionSettingsRepository auctionSettingsRepository;
-    private final DocumentNumberGeneratorService documentNumberGeneratorService;
     private final PasswordEncoder passwordEncoder;
 
     @Override

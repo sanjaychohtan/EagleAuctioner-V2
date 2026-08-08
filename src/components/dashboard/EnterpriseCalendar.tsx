@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useExecutiveDashboard } from "../../hooks/useDashboardQueries";
-
+import { useAuthStore } from "../../store/useAuthStore";
 
 interface CalendarEventItem {
   id: string;
@@ -34,7 +34,17 @@ export function EnterpriseCalendar({ themeMode, showToast }: EnterpriseCalendarP
   const [currentView, setCurrentView] = useState<"month" | "week" | "day" | "timeline" | "agenda">("month");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date("2026-07-06")); // Static anchor date
   
-  const { data: dashboardData, isLoading } = useExecutiveDashboard();
+  const user = useAuthStore((state) => state.user);
+  const userRoles = new Set((user?.roles || []).map((r) => r.toUpperCase()));
+  const isExecutiveOrAdmin =
+    userRoles.has("ROLE_SUPER_ADMIN") ||
+    userRoles.has("SUPER_ADMIN") ||
+    userRoles.has("ROLE_ADMIN") ||
+    userRoles.has("ADMIN") ||
+    userRoles.has("ROLE_EXECUTIVE") ||
+    userRoles.has("EXECUTIVE");
+
+  const { data: dashboardData, isLoading } = useExecutiveDashboard({ enabled: isExecutiveOrAdmin });
   
   const events: CalendarEventItem[] = (dashboardData?.calendarEvents || []).map(evt => ({
     id: evt.id,

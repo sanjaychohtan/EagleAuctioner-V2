@@ -1,9 +1,7 @@
 package com.eagleauctioner.service;
 
 import com.eagleauctioner.entity.RefreshToken;
-import com.eagleauctioner.entity.User;
 import com.eagleauctioner.repository.RefreshTokenRepository;
-import com.eagleauctioner.repository.RoleRepository;
 import com.eagleauctioner.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

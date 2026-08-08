@@ -8,7 +8,51 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { DashboardRole } from "../components/dashboard/DashboardTypes";
+
+const getRoleFromUser = (roles?: string[]): DashboardRole => {
+  if (!roles || roles.length === 0) return "seller";
+  const rSet = new Set(roles.map((r) => r.toUpperCase()));
+  if (
+    rSet.has("ROLE_SUPER_ADMIN") ||
+    rSet.has("SUPER_ADMIN") ||
+    rSet.has("ROLE_ADMIN") ||
+    rSet.has("ADMIN") ||
+    rSet.has("ROLE_EXECUTIVE") ||
+    rSet.has("EXECUTIVE")
+  ) {
+    return "executive";
+  }
+  if (rSet.has("ROLE_SELLER") || rSet.has("SELLER")) {
+    return "seller";
+  }
+  if (
+    rSet.has("ROLE_BUYER") ||
+    rSet.has("BUYER") ||
+    rSet.has("ROLE_BIDDER") ||
+    rSet.has("BIDDER")
+  ) {
+    return "buyer";
+  }
+  if (
+    rSet.has("ROLE_FINANCE") ||
+    rSet.has("FINANCE") ||
+    rSet.has("ROLE_ACCOUNTANT") ||
+    rSet.has("ACCOUNTANT")
+  ) {
+    return "finance";
+  }
+  if (
+    rSet.has("ROLE_OPERATIONS") ||
+    rSet.has("OPERATIONS") ||
+    rSet.has("ROLE_OPS_HEAD") ||
+    rSet.has("OPS_HEAD")
+  ) {
+    return "operations";
+  }
+  return "seller";
+};
 
 import { EnterpriseHeaderToolbar } from "../components/dashboard/enterprise/EnterpriseHeaderToolbar";
 import { SchemaViewerTab } from "../components/dashboard/enterprise/SchemaViewerTab";
@@ -38,9 +82,16 @@ export function EnterpriseDashboard({ initialTab = "monitoring" }: { initialTab?
   const [copiedQueryIndex, setCopiedQueryIndex] = useState<number | null>(null);
 
   const { themeMode } = useAppStore();
+  const user = useAuthStore((state) => state.user);
 
   const [perspective, setPerspective] = useState<"business" | "developer">("business");
-  const [activeRole, setActiveRole] = useState<DashboardRole>("executive");
+  const [activeRole, setActiveRole] = useState<DashboardRole>(() => getRoleFromUser(user?.roles));
+
+  useEffect(() => {
+    if (user?.roles) {
+      setActiveRole(getRoleFromUser(user.roles));
+    }
+  }, [user]);
   const [simulationMode, setSimulationMode] = useState<"normal" | "loading" | "empty" | "error">("normal");
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
   const [refreshCountdown, setRefreshCountdown] = useState<number>(15);

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import type { DashboardRole } from "../DashboardTypes";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 interface HeaderToolbarProps {
   themeMode: "light" | "dark";
@@ -202,37 +203,54 @@ export const EnterpriseHeaderToolbar: React.FC<HeaderToolbarProps> = memo(({
             
             {/* ROLES SELECTION BADGES */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-              {[
-                { id: "personalized", name: "Personalized Cockpit", icon: Sparkles },
-                { id: "executive", name: "Executive Desk", icon: TrendingUp },
-                { id: "admin", name: "Admin Control", icon: ShieldAlert },
-                { id: "buyer", name: "Buyer Desk", icon: KeyRound },
-                { id: "seller", name: "Seller Desk", icon: Tag },
-                { id: "finance", name: "Finance Desk", icon: Coins },
-                { id: "operations", name: "Operations Desk", icon: Gavel }
-              ].map((item) => {
-                const Icon = item.icon;
-                const isSel = activeRole === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveRole(item.id as DashboardRole);
-                      showToast(`Switched workspace perspective to ${item.name}`, "info");
-                    }}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
-                      isSel
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                        : themeMode === "dark"
-                        ? "bg-slate-950 border border-slate-850 text-slate-400 hover:text-white"
-                        : "bg-slate-50 border border-slate-150 text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{item.name}</span>
-                  </button>
-                );
-              })}
+              {(() => {
+                const user = useAuthStore.getState().user;
+                const userRoles = new Set((user?.roles || []).map((r) => r.toUpperCase()));
+                const isSuperAdminOrAdmin =
+                  userRoles.has("ROLE_SUPER_ADMIN") ||
+                  userRoles.has("SUPER_ADMIN") ||
+                  userRoles.has("ROLE_ADMIN") ||
+                  userRoles.has("ADMIN");
+
+                const allItems = [
+                  { id: "personalized", name: "Personalized Cockpit", icon: Sparkles },
+                  { id: "executive", name: "Executive Desk", icon: TrendingUp, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN", "ROLE_EXECUTIVE", "EXECUTIVE"] },
+                  { id: "admin", name: "Admin Control", icon: ShieldAlert, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN"] },
+                  { id: "buyer", name: "Buyer Desk", icon: KeyRound, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN", "ROLE_BUYER", "BUYER", "ROLE_BIDDER", "BIDDER"] },
+                  { id: "seller", name: "Seller Desk", icon: Tag, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN", "ROLE_SELLER", "SELLER"] },
+                  { id: "finance", name: "Finance Desk", icon: Coins, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN", "ROLE_FINANCE", "FINANCE", "ROLE_ACCOUNTANT", "ACCOUNTANT"] },
+                  { id: "operations", name: "Operations Desk", icon: Gavel, roles: ["ROLE_SUPER_ADMIN", "SUPER_ADMIN", "ROLE_ADMIN", "ADMIN", "ROLE_OPERATIONS", "OPERATIONS", "ROLE_OPS_HEAD", "OPS_HEAD"] }
+                ];
+
+                const visibleItems = allItems.filter(item => {
+                  if (isSuperAdminOrAdmin || item.id === "personalized") return true;
+                  return item.roles?.some(r => userRoles.has(r));
+                });
+
+                return visibleItems.map((item) => {
+                  const Icon = item.icon;
+                  const isSel = activeRole === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveRole(item.id as DashboardRole);
+                        showToast(`Switched workspace perspective to ${item.name}`, "info");
+                      }}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+                        isSel
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
+                          : themeMode === "dark"
+                          ? "bg-slate-950 border border-slate-850 text-slate-400 hover:text-white"
+                          : "bg-slate-50 border border-slate-150 text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{item.name}</span>
+                    </button>
+                  );
+                });
+              })()}
             </div>
 
             {/* SIMULATION TUNER */}
