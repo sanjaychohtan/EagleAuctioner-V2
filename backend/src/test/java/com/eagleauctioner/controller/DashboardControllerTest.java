@@ -107,4 +107,34 @@ public class DashboardControllerTest {
         mockMvc.perform(get("/api/v1/analytics/dashboard/executive"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser(roles = "OPS_HEAD")
+    void testGetOperationsDashboard_OpsHead_Success() throws Exception {
+        when(dashboardService.getOperationsDashboard(any(UUID.class))).thenReturn(new com.eagleauctioner.dto.DashboardDTOs.OperationsDashboardData());
+
+        mockMvc.perform(get("/api/v1/analytics/dashboard/operations"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "SELLER")
+    void testGetOperationsDashboard_Seller_Forbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/analytics/dashboard/operations"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "BUYER")
+    void testGetOperationsDashboard_Buyer_Forbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/analytics/dashboard/operations"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "FINANCE")
+    void testGetOperationsDashboard_Finance_Forbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/analytics/dashboard/operations"))
+                .andExpect(status().isForbidden());
+    }
 }

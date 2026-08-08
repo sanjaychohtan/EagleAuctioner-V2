@@ -94,7 +94,7 @@ public class DashboardController {
     }
 
     @GetMapping("/operations")
-    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('OPERATIONS') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('dashboard.view') or hasRole('OPS_HEAD') or hasRole('OPERATIONS') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<OperationsDashboardData> getOperationsDashboard(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
