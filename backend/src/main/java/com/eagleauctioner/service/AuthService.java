@@ -237,17 +237,33 @@ public class AuthService {
 
     @Transactional
     public void logout(String token) {
-        String tokenHash = hashToken(token);
-        refreshTokenRepository.findByTokenHash(tokenHash).ifPresent(dbToken -> {
-            dbToken.setRevokedAt(Instant.now());
-            refreshTokenRepository.save(dbToken);
-        });
+        if (token == null || token.isBlank()) {
+            return;
+        }
 
-        jwtService.revokeToken(token);
-        String familyId = jwtService.extractTokenFamilyId(token);
-        if (familyId != null) {
-            refreshTokenRepository.revokeFamily(familyId);
-            jwtService.revokeTokenFamily(familyId);
+        // 1. Revoke DB refresh token if token hash matches an active record
+        try {
+            String tokenHash = hashToken(token);
+            refreshTokenRepository.findByTokenHash(tokenHash).ifPresent(dbToken -> {
+                dbToken.setRevokedAt(Instant.now());
+                refreshTokenRepository.save(dbToken);
+            });
+        } catch (Exception e) {
+            log.warn("Refresh token DB revocation notice during logout: {}", e.getMessage());
+        }
+
+        // 2. Revoke JWT access token & token family safely
+        try {
+            jwtService.revokeToken(token);
+            String familyId = jwtService.extractTokenFamilyId(token);
+            if (familyId != null) {
+                refreshTokenRepository.revokeFamily(familyId);
+                jwtService.revokeTokenFamily(familyId);
+            }
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            log.info("Logout JWT processing skipped for invalid/expired token: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error during JWT logout processing: {}", e.getMessage(), e);
         }
     }
 

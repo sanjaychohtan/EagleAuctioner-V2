@@ -49,6 +49,8 @@ public class SuperAdminBootstrapInitializer implements ApplicationRunner {
         log.info("Executing Enterprise Production-Safe Initializer...");
         try {
             ensureSystemUser("admin@eagleauctioner.com", "Admin@123", UserType.ADMIN, "Super", "Admin", "ROLE_SUPER_ADMIN");
+            ensureSystemUser("demo.seller@eagleauctioner.com", "DemoSeller@123", UserType.SELLER, "Demo", "Seller", "ROLE_SELLER");
+            ensureSystemUser("demo.buyer@eagleauctioner.com", "DemoBuyer@123", UserType.BIDDER, "Demo", "Buyer", "ROLE_BIDDER");
             ensureSystemUser("finance@eagleauctioner.com", "Finance@123", UserType.ADMIN, "Finance", "Lead", "ROLE_FINANCE");
             ensureSystemUser("ops@eagleauctioner.com", "Ops@123", UserType.ADMIN, "Operations", "Head", "ROLE_OPS_HEAD");
         } catch (Exception e) {
