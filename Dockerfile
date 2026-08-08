@@ -15,8 +15,8 @@ RUN npm run build
 FROM nginx:1.25.4-alpine
 WORKDIR /usr/share/nginx/html
 
-# Install wget for healthcheck probe
-RUN apk add --no-cache wget
+# Install wget and curl for healthcheck probe
+RUN apk add --no-cache wget curl
 
 # Remove default nginx static assets
 RUN rm -rf ./*
