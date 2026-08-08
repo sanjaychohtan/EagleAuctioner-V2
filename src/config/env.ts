@@ -1,5 +1,5 @@
 /**
- * Eagle Auctioner - RC4 Enterprise Environment Configuration
+ * AUCTBIZ - Enterprise Environment Configuration
  * This file handles configuration validation and exposes safe public variables.
  */
 

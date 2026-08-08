@@ -75,11 +75,11 @@ export const LoginView: React.FC = () => {
       <div className="max-w-md w-full mx-auto my-auto space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2 font-mono">
-          <div className="h-12 w-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
-            <Gavel className="h-6 w-6" />
+          <div className="flex items-center justify-center mx-auto mb-2">
+            <img src="/src/assets/auctbiz-logo.png" alt="AUCTBIZ Logo" className="h-16 w-auto object-contain" />
           </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Eagle Auctioner Suite</h1>
-          <p className="text-xs text-slate-400">Enterprise B2B Auction Authorization Vault</p>
+          <h1 className="text-2xl font-black text-white tracking-wider">AUCTBIZ</h1>
+          <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">WHERE INDUSTRY MEETS OPPORTUNITY</p>
         </div>
 
         {/* Demo Quick Roles Bar */}
@@ -106,7 +106,7 @@ export const LoginView: React.FC = () => {
 
       {/* Footer copyright */}
       <footer className="text-center text-[10px] font-mono text-slate-600 py-4">
-        &copy; 2026 Eagle Auctioner Technologies. All rights reserved. ISO 27001 Certified.
+        &copy; 2026 AUCTBIZ Technologies. All rights reserved. ISO 27001 Certified.
       </footer>
 
       {/* MFA Modal */}

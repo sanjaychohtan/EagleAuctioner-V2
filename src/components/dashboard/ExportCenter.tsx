@@ -47,7 +47,7 @@ export function ExportCenter({ themeMode, showToast }: ExportCenterProps) {
   const handleExportNow = () => {
     exportMutation.mutate({ format, scope, columns }, {
       onSuccess: () => {
-        showToast(`Audit document ready for download: eagle_ledger_${scope.toLowerCase()}.${format.toLowerCase()}`, "success");
+        showToast(`Audit document ready for download: auctbiz_ledger_${scope.toLowerCase()}.${format.toLowerCase()}`, "success");
       },
       onError: () => {
         showToast("Failed to export report", "warning");

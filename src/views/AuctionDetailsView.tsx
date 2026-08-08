@@ -318,7 +318,7 @@ export const AuctionDetailsView: React.FC = () => {
           <div className="space-y-3.5 divide-y divide-slate-800/40">
             <div className="flex justify-between items-center py-1">
               <span className="text-slate-500">Corporate Originator</span>
-              <span className="text-slate-200 font-semibold">{auction.sellerCompanyName || "Eagle Seller Corp"}</span>
+              <span className="text-slate-200 font-semibold">{auction.sellerCompanyName || "AUCTBIZ Seller Corp"}</span>
             </div>
             <div className="flex justify-between items-center pt-2.5">
               <span className="text-slate-500">Corporate Shell Code</span>

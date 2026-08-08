@@ -1,5 +1,5 @@
 /**
- * Eagle Auctioner - Auction Type Definitions & DTOs
+ * AUCTBIZ - Auction Type Definitions & DTOs
  * Standard enterprise types aligning perfectly with the Spring Boot RC2 backend specifications.
  */
 

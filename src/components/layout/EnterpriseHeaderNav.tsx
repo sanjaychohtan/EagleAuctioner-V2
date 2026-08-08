@@ -216,7 +216,10 @@ export const EnterpriseHeaderNav: React.FC<EnterpriseHeaderNavProps> = memo(({
             >
               {sidebarExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <span className="font-bold tracking-tight text-sm">Eagle Auctioner Suite</span>
+            <div className="flex items-center gap-2">
+              <img src="/src/assets/auctbiz-logo.png" alt="AUCTBIZ" className="h-6 w-auto object-contain" />
+              <span className="font-extrabold tracking-wider text-sm text-white">AUCTBIZ</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

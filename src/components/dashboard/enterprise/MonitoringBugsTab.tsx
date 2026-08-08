@@ -46,7 +46,7 @@ export const MonitoringBugsTab: React.FC<MonitoringBugsTabProps> = memo(({
   const handleExportPDF = async () => {
     showToast("Generating official cryptographic audit PDF report...", "info");
     await exportPdf();
-    showToast("Downloaded Eagle_Auctioner_Bugs_Remediation_Report.pdf", "success");
+    showToast("Downloaded AUCTBIZ_Bugs_Remediation_Report.pdf", "success");
   };
 
   return (

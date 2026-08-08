@@ -1,5 +1,5 @@
 /**
- * Eagle Auctioner - RC4 Global Constants
+ * AUCTBIZ - Global Constants
  * Standard enterprise constants aligning perfectly with the Spring Boot RC2 backend specifications.
  */
 

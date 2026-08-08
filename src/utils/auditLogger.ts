@@ -1,5 +1,5 @@
 /**
- * Eagle Auctioner - Enterprise Security Audit Logger
+ * AUCTBIZ - Enterprise Security Audit Logger
  * Formats and records frontend security, authentication, and session events.
  */
 

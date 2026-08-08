@@ -67,7 +67,7 @@ export function EnterpriseCalendar({ themeMode, showToast }: EnterpriseCalendarP
   const handleExport = () => {
     showToast("Exporting calendar to Microsoft Exchange & Google Calendar .ICS format...", "info");
     setTimeout(() => {
-      showToast("Enterprise calendar exported successfully: eagle_scheduler.ics", "success");
+      showToast("Enterprise calendar exported successfully: auctbiz_scheduler.ics", "success");
     }, 1200);
   };
 

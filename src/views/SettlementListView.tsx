@@ -111,7 +111,7 @@ export const SettlementListView: React.FC = () => {
   const handleExportCSV = () => {
     try {
       const { headers, rows } = getExportData();
-      ExportUtility.exportCSV(headers, rows, `Eagle_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.csv`);
+      ExportUtility.exportCSV(headers, rows, `AUCTBIZ_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.csv`);
       showNotification("Escrow Settlement Ledger CSV downloaded.", "success");
     } catch (err) {
       showNotification("Failed to generate CSV export", "error");
@@ -121,7 +121,7 @@ export const SettlementListView: React.FC = () => {
   const handleExportPDF = () => {
     try {
       const { headers, rows } = getExportData();
-      ExportUtility.exportPDF("Eagle Escrow Settlement Ledger", headers, rows, `Eagle_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.pdf`);
+      ExportUtility.exportPDF("AUCTBIZ Escrow Settlement Ledger", headers, rows, `AUCTBIZ_Escrow_Settlement_Ledger_${new Date().toISOString().split("T")[0]}.pdf`);
       showNotification("Escrow Settlement Ledger PDF downloaded.", "success");
     } catch (err) {
       showNotification("Failed to generate PDF export", "error");

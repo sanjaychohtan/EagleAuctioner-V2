@@ -378,7 +378,7 @@ export function GlobalCommandPalette({
                 <span>↵ Select</span>
               </div>
               <div className="hidden sm:block">
-                <span>Eagle Console Gateway v2.4</span>
+                <span>AUCTBIZ Console Gateway v2.4</span>
               </div>
             </div>
           </motion.div>

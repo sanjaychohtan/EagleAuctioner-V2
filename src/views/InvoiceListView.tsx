@@ -236,7 +236,7 @@ export const InvoiceListView: React.FC = () => {
               <div className="space-y-4 bg-slate-950 p-4 border border-slate-850 rounded-lg text-slate-400 font-mono text-[11px] leading-relaxed">
                 <div className="flex justify-between border-b border-slate-900 pb-3">
                   <div>
-                    <span className="font-bold text-white block text-xs">EAGLE AUCTIONER INFRASTRUCTURE</span>
+                    <span className="font-bold text-white block text-xs">AUCTBIZ INFRASTRUCTURE</span>
                     <span className="text-[9px] block">Corporate HQ, Bandra Kurla Complex</span>
                     <span className="text-[9px] block">Mumbai, MH - 400051</span>
                     <span className="text-[9px] block">GSTIN: 27AAAAE1102B1Z3</span>

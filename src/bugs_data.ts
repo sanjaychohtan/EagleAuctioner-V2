@@ -373,7 +373,7 @@ export const generateBugsReportPDF = async () => {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("EAGLE AUCTIONER PLATFORM", margin, 18);
+    doc.text("AUCTBIZ PLATFORM", margin, 18);
     
     // Subtitle
     doc.setFont("helvetica", "normal");
@@ -410,7 +410,7 @@ export const generateBugsReportPDF = async () => {
     doc.setTextColor(148, 163, 184); // slate-400
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("CONFIDENTIAL - EAGLE AUCTIONER CORE SECURITY GROUP", margin, pageHeight - 10);
+    doc.text("CONFIDENTIAL - AUCTBIZ CORE SECURITY GROUP", margin, pageHeight - 10);
     doc.text(`Page ${pageNum}`, 210 - margin - 15, pageHeight - 10);
   };
 
@@ -430,7 +430,7 @@ export const generateBugsReportPDF = async () => {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
   doc.setTextColor(51, 65, 85); // slate-700
-  const introText = "This official documentation compiles the complete mitigation steps implemented to resolve all 38 critical, high, and medium severity vulnerabilities identified in the Eagle Auctioner application. These code fixes guarantee row-level security isolation, database consistency checks (double-entry balancing constraints), protection against concurrent race conditions, safe API routing access control, and full compliance with standard financial audit regulations.";
+  const introText = "This official documentation compiles the complete mitigation steps implemented to resolve all 38 critical, high, and medium severity vulnerabilities identified in the AUCTBIZ application. These code fixes guarantee row-level security isolation, database consistency checks (double-entry balancing constraints), protection against concurrent race conditions, safe API routing access control, and full compliance with standard financial audit regulations.";
   const splitIntro = doc.splitTextToSize(introText, contentWidth);
   doc.text(splitIntro, margin, y);
   y += (splitIntro.length * 4) + 6;
@@ -489,7 +489,7 @@ export const generateBugsReportPDF = async () => {
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-      doc.text("EAGLE AUCTIONER TECH SECURITY AUDIT - REMEDIATION PROCESS", margin, 15);
+      doc.text("AUCTBIZ TECH SECURITY AUDIT - REMEDIATION PROCESS", margin, 15);
       
       doc.setDrawColor(99, 102, 241);
       doc.setLineWidth(1.5);
@@ -562,7 +562,7 @@ export const generateBugsReportPDF = async () => {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("EAGLE AUCTIONER TECH SECURITY AUDIT - CONCLUSION", margin, 15);
+    doc.text("AUCTBIZ TECH SECURITY AUDIT - CONCLUSION", margin, 15);
     
     doc.setDrawColor(99, 102, 241);
     doc.setLineWidth(1.5);
@@ -597,5 +597,5 @@ export const generateBugsReportPDF = async () => {
   doc.setTextColor(100, 116, 139);
   doc.text("SHA-256 Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", margin + 6, y + 38);
 
-  doc.save("Eagle_Auctioner_Bugs_Remediation_Report.pdf");
+  doc.save("AUCTBIZ_Bugs_Remediation_Report.pdf");
 };

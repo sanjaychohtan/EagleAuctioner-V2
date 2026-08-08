@@ -49,7 +49,7 @@ export const AuctionListView: React.FC = () => {
       {/* 1. TOP STATS BAR */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-800/40">
         <div>
-          <p className="text-xs font-mono text-indigo-400 uppercase tracking-widest font-semibold mb-1">Eagle Auction Systems</p>
+          <p className="text-xs font-mono text-indigo-400 uppercase tracking-widest font-semibold mb-1">AUCTBIZ Systems</p>
           <h2 className="text-xl font-bold font-mono text-white">AUCTION RECOGNITION REGISTRY</h2>
           <p className="text-xs text-slate-400 mt-1">
             Real-time display of multi-tenant enterprise bidding campaigns and status transitions.
