@@ -74,7 +74,7 @@ public class PdfGenerationService {
         log.info("Generating secure PDF stream for Purchase Order {}", po.getDocumentNumber());
         StringBuilder builder = new StringBuilder();
         builder.append("==================================================\n");
-        builder.append("           EAGLE AUCTIONER - PURCHASE ORDER        \n");
+        builder.append("           AUCTBIZ - PURCHASE ORDER               \n");
         builder.append("==================================================\n");
         builder.append("Document Number: ").append(po.getDocumentNumber()).append("\n");
         builder.append("Status         : ").append(po.getStatus()).append("\n");
@@ -103,7 +103,7 @@ public class PdfGenerationService {
         log.info("Generating secure PDF stream for Platform Fee Invoice {}", fi.getDocumentNumber());
         StringBuilder builder = new StringBuilder();
         builder.append("==================================================\n");
-        builder.append("           EAGLE AUCTIONER - FEE INVOICE           \n");
+        builder.append("           AUCTBIZ - FEE INVOICE                  \n");
         builder.append("==================================================\n");
         builder.append("Document Number: ").append(fi.getDocumentNumber()).append("\n");
         builder.append("Status         : ").append(fi.getStatus()).append("\n");
@@ -119,7 +119,7 @@ public class PdfGenerationService {
         builder.append("Tax (GST/VAT)  : ").append(fi.getTaxAmount()).append("\n");
         builder.append("Invoice Total  : ").append(fi.getTotalAmount()).append("\n");
         builder.append("==================================================\n");
-        builder.append("Corporate Remit: Eagle Auctioner Finance Group\n");
+        builder.append("Corporate Remit: AUCTBIZ Finance Group\n");
         builder.append("[DIGITAL_SIGNATURE_ENVELOPE_METADATA_BLOCK_SHA256]\n");
         builder.append("==================================================\n");
 
@@ -130,12 +130,12 @@ public class PdfGenerationService {
 
     public String generateInvoicePdf(String invoiceNumber, Long subtotal, Long taxAmount, Long totalAmount) {
         log.info("Generating secure PDF stream for GST Invoice {}", invoiceNumber);
-        return "https://storage.eagleauctioner.com/invoices/" + sanitizeFilename(invoiceNumber) + ".pdf";
+        return "https://storage.auctbiz.com/invoices/" + sanitizeFilename(invoiceNumber) + ".pdf";
     }
 
     private String buildSaleConfirmationLayout(SaleConfirmation sc) {
         return "==================================================\n" +
-                "           EAGLE AUCTIONER - SALE CONFIRMATION     \n" +
+                "           AUCTBIZ - SALE CONFIRMATION            \n" +
                 "==================================================\n" +
                 "Document Number: " + sc.getDocumentNumber() + "\n" +
                 "Current Status : " + sc.getStatus() + "\n" +

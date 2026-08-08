@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { financeService } from "../api/financeService";
 import { CreateRefundRequest, LedgerAdjustmentRequest } from "../types/finance";
 
-export const useSettlements = () => {
+export const useSettlements = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["settlements"],
     queryFn: financeService.getSettlements,
+    enabled: options?.enabled ?? true,
   });
 };
 

@@ -146,6 +146,8 @@ public class JwtService {
                     .getBody();
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
             return e.getClaims();
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Invalid or tampered authentication token signature", e);
         }
     }
 

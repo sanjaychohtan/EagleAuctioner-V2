@@ -115,14 +115,54 @@ public class EnterpriseAuthorizationServiceTest {
     }
 
     @Test
-    @DisplayName("Should list all permissions in catalog")
-    void testGetAllPermissions() {
-        when(permissionRepository.findAll()).thenReturn(Collections.singletonList(samplePermission));
+    @DisplayName("Should list all permissions across SELLER, BUYER, SETTLEMENT, NOTIFICATION, and SYSTEM modules")
+    void testGetAllPermissionsWithNewModules() {
+        Permission sellerPerm = Permission.builder()
+                .id(UUID.randomUUID())
+                .name("Create Seller")
+                .actionKey("seller.create")
+                .module(Module.SELLER)
+                .description("Register seller")
+                .build();
+
+        Permission settlementPerm = Permission.builder()
+                .id(UUID.randomUUID())
+                .name("View Settlement")
+                .actionKey("settlement.view")
+                .module(Module.SETTLEMENT)
+                .description("View settlement")
+                .build();
+
+        Permission systemPerm = Permission.builder()
+                .id(UUID.randomUUID())
+                .name("Admin Access")
+                .actionKey("admin.access")
+                .module(Module.SYSTEM)
+                .description("Admin access")
+                .build();
+
+        when(permissionRepository.findAll()).thenReturn(Arrays.asList(samplePermission, sellerPerm, settlementPerm, systemPerm));
 
         List<PermissionDTO> permissions = authorizationService.getAllPermissions();
 
         assertNotNull(permissions);
-        assertEquals(1, permissions.size());
-        assertEquals("auction.create", permissions.get(0).getActionKey());
+        assertEquals(4, permissions.size());
+        assertEquals(Module.SELLER, permissions.get(1).getModule());
+        assertEquals(Module.SETTLEMENT, permissions.get(2).getModule());
+        assertEquals(Module.SYSTEM, permissions.get(3).getModule());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when creating duplicate role name")
+    void testCreateDuplicateRoleName() {
+        RoleCreateRequestDTO request = RoleCreateRequestDTO.builder()
+                .name("ROLE_CUSTOM_MANAGER")
+                .description("Duplicate role test")
+                .permissionIds(Collections.singletonList(samplePermissionId))
+                .build();
+
+        when(roleRepository.findByName("ROLE_CUSTOM_MANAGER")).thenReturn(Optional.of(sampleRole));
+
+        assertThrows(RuntimeException.class, () -> authorizationService.createRole(request, UUID.randomUUID()));
     }
 }

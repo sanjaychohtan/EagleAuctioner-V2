@@ -16,9 +16,9 @@ public class OpenApiConfig {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
-                        .title("Eagle Auctioner API")
+                        .title("AUCTBIZ API")
                         .version("v1.0")
-                        .description("API Documentation for Eagle Auctioner Enterprise Platform"))
+                        .description("API Documentation for AUCTBIZ Enterprise Platform"))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName,

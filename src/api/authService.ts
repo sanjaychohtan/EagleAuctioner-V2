@@ -26,17 +26,30 @@ export const AuthService = {
     
     const data = response.data?.data || response.data;
     console.log(`[AuthService] Login response received for: ${email}`);
+    let userProfile: UserProfileDTO;
+    if (data.user) {
+      userProfile = data.user;
+    } else {
+      try {
+        apiClient.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
+        userProfile = await this.getCurrentUser();
+      } catch {
+        userProfile = {
+          id: data.userId || "user-id-101",
+          username: email,
+          email: email,
+          roles: data.roles || ["ROLE_ADMIN"],
+          permissions: [],
+          kycStatus: "APPROVED" as any,
+          tenantId: "default"
+        };
+      }
+    }
+
     return {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
-      user: data.user || {
-        id: data.userId || "user-id-101",
-        username: email,
-        email: email,
-        roles: data.roles || ["ROLE_ADMIN"],
-        kycStatus: "APPROVED" as any,
-        tenantId: "default"
-      }
+      user: userProfile
     };
   },
 

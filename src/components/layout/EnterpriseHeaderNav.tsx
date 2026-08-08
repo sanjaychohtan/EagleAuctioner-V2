@@ -60,9 +60,9 @@ export const EnterpriseHeaderNav: React.FC<EnterpriseHeaderNavProps> = memo(({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch data for search indexes
-  const { data: auctions } = useAuctions();
-  const { data: settlements } = useSettlements();
+  // Fetch data for search indexes (only when search overlay is active)
+  const { data: auctions } = useAuctions({ enabled: showSearch });
+  const { data: settlements } = useSettlements({ enabled: showSearch });
 
   // Navigation Portals
   const navPortals = useMemo(() => {

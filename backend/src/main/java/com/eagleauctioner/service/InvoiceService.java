@@ -63,7 +63,7 @@ public class InvoiceService {
                 .build();
 
         FeeInvoiceItem platformFeeItem = FeeInvoiceItem.builder()
-                .description(String.format("Eagle Auctioner platform facilitation fee (%.2f%% on total purchase order value of %s)", 
+                .description(String.format("AUCTBIZ platform facilitation fee (%.2f%% on total purchase order value of %s)", 
                         rawFeePercent.doubleValue(), po.getTotalAmount().toString()))
                 .amount(subtotal)
                 .build();

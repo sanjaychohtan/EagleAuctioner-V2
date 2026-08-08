@@ -14,5 +14,10 @@ public enum Module {
     REPORTING,
     COMPLIANCE,
     LEGAL,
-    IT
+    IT,
+    SELLER,
+    BUYER,
+    SETTLEMENT,
+    NOTIFICATION,
+    SYSTEM
 }

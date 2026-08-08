@@ -22,7 +22,7 @@ export const AUCTION_KEYS = {
  * Hook to retrieve all auctions.
  * Updates the local Zustand store on successful load.
  */
-export const useAuctions = () => {
+export const useAuctions = (options?: { enabled?: boolean }) => {
   const setAuctions = useAuctionStore((state) => state.setAuctions);
 
   return useQuery({
@@ -33,6 +33,7 @@ export const useAuctions = () => {
       return data;
     },
     staleTime: 1000 * 30, // 30 seconds stale time
+    enabled: options?.enabled ?? true,
   });
 };
 

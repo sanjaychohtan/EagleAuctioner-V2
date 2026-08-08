@@ -81,8 +81,9 @@ export const RoleManagementView: React.FC = () => {
 
   const handleSubmitRole = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roleName.trim()) {
-      alert("Role name is required");
+    const cleanSuffix = roleName.trim().toUpperCase().replace(/^ROLE_/, "").replace(/[^A-Z0-9_]/g, "");
+    if (!cleanSuffix) {
+      alert("Please enter a valid role name after ROLE_ (e.g. MARKETING, FINANCE_MANAGER)");
       return;
     }
     if (selectedPermissionIds.length === 0) {
@@ -90,17 +91,19 @@ export const RoleManagementView: React.FC = () => {
       return;
     }
 
+    const fullRoleName = `ROLE_${cleanSuffix}`;
+
     try {
       setSubmitting(true);
       if (editingRole) {
         await authorizationService.updateRole(editingRole.id, {
-          name: roleName,
+          name: fullRoleName,
           description: roleDescription,
           permissionIds: selectedPermissionIds,
         });
       } else {
         await authorizationService.createRole({
-          name: roleName,
+          name: fullRoleName,
           description: roleDescription,
           permissionIds: selectedPermissionIds,
         });
@@ -331,8 +334,9 @@ export const RoleManagementView: React.FC = () => {
                     required
                     disabled={!!editingRole?.systemRole}
                     value={roleName}
-                    onChange={(e) => setRoleName(e.target.value.toUpperCase().replace(/[^A_Z0-9_]/g, ""))}
+                    onChange={(e) => setRoleName(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ""))}
                     placeholder="e.g. MARKETING_LEAD"
+                    maxLength={50}
                     className="w-full bg-slate-800/50 border border-slate-700 rounded-r-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                 </div>

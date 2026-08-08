@@ -1,8 +1,8 @@
-# Eagle Auctioner — Production Deployment Guide
+# AUCTBIZ — Production Deployment Guide
 
 ## Overview
 
-This guide provides step-by-step procedures for deploying the **Eagle Auctioner Enterprise Platform** into a production VPS environment using Docker Compose, Nginx, PostgreSQL 16, and Redis 7.
+This guide provides step-by-step procedures for deploying the **AUCTBIZ Enterprise Platform** into a production VPS environment using Docker Compose, Nginx, PostgreSQL 16, and Redis 7.
 
 ---
 
@@ -22,8 +22,8 @@ This guide provides step-by-step procedures for deploying the **Eagle Auctioner 
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/eagle-auctioner/v1.git /opt/eagle-auctioner
-cd /opt/eagle-auctioner
+git clone https://github.com/auctbiz/v1.git /opt/auctbiz
+cd /opt/auctbiz
 
 # 2. Prepare production environment file
 cp .env.production.example .env.production
@@ -37,7 +37,7 @@ nano .env.production
 - `POSTGRES_PASSWORD`: Strong database password.
 - `SPRING_DATA_REDIS_PASSWORD`: Strong Redis password.
 - `JWT_SECRET_KEY`: Base64-encoded 256-bit secret key.
-- `APPLICATION_CORS_ALLOWED_ORIGINS`: Domains (e.g. `https://app.eagleauctioner.com`).
+- `APPLICATION_CORS_ALLOWED_ORIGINS`: Domains (e.g. `https://app.auctbiz.com`).
 
 ---
 
@@ -49,11 +49,11 @@ mkdir -p /etc/nginx/ssl
 
 # Obtain certificates using certbot standalone mode
 sudo apt update && sudo apt install -y certbot
-sudo certbot certonly --standalone -d app.eagleauctioner.com -d admin.eagleauctioner.com
+sudo certbot certonly --standalone -d app.auctbiz.com -d admin.auctbiz.com
 
 # Copy or link certificates to Nginx target path
-cp /etc/letsencrypt/live/app.eagleauctioner.com/fullchain.pem /etc/nginx/ssl/fullchain.pem
-cp /etc/letsencrypt/live/app.eagleauctioner.com/privkey.pem /etc/nginx/ssl/privkey.pem
+cp /etc/letsencrypt/live/app.auctbiz.com/fullchain.pem /etc/nginx/ssl/fullchain.pem
+cp /etc/letsencrypt/live/app.auctbiz.com/privkey.pem /etc/nginx/ssl/privkey.pem
 ```
 
 ---

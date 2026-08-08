@@ -71,6 +71,23 @@ public class AuthController {
         response.setUsername(user.getEmail());
         response.setEmail(user.getEmail());
         response.setRoles(user.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet()));
+        
+        java.util.Set<String> permissions = new java.util.HashSet<>();
+        if (user.getRoles() != null) {
+            for (com.eagleauctioner.entity.Role role : user.getRoles()) {
+                if (role.getPermissions() != null) {
+                    for (com.eagleauctioner.entity.Permission p : role.getPermissions()) {
+                        if (p.getActionKey() != null && !p.getActionKey().isBlank()) {
+                            permissions.add(p.getActionKey());
+                        }
+                        if (p.getName() != null && !p.getName().isBlank()) {
+                            permissions.add(p.getName());
+                        }
+                    }
+                }
+            }
+        }
+        response.setPermissions(permissions);
         response.setKycStatus("APPROVED");
         response.setTenantId("default");
 
@@ -120,8 +137,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            // cookie.setAttribute("SameSite", "Strict"); // Depending on servlet API version
-            response.addHeader("Set-Cookie", "ea_refresh_token=" + refreshToken + "; Path=/; HttpOnly; Secure; SameSite=Strict");
+            response.addHeader("Set-Cookie", "ea_refresh_token=" + refreshToken + "; Path=/; HttpOnly; Secure; SameSite=Lax");
         }
     }
 
@@ -196,6 +212,7 @@ public class AuthController {
         private String username;
         private String email;
         private java.util.Set<String> roles;
+        private java.util.Set<String> permissions;
         private String kycStatus;
         private String tenantId;
     }
