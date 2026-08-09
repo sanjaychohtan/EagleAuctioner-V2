@@ -1,1 +1,142 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  html, body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: #020617;
+    color: #f8fafc;
+    overflow-x: hidden;
+  }
+
+  code, pre, kbd, samp, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ==========================================================================
+   AUCTBIZ 5-SECOND ENTERPRISE SPLASH SCREEN ANIMATIONS (GPU Accelerated)
+   ========================================================================== */
+
+@keyframes splashLogoScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+    filter: blur(8px);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.4));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(4px);
+  }
+}
+
+@keyframes splashShineSweep {
+  0% {
+    transform: translateX(-150%) rotate(25deg);
+  }
+  50% {
+    transform: translateX(150%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(150%) rotate(25deg);
+  }
+}
+
+@keyframes splashTaglineFade {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+    letter-spacing: 0.15em;
+  }
+  25% {
+    opacity: 0.9;
+    transform: translateY(0);
+    letter-spacing: 0.25em;
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.28em;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+    letter-spacing: 0.3em;
+  }
+}
+
+@keyframes splashContainerFadeOut {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  80% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes splashPulseGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.15);
+  }
+}
+
+.animate-splash-container {
+  animation: splashContainerFadeOut 5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-splash-logo {
+  animation: splashLogoScaleIn 5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-splash-shine {
+  animation: splashShineSweep 3s ease-in-out 0.8s infinite;
+}
+
+.animate-splash-tagline {
+  animation: splashTaglineFade 4.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+}
+
+.animate-splash-pulse {
+  animation: splashPulseGlow 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-splash-container,
+  .animate-splash-logo,
+  .animate-splash-shine,
+  .animate-splash-tagline,
+  .animate-splash-pulse {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
