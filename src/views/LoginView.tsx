@@ -101,6 +101,7 @@ export const LoginView: React.FC = () => {
           validationError={validationError}
           onLoginSubmit={handleLoginSubmit}
           onOpenForgotPassword={() => showNotification("Contact system admin for password reset", "info")}
+          onOpenSignUp={(role) => navigate("/onboarding", { state: { role } })}
         />
       </div>
 

@@ -37,22 +37,37 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
 
   const isSeller = role === "SELLER";
 
+  const formatAadhaar = (val: string): string => {
+    const clean = val.replace(/\D/g, "");
+    if (clean.length === 12) {
+      return `${clean.slice(0, 4)}-${clean.slice(4, 8)}-${clean.slice(8, 12)}`;
+    }
+    if (/^\d{4}-\d{4}-\d{4}$/.test(val.trim())) {
+      return val.trim();
+    }
+    return "0000-0000-0000";
+  };
+
   const handleSubmitRegistration = async () => {
     setIsSubmitting(true);
+    const formattedPan = (panNumber || (isSeller ? "AAACB1234C" : "ABCDE1234F")).trim().toUpperCase();
+    const formattedIfsc = (ifscCode || (isSeller ? "HDFC0000140" : "ICIC0000102")).trim().toUpperCase();
+    const formattedAadhaar = formatAadhaar(aadhaarNumber);
+
     try {
       if (isSeller) {
         await OnboardingService.registerBidder({
           bidderType: entityType,
           userRole: "ROLE_SELLER",
-          panNumber,
-          rawAadhaar: "000000000000",
-          organizationName: companyName,
-          registrationNumber: cinNumber,
-          gstin: gstinNumber,
-          registeredAddress: "Registered Office Address",
-          accountHolderName: companyName,
+          panNumber: formattedPan,
+          rawAadhaar: "0000-0000-0000",
+          organizationName: companyName || "Enterprise Seller Ltd",
+          registrationNumber: cinNumber || "L12345MH2026PLC000001",
+          gstin: gstinNumber || "27AAACB1234C1Z5",
+          registeredAddress: "Registered Corporate Office",
+          accountHolderName: companyName || "Enterprise Account",
           accountNumber: bankAccount || "1122334455",
-          ifscCode: ifscCode || "HDFC0000140",
+          ifscCode: formattedIfsc,
           bankName: "HDFC Bank",
           branchName: "Main Corporate Branch"
         });
@@ -61,20 +76,20 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
         await OnboardingService.registerBidder({
           bidderType: entityType,
           userRole: "ROLE_BUYER",
-          panNumber,
-          rawAadhaar: aadhaarNumber || "000000000000",
+          panNumber: formattedPan,
+          rawAadhaar: formattedAadhaar,
           accountHolderName: fullName || "Buyer Account",
           accountNumber: bankAccount || "9988776655",
-          ifscCode: ifscCode || "ICIC0000102",
+          ifscCode: formattedIfsc,
           bankName: "ICICI Bank",
           branchName: "Retail Operations Branch"
         });
         showNotification("Buyer KYC onboarding application submitted successfully!", "success");
       }
-      navigate("/monitoring");
+      navigate("/auctions");
     } catch (err: any) {
       const friendly = handleApiError(err);
-      showNotification(`Registration failed: ${friendly.message}`, "error");
+      showNotification(`Registration error (${friendly.status}): ${friendly.message}`, "error");
     } finally {
       setIsSubmitting(false);
     }

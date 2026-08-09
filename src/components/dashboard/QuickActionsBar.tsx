@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+import { useAuth } from "../../context/AuthContext";
+
 interface QuickActionsBarProps {
   themeMode: "light" | "dark";
   showToast: (msg: string, type: "success" | "info" | "warning") => void;
@@ -25,6 +27,7 @@ interface QuickActionsBarProps {
 }
 
 export function QuickActionsBar({ themeMode, showToast, onTriggerAction }: QuickActionsBarProps) {
+  const { hasPermission } = useAuth();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   // Form States
@@ -92,8 +95,8 @@ export function QuickActionsBar({ themeMode, showToast, onTriggerAction }: Quick
     showToast(successMsg, "success");
   };
 
-  const actionItems = [
-    { id: "create-auction", label: "Create Auction", icon: Plus, desc: "Add live lot", color: "text-blue-500 hover:bg-blue-500/10" },
+  const allActionItems = [
+    { id: "create-auction", label: "Create Auction", icon: Plus, desc: "Add live lot", color: "text-blue-500 hover:bg-blue-500/10", permission: "auction.create" },
     { id: "create-seller", label: "Create Seller", icon: UserPlus, desc: "Onboard partner", color: "text-indigo-500 hover:bg-indigo-500/10" },
     { id: "upload-catalogue", label: "Upload Catalogue", icon: Upload, desc: "Bulk CSV list", color: "text-cyan-500 hover:bg-cyan-500/10", direct: true, action: "upload-catalogue", success: "Catalogs processed: 42 new lots imported" },
     { id: "generate-invoice", label: "Generate Invoice", icon: FileText, desc: "Tax GST compliant", color: "text-amber-500 hover:bg-amber-500/10", direct: true, action: "generate-invoice", success: "Dual signature commercial invoice generated" },
@@ -104,6 +107,8 @@ export function QuickActionsBar({ themeMode, showToast, onTriggerAction }: Quick
     { id: "bulk-import", label: "Bulk Import", icon: Database, desc: "Drizzle seed", color: "text-teal-500 hover:bg-teal-500/10", direct: true, action: "seed-data", success: "Re-seeded database schema with 60 lot objects" },
     { id: "export-report", label: "Export Report", icon: Download, desc: "Audit excel", color: "text-red-500 hover:bg-red-500/10", direct: true, action: "export-pdf", success: "Secured audit ledger downloaded as signed PDF" },
   ];
+
+  const actionItems = allActionItems.filter((item) => !item.permission || hasPermission(item.permission));
 
   return (
     <div className="space-y-3">

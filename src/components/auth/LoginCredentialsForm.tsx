@@ -16,6 +16,7 @@ interface LoginCredentialsFormProps {
   validationError: string | null;
   onLoginSubmit: (e: React.FormEvent) => void;
   onOpenForgotPassword: () => void;
+  onOpenSignUp?: (role: "BUYER" | "SELLER") => void;
 }
 
 export const LoginCredentialsForm: React.FC<LoginCredentialsFormProps> = memo(({
@@ -32,7 +33,8 @@ export const LoginCredentialsForm: React.FC<LoginCredentialsFormProps> = memo(({
   isSubmitting,
   validationError,
   onLoginSubmit,
-  onOpenForgotPassword
+  onOpenForgotPassword,
+  onOpenSignUp
 }) => {
   return (
     <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl font-mono space-y-5">
@@ -142,6 +144,27 @@ export const LoginCredentialsForm: React.FC<LoginCredentialsFormProps> = memo(({
           <span>{isSubmitting ? "Authenticating..." : "Authorize Access"}</span>
           <ArrowRight className="h-4 w-4" />
         </button>
+
+        {/* Public Registration Links */}
+        <div className="border-t border-slate-800/80 pt-4 text-center space-y-2">
+          <span className="text-[10px] uppercase font-bold text-slate-500 block">Don't have an enterprise account?</span>
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <button
+              type="button"
+              onClick={() => onOpenSignUp?.("BUYER")}
+              className="py-2 px-3 rounded-xl bg-slate-950 hover:bg-blue-600/10 border border-slate-800 text-blue-400 hover:border-blue-500/30 font-bold transition-all cursor-pointer"
+            >
+              Sign Up as Buyer
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenSignUp?.("SELLER")}
+              className="py-2 px-3 rounded-xl bg-slate-950 hover:bg-emerald-600/10 border border-slate-800 text-emerald-400 hover:border-emerald-500/30 font-bold transition-all cursor-pointer"
+            >
+              Sign Up as Seller
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );

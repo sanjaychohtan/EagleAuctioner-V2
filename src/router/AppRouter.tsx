@@ -44,6 +44,24 @@ const PageLoadingFallback: React.FC = () => (
   </div>
 );
 
+import { useAuth } from "../context/AuthContext";
+
+const RoleBasedRootRedirect: React.FC = () => {
+  const { user, hasRole } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (hasRole([USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN])) {
+    return <Navigate to="/monitoring" replace />;
+  }
+  if (hasRole([USER_ROLE.FINANCE, USER_ROLE.ACCOUNTANT])) {
+    return <Navigate to="/finance" replace />;
+  }
+  if (hasRole([USER_ROLE.OPERATIONS, USER_ROLE.OPS_HEAD])) {
+    return <Navigate to="/admin/kyc" replace />;
+  }
+  return <Navigate to="/auctions" replace />;
+};
+
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
@@ -64,7 +82,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/monitoring"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.OPERATIONS, USER_ROLE.OPS_HEAD]}>
                 <EnterpriseLayout>
                   <EnterpriseDashboard initialTab="monitoring" />
                 </EnterpriseLayout>
@@ -74,7 +92,7 @@ export const AppRouter: React.FC = () => {
           <Route
             path="/schema"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.OPERATIONS, USER_ROLE.OPS_HEAD]}>
                 <EnterpriseLayout>
                   <EnterpriseDashboard initialTab="visual" />
                 </EnterpriseLayout>
@@ -325,8 +343,8 @@ export const AppRouter: React.FC = () => {
           />
 
           {/* DEFAULT SYSTEMS REDIRECTION */}
-          <Route path="/" element={<Navigate to="/monitoring" replace />} />
-          <Route path="*" element={<Navigate to="/monitoring" replace />} />
+          <Route path="/" element={<RoleBasedRootRedirect />} />
+          <Route path="*" element={<RoleBasedRootRedirect />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

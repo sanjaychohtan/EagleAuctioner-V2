@@ -24,12 +24,14 @@ import { AuthService } from "../../api/authService";
 import { changePasswordSchema } from "../../validation/authSchema";
 import { handleApiError } from "../../api/errorHandler";
 
+import { USER_ROLE } from "../../constants";
+
 interface EnterpriseLayoutProps {
   children?: React.ReactNode;
 }
 
 export function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
-  const { user, logout, tenantId, updateTenantId, hasPermission } = useAuth();
+  const { user, logout, tenantId, updateTenantId, hasPermission, hasRole } = useAuth();
   const { themeMode, toggleThemeMode, sidebarExpanded, setSidebarExpanded } = useAppStore();
   const { showNotification } = useNotification();
   const location = useLocation();
@@ -88,8 +90,8 @@ export function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
   };
 
   const allNavLinks = [
-    { name: "Monitoring Telemetry", path: "/monitoring", icon: LayoutDashboard, permission: "AUTH" },
-    { name: "PostgreSQL Schema", path: "/schema", icon: Database, permission: "AUTH" },
+    { name: "Monitoring Telemetry", path: "/monitoring", icon: LayoutDashboard, allowedRoles: [USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.OPERATIONS, USER_ROLE.OPS_HEAD] },
+    { name: "PostgreSQL Schema", path: "/schema", icon: Database, allowedRoles: [USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.OPERATIONS, USER_ROLE.OPS_HEAD] },
     { name: "Role & Access Studio", path: "/admin/roles", icon: Shield, permission: "role.manage" },
     { name: "KYC Onboarding", path: "/onboarding", icon: UserCheck, permission: "AUTH" },
     { name: "Admin KYC Queue", path: "/admin/kyc", icon: Layers, permission: "kyc.review" },
@@ -97,7 +99,13 @@ export function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
     { name: "Finance Hub", path: "/finance", icon: FileSpreadsheet, permission: "finance.wallet.view" },
   ];
 
-  const navLinks = allNavLinks.filter((link) => link.permission === "AUTH" || hasPermission(link.permission));
+  const navLinks = allNavLinks.filter((link) => {
+    if (link.allowedRoles) {
+      return hasRole(link.allowedRoles);
+    }
+    if (link.permission === "AUTH") return true;
+    return hasPermission(link.permission);
+  });
 
   return (
     <div className={`min-h-screen font-sans ${themeMode === "dark" ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}>

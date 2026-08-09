@@ -12,7 +12,19 @@ export function handleApiError(error: AxiosError): FriendlyError {
 
   // Safe extraction of backend custom messages while avoiding password/sensitive logs leaks
   const backendData = error.response?.data as any;
-  const backendMessage = backendData?.message || backendData?.error;
+  let backendMessage = backendData?.message || backendData?.error;
+
+  if (backendData?.errors) {
+    if (Array.isArray(backendData.errors)) {
+      backendMessage = backendData.errors
+        .map((e: any) => (typeof e === "string" ? e : e.defaultMessage || e.message || `${e.field}: ${e.code || "invalid"}`))
+        .join("; ");
+    } else if (typeof backendData.errors === "object") {
+      backendMessage = Object.entries(backendData.errors)
+        .map(([field, msg]) => `${field}: ${msg}`)
+        .join("; ");
+    }
+  }
 
   switch (status) {
     case 400:
