@@ -32,7 +32,7 @@ export const AuthService = {
     } else {
       try {
         apiClient.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
-        userProfile = await this.getCurrentUser();
+        userProfile = await this.getCurrentUser(data.accessToken);
       } catch {
         userProfile = {
           id: data.userId || "user-id-101",
@@ -89,8 +89,12 @@ export const AuthService = {
     };
   },
 
-  async getCurrentUser(): Promise<UserProfileDTO> {
-    const response = await apiClient.get<any>(API_ENDPOINTS.AUTH.ME);
+  async getCurrentUser(customToken?: string): Promise<UserProfileDTO> {
+    const config: any = {};
+    if (customToken) {
+      config.headers = { Authorization: `Bearer ${customToken}` };
+    }
+    const response = await apiClient.get<any>(API_ENDPOINTS.AUTH.ME, config);
     const data = response.data?.data || response.data;
     return data;
   },

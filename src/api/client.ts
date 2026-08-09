@@ -40,11 +40,11 @@ apiClient.interceptors.request.use(
     const token = useAuthStore.getState().accessToken || localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     const tenantId = useAuthStore.getState().tenantId || localStorage.getItem(STORAGE_KEYS.TENANT_ID);
 
-    if (token) {
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (tenantId) {
+    if (tenantId && !config.headers["X-Tenant-Id"]) {
       config.headers["X-Tenant-Id"] = tenantId;
     }
 
@@ -65,7 +65,10 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const isAuthRoute = originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/refresh");
+    const isAuthRoute =
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/refresh") ||
+      originalRequest.url?.includes("/auth/me");
 
     // Check if the error is 401 and we haven't retried yet and it is not an auth route
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {

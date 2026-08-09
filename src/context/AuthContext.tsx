@@ -110,9 +110,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       showNotification("Access denied. Your role has insufficient permissions to execute this request.", "error");
     };
 
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        verifySession();
+      }
+    };
+
     window.addEventListener("storage", handleStorageEvent);
     window.addEventListener("unauthorized_redirect", handleUnauthorized);
     window.addEventListener("forbidden_redirect", handleForbidden);
+    window.addEventListener("pageshow", handlePageShow);
     verifySession();
 
     return () => {
@@ -120,6 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       window.removeEventListener("storage", handleStorageEvent);
       window.removeEventListener("unauthorized_redirect", handleUnauthorized);
       window.removeEventListener("forbidden_redirect", handleForbidden);
+      window.removeEventListener("pageshow", handlePageShow);
     };
   }, []);
 
@@ -163,6 +171,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const login = async (username: string, password: string): Promise<UserProfileDTO> => {
+    clearAuthData();
     setSessionStatus("loading");
     auditLogger.log("LOGIN_ATTEMPT", { username, tenantId });
     try {
