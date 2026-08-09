@@ -36,7 +36,12 @@ export const AuctionListView: React.FC = () => {
       auc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       auc.auctionNumber.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === "ALL" || auc.state === statusFilter;
+    const matchesStatus =
+      statusFilter === "ALL"
+        ? true
+        : statusFilter === "UPCOMING"
+        ? ((auc.state as string) === "UPCOMING" || auc.state === "PUBLISHED" || auc.state === "APPROVED") && new Date(auc.auctionStart).getTime() > Date.now()
+        : auc.state === (statusFilter as any);
     const matchesType = typeFilter === "ALL" || auc.auctionType === typeFilter;
 
     return matchesSearch && matchesStatus && matchesType;
@@ -102,6 +107,7 @@ export const AuctionListView: React.FC = () => {
             id="auction-status-filter"
           >
             <option value="ALL">ALL LIFECYCLE STATES</option>
+            <option value="UPCOMING">STATUS: UPCOMING</option>
             {Object.values(AuctionState).map((state) => (
               <option key={state} value={state}>
                 STATUS: {state}

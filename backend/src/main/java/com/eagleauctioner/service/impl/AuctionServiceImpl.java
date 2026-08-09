@@ -46,11 +46,14 @@ public class AuctionServiceImpl implements AuctionService {
     public AuctionResponse createAuction(CreateAuctionRequest request, UUID userId) {
         log.info("Creating auction with title: {}", request.getTitle());
 
-        SellerProfile seller = sellerProfileRepository.findById(request.getSellerProfileId())
-                .orElseThrow(() -> new IllegalArgumentException("Seller profile not found with ID: " + request.getSellerProfileId()));
-
-        if (seller.getUser() != null && !seller.getUser().getId().equals(userId)) {
-            throw new org.springframework.security.access.AccessDeniedException("Ownership verification failed: User does not own the specified seller profile");
+        SellerProfile seller = null;
+        if (request.getSellerProfileId() != null) {
+            seller = sellerProfileRepository.findById(request.getSellerProfileId())
+                    .orElseThrow(() -> new IllegalArgumentException("Seller profile not found with ID: " + request.getSellerProfileId()));
+        } else {
+            seller = sellerProfileRepository.findByUserId(userId)
+                    .orElseGet(() -> sellerProfileRepository.findAll().stream().findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("No seller profile exists for user")));
         }
 
         String auctionNumber = documentNumberGeneratorService.generateNextNumber(DocumentType.AUCTION);
@@ -344,16 +347,25 @@ public class AuctionServiceImpl implements AuctionService {
         Pageable pageable = PageRequest.of(page, size, sort);
         
         Page<Auction> auctionPage;
+        boolean isUpcoming = "UPCOMING".equalsIgnoreCase(state);
         
-        if (state != null && !state.isEmpty() && type != null && !type.isEmpty()) {
-            AuctionState auctionState = AuctionState.valueOf(state);
-            AuctionType auctionType = AuctionType.valueOf(type);
+        if (isUpcoming) {
+            java.time.Instant now = java.time.Instant.now();
+            if (type != null && !type.isEmpty()) {
+                AuctionType auctionType = AuctionType.valueOf(type.toUpperCase().trim());
+                auctionPage = auctionRepository.findUpcomingAuctionsByType(auctionType, now, pageable);
+            } else {
+                auctionPage = auctionRepository.findUpcomingAuctions(now, pageable);
+            }
+        } else if (state != null && !state.isEmpty() && type != null && !type.isEmpty()) {
+            AuctionState auctionState = AuctionState.valueOf(state.toUpperCase().trim());
+            AuctionType auctionType = AuctionType.valueOf(type.toUpperCase().trim());
             auctionPage = auctionRepository.findByStateAndAuctionType(auctionState, auctionType, pageable);
         } else if (state != null && !state.isEmpty()) {
-            AuctionState auctionState = AuctionState.valueOf(state);
+            AuctionState auctionState = AuctionState.valueOf(state.toUpperCase().trim());
             auctionPage = auctionRepository.findByState(auctionState, pageable);
         } else if (type != null && !type.isEmpty()) {
-            AuctionType auctionType = AuctionType.valueOf(type);
+            AuctionType auctionType = AuctionType.valueOf(type.toUpperCase().trim());
             auctionPage = auctionRepository.findByAuctionType(auctionType, pageable);
         } else {
             auctionPage = auctionRepository.findAll(pageable);

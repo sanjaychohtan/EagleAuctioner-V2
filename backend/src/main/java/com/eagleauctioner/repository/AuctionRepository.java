@@ -55,6 +55,14 @@ public interface AuctionRepository extends JpaRepository<Auction, UUID> {
     Page<Auction> findByAuctionType(AuctionType auctionType, Pageable pageable);
 
     @EntityGraph(attributePaths = {"lots", "sellerProfile"})
+    @Query("SELECT a FROM Auction a WHERE a.state IN (com.eagleauctioner.enums.AuctionState.PUBLISHED, com.eagleauctioner.enums.AuctionState.APPROVED, com.eagleauctioner.enums.AuctionState.DRAFT) AND a.auctionStart > :now")
+    Page<Auction> findUpcomingAuctions(@Param("now") Instant now, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"lots", "sellerProfile"})
+    @Query("SELECT a FROM Auction a WHERE a.state IN (com.eagleauctioner.enums.AuctionState.PUBLISHED, com.eagleauctioner.enums.AuctionState.APPROVED, com.eagleauctioner.enums.AuctionState.DRAFT) AND a.auctionType = :type AND a.auctionStart > :now")
+    Page<Auction> findUpcomingAuctionsByType(@Param("type") AuctionType type, @Param("now") Instant now, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"lots", "sellerProfile"})
     Page<Auction> findAll(Pageable pageable);
 
     long countByState(AuctionState state);

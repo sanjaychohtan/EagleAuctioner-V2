@@ -78,7 +78,11 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
           userRole: "ROLE_BUYER",
           panNumber: formattedPan,
           rawAadhaar: formattedAadhaar,
-          accountHolderName: fullName || "Buyer Account",
+          organizationName: entityType === "CORPORATE" ? (companyName || "Enterprise Buyer Corp") : undefined,
+          registrationNumber: entityType === "CORPORATE" ? (cinNumber || "U74999MH2026PTC123456") : undefined,
+          gstin: entityType === "CORPORATE" ? (gstinNumber || "27AAACB1234C1Z5") : undefined,
+          registeredAddress: entityType === "CORPORATE" ? "Registered Office Address" : undefined,
+          accountHolderName: fullName || (entityType === "CORPORATE" ? companyName : "Buyer Account"),
           accountNumber: bankAccount || "9988776655",
           ifscCode: formattedIfsc,
           bankName: "ICICI Bank",
@@ -177,7 +181,9 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
             <div className="space-y-4">
               {!isSeller && (
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Full Legal Name *</label>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                    {entityType === "CORPORATE" ? "Authorized Representative / Full Legal Name *" : "Full Legal Name *"}
+                  </label>
                   <input
                     type="text"
                     value={fullName}
@@ -188,20 +194,45 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({ role }) 
                 </div>
               )}
 
+              {entityType === "CORPORATE" && (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Organization / Company Name *</label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="e.g. Acme Industrial Solutions Pvt Ltd"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Registration / CIN Number *</label>
+                    <input
+                      type="text"
+                      value={cinNumber}
+                      onChange={(e) => setCinNumber(e.target.value)}
+                      placeholder="e.g. U74999MH2026PTC123456"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold outline-none"
+                    />
+                  </div>
+                </>
+              )}
+
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
-                  {isSeller ? "Company PAN *" : "PAN Number *"}
+                  {entityType === "CORPORATE" ? "Company PAN *" : "PAN Number *"}
                 </label>
                 <input
                   type="text"
                   value={panNumber}
                   onChange={(e) => setPanNumber(e.target.value)}
-                  placeholder={isSeller ? "AAACB1234C" : "ABCDE1234F"}
+                  placeholder={entityType === "CORPORATE" ? "AAACB1234C" : "ABCDE1234F"}
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold outline-none"
                 />
               </div>
 
-              {isSeller && (
+              {(isSeller || entityType === "CORPORATE") && (
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">GSTIN Certificate *</label>
                   <input

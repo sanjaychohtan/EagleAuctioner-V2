@@ -13,6 +13,12 @@ import {
   LotSortRequest,
 } from "../types/auction";
 
+const unwrapData = <T>(res: any): T => {
+  if (res?.data?.data !== undefined) return res.data.data;
+  if (res?.data?.content !== undefined) return res.data.content;
+  return res?.data;
+};
+
 export const AuctionService = {
   /**
    * Creates a new auction in DRAFT state.
@@ -20,11 +26,11 @@ export const AuctionService = {
    */
   async createAuction(request: CreateAuctionRequest): Promise<AuctionResponse> {
     console.log("[AuctionService] Creating a new auction draft with title:", request.title);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.CREATE,
       request
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -33,11 +39,11 @@ export const AuctionService = {
    */
   async updateAuction(id: string, request: UpdateAuctionRequest): Promise<AuctionResponse> {
     console.log(`[AuctionService] Updating auction draft ID: ${id}`);
-    const response = await apiClient.put<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.put(
       API_ENDPOINTS.AUCTION.UPDATE(id),
       request
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -46,11 +52,11 @@ export const AuctionService = {
    */
   async updateSettings(id: string, request: UpdateSettingsRequest): Promise<AuctionResponse> {
     console.log(`[AuctionService] Updating settings for auction ID: ${id}`);
-    const response = await apiClient.put<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.put(
       API_ENDPOINTS.AUCTION.UPDATE_SETTINGS(id),
       request
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -59,10 +65,10 @@ export const AuctionService = {
    */
   async submitForReview(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Submitting auction ID: ${id} for admin review`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.SUBMIT_REVIEW(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -71,10 +77,10 @@ export const AuctionService = {
    */
   async approveAuction(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Approving auction ID: ${id} (Admin action)`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.APPROVE(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -83,10 +89,10 @@ export const AuctionService = {
    */
   async rejectAuction(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Rejecting auction ID: ${id} (Admin action)`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.REJECT(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -95,10 +101,10 @@ export const AuctionService = {
    */
   async publishAuction(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Publishing approved auction ID: ${id} to active state`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.PUBLISH(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -107,10 +113,10 @@ export const AuctionService = {
    */
   async cancelAuction(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Cancelling auction ID: ${id}`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.CANCEL(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -119,10 +125,10 @@ export const AuctionService = {
    */
   async archiveAuction(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Archiving auction ID: ${id}`);
-    const response = await apiClient.post<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.post(
       API_ENDPOINTS.AUCTION.ARCHIVE(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -131,10 +137,10 @@ export const AuctionService = {
    */
   async getAuctionDetails(id: string): Promise<AuctionResponse> {
     console.log(`[AuctionService] Retrieving full details for auction ID: ${id}`);
-    const response = await apiClient.get<ApiResponse<AuctionResponse>>(
+    const response = await apiClient.get(
       API_ENDPOINTS.AUCTION.DETAIL(id)
     );
-    return response.data.data;
+    return unwrapData<AuctionResponse>(response);
   },
 
   /**
@@ -143,10 +149,11 @@ export const AuctionService = {
    */
   async listAuctions(): Promise<AuctionSummaryResponse[]> {
     console.log("[AuctionService] Retrieving summary list of all auctions");
-    const response = await apiClient.get<ApiResponse<AuctionSummaryResponse[]>>(
+    const response = await apiClient.get(
       API_ENDPOINTS.AUCTION.LIST
     );
-    return response.data.data;
+    const data = unwrapData<AuctionSummaryResponse[]>(response);
+    return Array.isArray(data) ? data : [];
   },
 
   /**
