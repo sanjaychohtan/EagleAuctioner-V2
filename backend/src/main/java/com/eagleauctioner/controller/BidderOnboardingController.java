@@ -25,7 +25,7 @@ public class BidderOnboardingController {
     private final BidderOnboardingService onboardingService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('buyer.create') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('buyer.create') or hasRole('BIDDER') or hasRole('BUYER')")
     @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<BidderProfileResponse> registerBidder(
             @CurrentUser UserPrincipal currentUser,
@@ -35,8 +35,15 @@ public class BidderOnboardingController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BidderProfileResponse> getMyProfile(@CurrentUser UserPrincipal currentUser) {
+        BidderProfileResponse response = onboardingService.getBidderProfileByUserId(currentUser.getId());
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{profileId}/documents")
-    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('kyc.submit') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('kyc.submit') or hasRole('BIDDER') or hasRole('BUYER')")
     @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> submitDocuments(
             @CurrentUser UserPrincipal currentUser,
@@ -48,7 +55,7 @@ public class BidderOnboardingController {
     }
 
     @PostMapping("/{profileId}/bank/verify")
-    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('bidder.manage') or hasRole('BIDDER')")
+    @PreAuthorize("hasAuthority('bidder.create') or hasAuthority('bidder.manage') or hasRole('BIDDER') or hasRole('BUYER')")
     @EnforceDataScope(DataScopeType.BUYER)
     public ResponseEntity<Void> verifyBankAccount(
             @CurrentUser UserPrincipal currentUser,
@@ -58,7 +65,7 @@ public class BidderOnboardingController {
     }
 
     @PostMapping("/admin/review/{profileId}")
-    @PreAuthorize("hasAuthority('kyc.review')")
+    @PreAuthorize("hasAuthority('kyc.review') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('OPERATIONS') or hasRole('OPS_HEAD')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewKyc(
             @CurrentUser UserPrincipal currentUser,

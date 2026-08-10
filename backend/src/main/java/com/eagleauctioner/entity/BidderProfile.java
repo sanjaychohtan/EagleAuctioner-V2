@@ -84,6 +84,47 @@ public class BidderProfile extends BaseEntity {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
+    @Column(name = "temp_customer_id", length = 50, unique = true)
+    private String tempCustomerId;
+
+    @Column(name = "permanent_customer_id", length = 50, unique = true)
+    private String permanentCustomerId;
+
+    @Column(name = "bidder_id", length = 50, unique = true)
+    private String bidderId;
+
+    @Column(name = "account_type", length = 50)
+    private String accountType;
+
+    @Column(name = "state_name", length = 100)
+    private String stateName;
+
+    @Column(name = "city_name", length = 100)
+    private String cityName;
+
+    @Column(name = "plan_type", length = 50)
+    @Builder.Default
+    private String planType = "FREE";
+
+    @Column(name = "payment_amount", precision = 15, scale = 2)
+    private java.math.BigDecimal paymentAmount;
+
+    @Column(name = "payment_date")
+    private Instant paymentDate;
+
+    @Column(name = "payment_reference", length = 100)
+    private String paymentReference;
+
+    @Column(name = "payment_mode", length = 50)
+    private String paymentMode;
+
+    @Column(name = "payment_proof_url", columnDefinition = "TEXT")
+    private String paymentProofUrl;
+
+    @Column(name = "payment_status", length = 50)
+    @Builder.Default
+    private String paymentStatus = "NOT_REQUIRED";
+
     /**
      * JPA Attribute Converter for encrypting PAN numbers before saving to the database
      * and decrypting them on retrieval. Uses standard AES-256 GCM encryption.

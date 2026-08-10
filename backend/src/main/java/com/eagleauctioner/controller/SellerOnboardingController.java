@@ -23,13 +23,19 @@ public class SellerOnboardingController {
 
     private final SellerOnboardingService sellerService;
 
-    @PostMapping("/register")
-    @PreAuthorize("hasAuthority('seller.create') or hasAuthority('seller.manage') or hasRole('SELLER')")
+    @PostMapping("/admin/create")
+    @PreAuthorize("hasAuthority('seller.create') or hasAuthority('seller.manage') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('OPERATIONS') or hasRole('OPS_HEAD')")
     @EnforceDataScope(DataScopeType.COMPANY)
-    public ResponseEntity<SellerProfileResponse> registerSeller(
+    public ResponseEntity<SellerProfileResponse> createSellerInternal(
             @CurrentUser UserPrincipal currentUser,
-            @Valid @RequestBody SellerRegistrationRequest request) {
-        return ResponseEntity.ok(sellerService.registerSeller(currentUser.getId(), request));
+            @Valid @RequestBody InternalSellerCreateRequest request) {
+        return ResponseEntity.ok(sellerService.createSellerInternal(currentUser.getId(), request));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<SellerProfileResponse> getMySellerProfile(@CurrentUser UserPrincipal currentUser) {
+        return ResponseEntity.ok(sellerService.getSellerByUserId(currentUser.getId()));
     }
 
     @PostMapping("/{profileId}/documents")
@@ -44,7 +50,7 @@ public class SellerOnboardingController {
     }
 
     @PostMapping("/admin/review/{profileId}")
-    @PreAuthorize("hasAuthority('seller.review') or hasAuthority('kyc.review')")
+    @PreAuthorize("hasAuthority('seller.review') or hasAuthority('kyc.review') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('OPERATIONS') or hasRole('OPS_HEAD')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<Void> reviewSeller(
             @CurrentUser UserPrincipal currentUser,
@@ -55,7 +61,7 @@ public class SellerOnboardingController {
     }
 
     @GetMapping("/admin/search")
-    @PreAuthorize("hasAuthority('seller.view') or hasAuthority('kyc.review')")
+    @PreAuthorize("hasAuthority('seller.view') or hasAuthority('kyc.review') or hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('OPERATIONS') or hasRole('OPS_HEAD')")
     @EnforceDataScope(DataScopeType.COMPANY)
     public ResponseEntity<List<SellerProfileResponse>> searchSellers(
             @RequestParam(required = false) com.eagleauctioner.enums.SellerState state,

@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: "/v1/auth/login",
     REGISTER: "/v1/auth/register",
+    REGISTER_BIDDER: "/v1/auth/register-bidder",
+    REGISTER_SELLER: "/v1/auth/register-seller",
     LOGOUT: "/v1/auth/logout",
     REFRESH: "/v1/auth/refresh",
     RESET_PASSWORD: "/v1/auth/reset-password",

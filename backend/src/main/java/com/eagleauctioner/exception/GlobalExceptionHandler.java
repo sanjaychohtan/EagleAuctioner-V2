@@ -28,6 +28,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiResponse.error("Validation failed", errors));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(org.springframework.dao.DataIntegrityViolationException ex) {
+        String message = "Conflict detected. The specified record or identifier already exists in the system.";
+        String causeMsg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (causeMsg != null) {
+            String lower = causeMsg.toLowerCase();
+            if (lower.contains("email")) {
+                message = "This email is already registered";
+            } else if (lower.contains("pan")) {
+                message = "This PAN is already registered";
+            } else if (lower.contains("aadhaar")) {
+                message = "This Aadhaar is already registered";
+            } else if (lower.contains("gstin")) {
+                message = "This GSTIN is already registered";
+            } else if (lower.contains("mobile")) {
+                message = "This mobile number is already registered";
+            }
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(message, null));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(ex.getMessage(), null));

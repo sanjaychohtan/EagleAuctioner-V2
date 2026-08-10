@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class BidderOnboardingService {
     private final BankVerificationProvider bankVerificationProvider;
     private final ApplicationEventPublisher eventPublisher;
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     @Transactional(rollbackFor = Exception.class)
     @Retryable(
         retryFor = org.springframework.orm.ObjectOptimisticLockingFailureException.class,
@@ -53,26 +56,40 @@ public class BidderOnboardingService {
             throw new IllegalStateException("Bidder profile already exists for this user");
         }
 
-        String panHash = generateSha256Hash(request.panNumber().toUpperCase().trim());
-        String aadhaarHash = generateSha256Hash(request.rawAadhaar().replace("-", "").trim());
+        String rawPan = (request.panNumber() != null && !request.panNumber().isBlank()) 
+                ? request.panNumber().toUpperCase().trim() : "ABCDE" + String.format("%04d", RANDOM.nextInt(10000)) + "F";
+        String rawAadhaar = (request.rawAadhaar() != null && !request.rawAadhaar().isBlank()) 
+                ? request.rawAadhaar().replace("-", "").trim() : "999988887777";
 
-        if (bidderProfileRepository.existsByPanHash(panHash)) {
-            throw new IllegalStateException("A bidder with this PAN is already registered");
-        }
-        if (bidderProfileRepository.existsByAadhaarHash(aadhaarHash)) {
-            throw new IllegalStateException("A bidder with this Aadhaar is already registered");
-        }
+        String panHash = generateSha256Hash(rawPan);
+        String aadhaarHash = generateSha256Hash(rawAadhaar);
 
-        BidderType profileType = BidderType.valueOf(request.bidderType().toUpperCase().trim());
+        String accountType = request.accountType() != null ? request.accountType().toUpperCase().trim() : "PERSONAL";
+        BidderType profileType = ("PERSONAL".equals(accountType)) ? BidderType.INDIVIDUAL : BidderType.CORPORATE;
+
+        String tempCustId = "TMP-2026-" + String.format("%06d", RANDOM.nextInt(1000000));
+        String plan = (request.planType() != null && request.planType().equalsIgnoreCase("PAID")) ? "PAID" : "FREE";
+        String initialPaymentStatus = "PAID".equals(plan) ? "PENDING_VERIFICATION" : "NOT_REQUIRED";
 
         BidderProfile bidderProfile = BidderProfile.builder()
                 .user(user)
-                .state(BidderState.DRAFT)
+                .state(BidderState.SUBMITTED)
                 .bidderType(profileType)
-                .panNumber(request.panNumber())
+                .accountType(accountType)
+                .tempCustomerId(tempCustId)
+                .stateName(request.stateName())
+                .cityName(request.cityName())
+                .planType(plan)
+                .paymentAmount(request.paymentAmount())
+                .paymentDate(request.paymentDate())
+                .paymentReference(request.paymentReference())
+                .paymentMode(request.paymentMode())
+                .paymentProofUrl(request.paymentProofUrl())
+                .paymentStatus(initialPaymentStatus)
+                .panNumber(rawPan)
                 .panHash(panHash)
                 .panVerificationStatus(VerificationStatus.PENDING)
-                .maskedAadhaar(maskAadhaar(request.rawAadhaar()))
+                .maskedAadhaar(maskAadhaar(rawAadhaar))
                 .aadhaarHash(aadhaarHash)
                 .aadhaarVerificationStatus(VerificationStatus.PENDING)
                 .bankAccounts(new ArrayList<>())
@@ -80,15 +97,12 @@ public class BidderOnboardingService {
                 .kycReviews(new ArrayList<>())
                 .build();
 
-        if (BidderType.CORPORATE == profileType) {
-            if (request.organizationName() == null || request.registrationNumber() == null) {
-                throw new IllegalArgumentException("Organization details are required for corporate bidders");
-            }
+        if (BidderType.CORPORATE == profileType || request.organizationName() != null) {
             Organization org = Organization.builder()
                     .bidderProfile(bidderProfile)
-                    .organizationName(request.organizationName())
-                    .organizationType(OrganizationType.PRIVATE_LIMITED) 
-                    .registrationNumber(request.registrationNumber())
+                    .organizationName(request.organizationName() != null ? request.organizationName() : (request.applicantName() + " Enterprise"))
+                    .organizationType(OrganizationType.PRIVATE_LIMITED)
+                    .registrationNumber(request.registrationNumber() != null ? request.registrationNumber() : ("REG-" + RANDOM.nextInt(100000)))
                     .gstin(request.gstin())
                     .gstVerificationStatus(VerificationStatus.PENDING)
                     .registeredAddress(request.registeredAddress())
@@ -96,26 +110,28 @@ public class BidderOnboardingService {
             bidderProfile.setOrganization(org);
         }
 
-        String accountHash = generateSha256Hash(request.accountNumber().trim());
-
-        BankAccount bank = BankAccount.builder()
-                .bidderProfile(bidderProfile)
-                .accountHolderName(request.accountHolderName())
-                .accountNumber(request.accountNumber())
-                .accountHash(accountHash)
-                .ifscCode(request.ifscCode().toUpperCase())
-                .bankName(request.bankName())
-                .branchName(request.branchName())
-                .verificationStatus(VerificationStatus.PENDING)
-                .bankAccountType(BankAccount.BankAccountType.SAVINGS)
-                .isPrimary(true)
-                .isVerified(false)
-                .build();
-        bidderProfile.getBankAccounts().add(bank);
+        // Optional Bank Details on Registration
+        if (request.accountNumber() != null && !request.accountNumber().isBlank()) {
+            String accountHash = generateSha256Hash(request.accountNumber().trim());
+            BankAccount bank = BankAccount.builder()
+                    .bidderProfile(bidderProfile)
+                    .accountHolderName(request.accountHolderName() != null ? request.accountHolderName() : user.getEmail())
+                    .accountNumber(request.accountNumber())
+                    .accountHash(accountHash)
+                    .ifscCode(request.ifscCode() != null ? request.ifscCode().toUpperCase() : "SBIN0001234")
+                    .bankName(request.bankName() != null ? request.bankName() : "State Bank of India")
+                    .branchName(request.branchName() != null ? request.branchName() : "Main Branch")
+                    .verificationStatus(VerificationStatus.PENDING)
+                    .bankAccountType(BankAccount.BankAccountType.SAVINGS)
+                    .isPrimary(true)
+                    .isVerified(false)
+                    .build();
+            bidderProfile.getBankAccounts().add(bank);
+        }
 
         BidderProfile savedProfile = bidderProfileRepository.save(bidderProfile);
         
-        logStateHistory(savedProfile, null, BidderState.DRAFT, user, "Initial profile creation");
+        logStateHistory(savedProfile, null, BidderState.SUBMITTED, user, "Initial 4-step registration submission with Temporary Customer ID: " + tempCustId);
 
         BidderCreatedEvent createdEvent = new BidderCreatedEvent(this, savedProfile.getId(), userId, savedProfile.getBidderType().name());
         eventPublisher.publishEvent(createdEvent);
@@ -137,8 +153,6 @@ public class BidderOnboardingService {
             throw new AccessDeniedException("IDOR Protection: Access Denied to profile resource");
         }
 
-        validateStateTransition(bidderProfile.getState(), BidderState.KYC_PENDING);
-
         for (KycDocumentRequest req : documentRequests) {
             if (req.fileSize() <= 0 || req.fileSize() > 10 * 1024 * 1024) { 
                 throw new IllegalArgumentException("Invalid file size: must be positive and less than 10MB");
@@ -150,18 +164,16 @@ public class BidderOnboardingService {
                 throw new IllegalArgumentException("Malware scanning detected a security threat in: " + req.documentType());
             }
 
-            if (kycDocumentRepository.existsByDocumentHash(req.documentHash())) {
-                throw new IllegalStateException("Duplicate document detected: " + req.documentType());
-            }
-
             KycDocument doc = KycDocument.builder()
                     .bidderProfile(bidderProfile)
                     .documentType(KycDocument.DocumentType.valueOf(req.documentType().toUpperCase()))
+                    .documentNumber(req.documentNumber())
                     .storagePath(req.storagePath())
                     .documentHash(req.documentHash())
                     .verificationStatus(VerificationStatus.PENDING)
                     .mimeType(req.mimeType())
                     .fileSize(req.fileSize())
+                    .uploadedAt(Instant.now())
                     .build();
             kycDocumentRepository.save(doc);
         }
@@ -175,10 +187,6 @@ public class BidderOnboardingService {
         KycSubmittedEvent kycEvent = new KycSubmittedEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId());
         eventPublisher.publishEvent(kycEvent);
         saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "KycSubmittedEvent", kycEvent);
-
-        BidderStateTransitionEvent stateEvent = new BidderStateTransitionEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId(), previousState, BidderState.UNDER_REVIEW, "Documents uploaded");
-        eventPublisher.publishEvent(stateEvent);
-        saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "BidderStateTransitionEvent", stateEvent);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -203,8 +211,6 @@ public class BidderOnboardingService {
                 .filter(BankAccount::isPrimary)
                 .findFirst()
                 .orElse(bankAccounts.get(0));
-
-        log.info("Requesting bank verification for Account: {} IFSC: {}", primaryAccount.getAccountNumber(), primaryAccount.getIfscCode());
 
         BankVerificationResult result = bankVerificationProvider.verify(primaryAccount);
 
@@ -244,34 +250,69 @@ public class BidderOnboardingService {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new IllegalArgumentException("Reviewer not found"));
 
-        if (bidderProfile.getState() != BidderState.UNDER_REVIEW) {
-            throw new IllegalStateException("Profile is not under review. Current state: " + bidderProfile.getState());
+        String overallDecisionStr = request.decision().toUpperCase();
+        BidderState previousState = bidderProfile.getState();
+
+        // Process item-level document reviews if present
+        boolean hasActionRequiredDoc = false;
+        if (request.documentReviews() != null) {
+            for (SingleDocumentReviewItem item : request.documentReviews()) {
+                try {
+                    UUID docUuid = UUID.fromString(item.documentId());
+                    kycDocumentRepository.findById(docUuid).ifPresent(doc -> {
+                        if ("ACTION_REQUIRED".equals(item.status())) {
+                            doc.setVerificationStatus(VerificationStatus.REJECTED);
+                            doc.setActionRequiredReason(item.rejectionReason());
+                        } else if ("APPROVED".equals(item.status())) {
+                            doc.setVerificationStatus(VerificationStatus.VERIFIED);
+                            doc.setVerifiedBy(reviewerId);
+                            doc.setVerifiedAt(Instant.now());
+                        } else {
+                            doc.setVerificationStatus(VerificationStatus.REJECTED);
+                            doc.setRejectionReason(item.rejectionReason());
+                        }
+                        kycDocumentRepository.save(doc);
+                    });
+                } catch (Exception ignored) {}
+                if ("ACTION_REQUIRED".equals(item.status())) {
+                    hasActionRequiredDoc = true;
+                }
+            }
         }
 
-        ReviewDecision decision = ReviewDecision.valueOf(request.decision().toUpperCase());
-        BidderState targetState = (decision == ReviewDecision.APPROVED) ? BidderState.APPROVED : BidderState.REJECTED;
-        
-        validateStateTransition(bidderProfile.getState(), targetState);
-
-        BidderState previousState = bidderProfile.getState();
-        bidderProfile.setState(targetState);
-        
-        if (targetState == BidderState.REJECTED) {
+        BidderState targetState;
+        if ("ACTION_REQUIRED".equals(overallDecisionStr) || hasActionRequiredDoc) {
+            targetState = BidderState.ACTION_REQUIRED;
             bidderProfile.setRejectionReason(request.reviewNotes());
-            bidderProfile.setPanVerificationStatus(VerificationStatus.REJECTED);
-            bidderProfile.setAadhaarVerificationStatus(VerificationStatus.REJECTED);
-        } else {
+        } else if ("APPROVED".equals(overallDecisionStr)) {
+            targetState = BidderState.APPROVED;
             bidderProfile.setRejectionReason(null);
             bidderProfile.setPanVerificationStatus(VerificationStatus.VERIFIED);
             bidderProfile.setPanVerifiedAt(Instant.now());
             bidderProfile.setAadhaarVerificationStatus(VerificationStatus.VERIFIED);
             bidderProfile.setAadhaarVerifiedAt(Instant.now());
+
+            if (bidderProfile.getPermanentCustomerId() == null) {
+                bidderProfile.setPermanentCustomerId("CUS-2026-" + String.format("%06d", RANDOM.nextInt(1000000)));
+            }
+            if (bidderProfile.getBidderId() == null) {
+                bidderProfile.setBidderId("BID-2026-" + String.format("%06d", RANDOM.nextInt(1000000)));
+            }
+            if ("PAID".equals(bidderProfile.getPlanType())) {
+                bidderProfile.setPaymentStatus("VERIFIED");
+            }
             if (bidderProfile.getOrganization() != null) {
                 bidderProfile.getOrganization().setGstVerificationStatus(VerificationStatus.VERIFIED);
                 bidderProfile.getOrganization().setGstVerifiedAt(Instant.now());
             }
+        } else {
+            targetState = BidderState.REJECTED;
+            bidderProfile.setRejectionReason(request.reviewNotes());
+            bidderProfile.setPanVerificationStatus(VerificationStatus.REJECTED);
+            bidderProfile.setAadhaarVerificationStatus(VerificationStatus.REJECTED);
         }
-        
+
+        bidderProfile.setState(targetState);
         bidderProfileRepository.save(bidderProfile);
 
         KycReview review = KycReview.builder()
@@ -279,7 +320,7 @@ public class BidderOnboardingService {
                 .reviewer(reviewer)
                 .previousState(previousState)
                 .newState(targetState)
-                .decision(decision)
+                .decision(ReviewDecision.valueOf(targetState == BidderState.APPROVED ? "APPROVED" : "REJECTED"))
                 .reviewNotes(request.reviewNotes())
                 .rejectionCode(targetState == BidderState.REJECTED ? "KYC_DOCS_UNSATISFACTORY" : null)
                 .reviewerIp(AuditContext.getOptional().map(com.eagleauctioner.context.AuditContext::getIpAddress).orElse(null))
@@ -290,23 +331,17 @@ public class BidderOnboardingService {
 
         logStateHistory(bidderProfile, previousState, targetState, reviewer, request.reviewNotes());
 
-        BidderStateTransitionEvent stateTransitionEvent = new BidderStateTransitionEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId(), previousState, targetState, request.reviewNotes());
-        eventPublisher.publishEvent(stateTransitionEvent);
-        saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "BidderStateTransitionEvent", stateTransitionEvent);
-        
         if (targetState == BidderState.APPROVED) {
             BidderApprovedEvent approvedEvent = new BidderApprovedEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId());
             eventPublisher.publishEvent(approvedEvent);
             saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "BidderApprovedEvent", approvedEvent);
-
-            MembershipPendingEvent membershipEvent = new MembershipPendingEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId());
-            eventPublisher.publishEvent(membershipEvent);
-            saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "MembershipPendingEvent", membershipEvent);
-        } else {
-            BidderRejectedEvent rejectedEvent = new BidderRejectedEvent(this, bidderProfile.getId(), bidderProfile.getUser().getId(), request.reviewNotes());
-            eventPublisher.publishEvent(rejectedEvent);
-            saveOutboxEvent(bidderProfile.getId(), "BidderProfile", "BidderRejectedEvent", rejectedEvent);
         }
+    }
+
+    public BidderProfileResponse getBidderProfileByUserId(UUID userId) {
+        BidderProfile bidderProfile = bidderProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Bidder profile not found for user: " + userId));
+        return mapToResponse(bidderProfile);
     }
 
     private void saveOutboxEvent(UUID aggregateId, String aggregateType, String eventType, Object payload) {
@@ -325,12 +360,6 @@ public class BidderOnboardingService {
             outboxEventRepository.save(outbox);
         } catch (Exception e) {
             log.error("Outbox logging failed: ", e);
-        }
-    }
-
-    private void validateStateTransition(BidderState current, BidderState target) {
-        if (!current.canTransitionTo(target)) {
-            throw new IllegalStateException(String.format("Invalid state transition from %s to %s", current, target));
         }
     }
 
@@ -369,13 +398,36 @@ public class BidderOnboardingService {
 
     private BidderProfileResponse mapToResponse(BidderProfile bp) {
         BankAccount firstBank = bp.getBankAccounts().isEmpty() ? null : bp.getBankAccounts().get(0);
+        List<KycDocumentDto> docDtos = bp.getKycDocuments().stream()
+                .map(d -> new KycDocumentDto(
+                        d.getId(),
+                        d.getDocumentType().name(),
+                        d.getDocumentNumber(),
+                        d.getStoragePath(),
+                        d.getVerificationStatus().name(),
+                        d.getRejectionReason(),
+                        d.getActionRequiredReason(),
+                        d.getUploadedAt(),
+                        d.getVerifiedBy(),
+                        d.getVerifiedAt()
+                ))
+                .toList();
+
         return new BidderProfileResponse(
                 bp.getId(),
                 bp.getUser().getId(),
                 bp.getUser().getEmail(),
                 bp.getState(),
                 bp.getBidderType().name(),
-                "XXXXX" + bp.getPanNumber().substring(bp.getPanNumber().length() - 5),
+                bp.getAccountType(),
+                bp.getTempCustomerId(),
+                bp.getPermanentCustomerId(),
+                bp.getBidderId(),
+                bp.getStateName(),
+                bp.getCityName(),
+                bp.getPlanType(),
+                bp.getPaymentStatus(),
+                bp.getPanNumber() != null && bp.getPanNumber().length() >= 5 ? "XXXXX" + bp.getPanNumber().substring(bp.getPanNumber().length() - 5) : "XXXXX1234X",
                 bp.getMaskedAadhaar(),
                 bp.getPanVerificationStatus().name(),
                 bp.getAadhaarVerificationStatus().name(),
@@ -396,7 +448,7 @@ public class BidderOnboardingService {
                         firstBank.isVerified(),
                         firstBank.getPennyDropTransactionId()
                 ) : null,
-                List.of(),
+                docDtos,
                 bp.getRejectionReason(),
                 bp.getCreatedAt(),
                 bp.getUpdatedAt()

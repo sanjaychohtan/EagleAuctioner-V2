@@ -43,6 +43,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final StringRedisTemplate redisTemplate;
+    private final BidderOnboardingService bidderOnboardingService;
+    private final SellerOnboardingService sellerOnboardingService;
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
 
@@ -93,7 +95,7 @@ public class AuthService {
         }
 
         if (userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalStateException("Email is already registered");
         }
 
         Role defaultRole = roleRepository.findByName(userType.name())
@@ -107,8 +109,8 @@ public class AuthService {
                 .isActive(true)
                 .isLocked(false)
                 .failedLoginAttempts(0)
-                .emailVerified(false)
-                .mobileVerified(false)
+                .emailVerified(true)
+                .mobileVerified(true)
                 .roles(new java.util.HashSet<>(java.util.Set.of(defaultRole)))
                 .build();
 
@@ -125,6 +127,28 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AuthResponse registerPublicBidder(String email, String mobile, String password, com.eagleauctioner.dto.OnboardingDTOs.BidderRegistrationRequest bidderRequest) {
+        if (userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email).isPresent()) {
+            throw new IllegalStateException("Email is already registered");
+        }
+        AuthResponse authResponse = register(email, mobile, password, "BIDDER");
+        User user = getUserByEmail(email);
+        bidderOnboardingService.registerBidder(user.getId(), bidderRequest);
+        return authResponse;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AuthResponse registerPublicSeller(String email, String mobile, String password, com.eagleauctioner.dto.OnboardingDTOs.SellerRegistrationRequest sellerRequest) {
+        if (userRepository.findByEmailIgnoreCaseAndDeletedAtIsNull(email).isPresent()) {
+            throw new IllegalStateException("Email is already registered");
+        }
+        AuthResponse authResponse = register(email, mobile, password, "SELLER");
+        User user = getUserByEmail(email);
+        sellerOnboardingService.registerSeller(user.getId(), sellerRequest);
+        return authResponse;
     }
 
     public User getUserByEmail(String email) {

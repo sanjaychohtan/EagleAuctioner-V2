@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Set;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -22,15 +23,40 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthService.AuthResponse>> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse httpServletResponse) {
+        String requestedType = request.getUserType() != null ? request.getUserType().toUpperCase() : "BIDDER";
+        if (Set.of("SELLER", "ADMIN", "SUPER_ADMIN", "FINANCE", "OPS", "OPS_HEAD").contains(requestedType)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Public registration for requested role is disabled. " + requestedType + " access is provided by AUCTBIZ.", null));
+        }
+
         AuthService.AuthResponse response = authService.register(
                 request.getEmail(),
                 request.getMobile(),
                 request.getPassword(),
-                request.getUserType()
+                "BIDDER"
         );
         setRefreshTokenCookie(httpServletResponse, response.getRefreshToken());
         response.setRefreshToken(null);
         return ResponseEntity.ok(ApiResponse.success("User registered successfully", response));
+    }
+
+    @PostMapping("/register-bidder")
+    public ResponseEntity<ApiResponse<AuthService.AuthResponse>> registerPublicBidder(@Valid @RequestBody PublicBidderRegisterRequest request, HttpServletResponse httpServletResponse) {
+        AuthService.AuthResponse response = authService.registerPublicBidder(
+                request.getEmail(),
+                request.getMobile(),
+                request.getPassword(),
+                request.getBidderDetails()
+        );
+        setRefreshTokenCookie(httpServletResponse, response.getRefreshToken());
+        response.setRefreshToken(null);
+        return ResponseEntity.ok(ApiResponse.success("Buyer registered successfully", response));
+    }
+
+    @PostMapping("/register-seller")
+    public ResponseEntity<ApiResponse<AuthService.AuthResponse>> registerPublicSeller(@Valid @RequestBody PublicSellerRegisterRequest request, HttpServletResponse httpServletResponse) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("Public Seller self-registration is disabled. Seller access is provided by AUCTBIZ.", null));
     }
 
     @PostMapping("/login")
@@ -204,6 +230,46 @@ public class AuthController {
         @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", 
                  message = "Password must be at least 8 characters long, contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character")
         private String newPassword;
+    }
+
+    @Data
+    public static class PublicBidderRegisterRequest {
+        @NotBlank(message = "Email is required")
+        @Email(message = "Invalid email format")
+        private String email;
+
+        @NotBlank(message = "Mobile number is required")
+        @Pattern(regexp = "^\\+?[1-9]\\d{9,14}$", message = "Invalid mobile number format")
+        private String mobile;
+
+        @NotBlank(message = "Password is required")
+        @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", 
+                 message = "Password must be at least 8 characters long, contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character")
+        private String password;
+
+        @Valid
+        @jakarta.validation.constraints.NotNull(message = "Bidder onboarding details are required")
+        private com.eagleauctioner.dto.OnboardingDTOs.BidderRegistrationRequest bidderDetails;
+    }
+
+    @Data
+    public static class PublicSellerRegisterRequest {
+        @NotBlank(message = "Email is required")
+        @Email(message = "Invalid email format")
+        private String email;
+
+        @NotBlank(message = "Mobile number is required")
+        @Pattern(regexp = "^\\+?[1-9]\\d{9,14}$", message = "Invalid mobile number format")
+        private String mobile;
+
+        @NotBlank(message = "Password is required")
+        @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", 
+                 message = "Password must be at least 8 characters long, contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character")
+        private String password;
+
+        @Valid
+        @jakarta.validation.constraints.NotNull(message = "Seller onboarding details are required")
+        private com.eagleauctioner.dto.OnboardingDTOs.SellerRegistrationRequest sellerDetails;
     }
 
     @Data

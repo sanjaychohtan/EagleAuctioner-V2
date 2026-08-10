@@ -84,6 +84,12 @@ public class SellerProfile extends BaseEntity {
     @Column(name = "blacklist_reason", columnDefinition = "TEXT")
     private String blacklistReason;
 
+    @Column(name = "seller_code", length = 50, unique = true)
+    private String sellerCode;
+
+    @Column(name = "temp_seller_id", length = 50, unique = true)
+    private String tempSellerId;
+
     @Column(name = "onboarded_at")
     private Instant onboardedAt;
 

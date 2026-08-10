@@ -54,6 +54,18 @@ public class KycDocument extends BaseEntity {
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
 
+    @Column(name = "document_number", length = 100)
+    private String documentNumber;
+
+    @Column(name = "uploaded_at")
+    private Instant uploadedAt;
+
+    @Column(name = "verified_by")
+    private java.util.UUID verifiedBy;
+
     @Column(name = "verified_at")
     private Instant verifiedAt;
+
+    @Column(name = "action_required_reason", columnDefinition = "TEXT")
+    private String actionRequiredReason;
 }

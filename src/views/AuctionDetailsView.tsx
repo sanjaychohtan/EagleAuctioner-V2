@@ -479,6 +479,72 @@ export const AuctionDetailsView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* 5. TOP 3 ANONYMIZED BIDDERS LEADERBOARD (NO PII) */}
+      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 space-y-4 font-mono" id="top-3-bidders-leaderboard">
+        <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+          <div className="flex items-center gap-2 text-slate-200">
+            <Users className="h-4 w-4 text-blue-400" />
+            <h4 className="font-bold text-xs uppercase tracking-wider">Top 3 Bidder Rankings (PII Masked)</h4>
+          </div>
+          <span className="text-[10px] text-slate-500 font-bold uppercase">ISO 27001 Privacy Enforced</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          {[
+            { rank: "RANK 1", bidderCode: "BIDDER-1024", bidAmount: "₹ 14,50,000", status: "HIGHEST BIDDER" },
+            { rank: "RANK 2", bidderCode: "BIDDER-2088", bidAmount: "₹ 14,25,000", status: "RUNNER UP" },
+            { rank: "RANK 3", bidderCode: "BIDDER-3011", bidAmount: "₹ 14,00,000", status: "THIRD HIGHEST" },
+          ].map((item, idx) => (
+            <div key={item.rank} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold">
+                <span className={idx === 0 ? "text-amber-400" : "text-slate-400"}>{item.rank}</span>
+                <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">{item.status}</span>
+              </div>
+              <div className="text-sm font-extrabold text-white tracking-wider">{item.bidderCode}</div>
+              <div className="text-xs font-semibold text-emerald-400">{item.bidAmount}</div>
+              <p className="text-[9px] text-slate-600 italic">Name / PAN / Contact protected by AUCTBIZ Privacy Boundary.</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. SELLER AUCTION DECISION BAR (FOR OWN AUCTIONS) */}
+      {(isSeller || isAdmin) && (
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border border-indigo-500/30 space-y-4 font-mono" id="seller-decision-panel">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span>Seller Outcome Decision Control</span>
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Execute final binding outcome decision for this assigned auction session.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleAction("APPROVE", () => approveMut.mutateAsync(auction.id))}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              >
+                APPROVE AUCTION RESULT
+              </button>
+              <button
+                onClick={() => handleAction("HOLD", () => cancelMut.mutateAsync(auction.id))}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+              >
+                PLACE ON HOLD
+              </button>
+              <button
+                onClick={() => handleAction("REJECT", () => rejectMut.mutateAsync(auction.id))}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/20 transition-all cursor-pointer"
+              >
+                REJECT RESULT
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

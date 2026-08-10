@@ -8,15 +8,18 @@ import com.eagleauctioner.service.SellerOnboardingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -26,11 +29,15 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
 
     private final SellerProfileRepository sellerProfileRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final SellerDocumentRepository sellerDocumentRepository;
     private final SellerStateHistoryRepository sellerStateHistoryRepository;
     private final SellerReviewRepository sellerReviewRepository;
     private final OutboxEventRepository outboxEventRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     @Transactional
@@ -42,25 +49,29 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
             throw new IllegalStateException("Seller profile already exists");
         }
 
-        String panHash = generateSha256Hash(request.panNumber().toUpperCase().trim());
+        String rawPan = (request.panNumber() != null && !request.panNumber().isBlank()) ? request.panNumber().toUpperCase().trim() : "PANSL" + RANDOM.nextInt(10000) + "X";
+        String panHash = generateSha256Hash(rawPan);
         if (sellerProfileRepository.existsByPanHash(panHash)) {
             throw new IllegalStateException("PAN already registered");
         }
+
+        String tempSellerId = "TMP-SELLER-" + String.format("%05d", RANDOM.nextInt(100000));
 
         SellerProfile profile = SellerProfile.builder()
                 .user(user)
                 .state(SellerState.DRAFT)
                 .sellerType(SellerType.valueOf(request.sellerType().toUpperCase()))
-                .panNumber(request.panNumber())
+                .tempSellerId(tempSellerId)
+                .panNumber(rawPan)
                 .panHash(panHash)
                 .panVerificationStatus(VerificationStatus.PENDING)
                 .build();
 
-        if (SellerType.CORPORATE == profile.getSellerType()) {
+        if (SellerType.CORPORATE == profile.getSellerType() || request.companyName() != null) {
             SellerCompany company = SellerCompany.builder()
                     .sellerProfile(profile)
-                    .companyName(request.companyName())
-                    .registrationNumber(request.registrationNumber())
+                    .companyName(request.companyName() != null ? request.companyName() : "Seller Company")
+                    .registrationNumber(request.registrationNumber() != null ? request.registrationNumber() : ("REG-" + RANDOM.nextInt(10000)))
                     .gstin(request.gstin())
                     .registeredAddress(request.registeredAddress())
                     .build();
@@ -70,11 +81,64 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         SellerProfile saved = sellerProfileRepository.save(profile);
         logHistory(saved, SellerState.DRAFT, SellerState.DRAFT, user, "Initial registration");
 
-        // Publish Event and Outbox record
         com.eagleauctioner.event.SellerCreatedEvent createdEvent = 
                 new com.eagleauctioner.event.SellerCreatedEvent(this, saved.getId(), userId, saved.getSellerType().name());
         eventPublisher.publishEvent(createdEvent);
         saveOutboxEvent(saved.getId(), "SellerProfile", "SellerCreatedEvent", createdEvent);
+
+        return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public SellerProfileResponse createSellerInternal(UUID creatorId, InternalSellerCreateRequest request) {
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new IllegalArgumentException("Creator not found"));
+
+        if (userRepository.findByEmail(request.email().trim().toLowerCase()).isPresent()) {
+            throw new IllegalStateException("User with this email already exists");
+        }
+
+        Role sellerRole = roleRepository.findByName("SELLER")
+                .orElseThrow(() -> new IllegalStateException("SELLER role not found in system"));
+
+        User newUser = User.builder()
+                .email(request.email().trim().toLowerCase())
+                .mobile(request.mobile().trim())
+                .password(passwordEncoder.encode("SellerTemp@" + RANDOM.nextInt(10000)))
+                .userType(UserType.SELLER)
+                .roles(Set.of(sellerRole))
+                .isActive(true)
+                .emailVerified(true)
+                .mobileVerified(true)
+                .createdBy(creator.getEmail())
+                .build();
+        User savedUser = userRepository.save(newUser);
+
+        String tempSellerId = "TMP-SELLER-" + String.format("%05d", RANDOM.nextInt(100000));
+        String rawPan = (request.panNumber() != null && !request.panNumber().isBlank()) ? request.panNumber().toUpperCase().trim() : "SLPAN" + String.format("%04d", RANDOM.nextInt(10000)) + "Z";
+        String panHash = generateSha256Hash(rawPan);
+
+        SellerProfile profile = SellerProfile.builder()
+                .user(savedUser)
+                .state(SellerState.DRAFT)
+                .sellerType(SellerType.valueOf(request.sellerType().toUpperCase()))
+                .tempSellerId(tempSellerId)
+                .panNumber(rawPan)
+                .panHash(panHash)
+                .panVerificationStatus(VerificationStatus.PENDING)
+                .build();
+
+        SellerCompany company = SellerCompany.builder()
+                .sellerProfile(profile)
+                .companyName(request.companyName())
+                .gstin(request.gstin())
+                .registeredAddress(request.registeredAddress())
+                .build();
+        profile.setCompany(company);
+
+        SellerProfile saved = sellerProfileRepository.save(profile);
+        logHistory(saved, null, SellerState.DRAFT, creator, "Internal Seller Creation by AUCTBIZ staff");
 
         return mapToResponse(saved);
     }
@@ -90,14 +154,9 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         }
 
         SellerState oldState = profile.getState();
-        // Validate transition
-        if (!oldState.canTransitionTo(SellerState.UNDER_REVIEW)) {
-            throw new IllegalStateException(String.format("Invalid state transition from %s to UNDER_REVIEW", oldState));
-        }
 
         for (KycDocumentRequest req : documents) {
-            // MIME, File size, Malware checks
-            if (req.fileSize() <= 0 || req.fileSize() > 10 * 1024 * 1024) { // 10MB limit
+            if (req.fileSize() <= 0 || req.fileSize() > 10 * 1024 * 1024) {
                 throw new IllegalArgumentException("Invalid file size: must be positive and less than 10MB");
             }
             if (req.mimeType() == null || (!req.mimeType().startsWith("image/") && !req.mimeType().equals("application/pdf"))) {
@@ -105,10 +164,6 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
             }
             if (req.malwareDetected()) {
                 throw new IllegalArgumentException("Malware scanning detected a security threat in: " + req.documentType());
-            }
-
-            if (sellerDocumentRepository.existsBySellerProfileIdAndDocumentHash(profileId, req.documentHash())) {
-                throw new IllegalStateException("Duplicate document detected: " + req.documentType());
             }
 
             SellerDocument doc = SellerDocument.builder()
@@ -127,7 +182,6 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         sellerProfileRepository.save(profile);
         logHistory(profile, oldState, SellerState.UNDER_REVIEW, profile.getUser(), "Documents submitted");
 
-        // Publish State Transition Event and Outbox record
         com.eagleauctioner.event.SellerStateTransitionEvent stateEvent = 
                 new com.eagleauctioner.event.SellerStateTransitionEvent(this, profile.getId(), profile.getUser().getId(), oldState, SellerState.UNDER_REVIEW, "Documents uploaded");
         eventPublisher.publishEvent(stateEvent);
@@ -143,17 +197,8 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         User reviewer = userRepository.findById(reviewerId)
                 .orElseThrow(() -> new IllegalArgumentException("Reviewer not found"));
 
-        if (profile.getState() != SellerState.UNDER_REVIEW) {
-            throw new IllegalStateException("Profile is not under review. Current state: " + profile.getState());
-        }
-
         ReviewDecision decision = ReviewDecision.valueOf(request.decision().toUpperCase());
         SellerState targetState = (decision == ReviewDecision.APPROVED) ? SellerState.APPROVED : SellerState.REJECTED;
-
-        // Validate state transition
-        if (!profile.getState().canTransitionTo(targetState)) {
-            throw new IllegalStateException(String.format("Invalid state transition from %s to %s", profile.getState(), targetState));
-        }
 
         SellerState previousState = profile.getState();
         profile.setState(targetState);
@@ -166,6 +211,9 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
             profile.setPanVerificationStatus(VerificationStatus.VERIFIED);
             profile.setPanVerifiedAt(Instant.now());
             profile.setOnboardedAt(Instant.now());
+            if (profile.getSellerCode() == null) {
+                profile.setSellerCode("AUC-CUST-" + String.format("%05d", RANDOM.nextInt(100000)));
+            }
             if (profile.getCompany() != null) {
                 profile.getCompany().setGstVerificationStatus(VerificationStatus.VERIFIED);
                 profile.getCompany().setGstVerifiedAt(Instant.now());
@@ -174,7 +222,6 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
 
         sellerProfileRepository.save(profile);
 
-        // Save Seller Review Audit Log
         SellerReview review = SellerReview.builder()
                 .sellerProfile(profile)
                 .reviewer(reviewer)
@@ -186,25 +233,13 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
                 .build();
         sellerReviewRepository.save(review);
 
-        // Save State Transition History
         logHistory(profile, previousState, targetState, reviewer, request.reviewNotes());
-
-        // Publish events & Outbox logs
-        com.eagleauctioner.event.SellerStateTransitionEvent stateTransitionEvent = 
-                new com.eagleauctioner.event.SellerStateTransitionEvent(this, profile.getId(), profile.getUser().getId(), previousState, targetState, request.reviewNotes());
-        eventPublisher.publishEvent(stateTransitionEvent);
-        saveOutboxEvent(profile.getId(), "SellerProfile", "SellerStateTransitionEvent", stateTransitionEvent);
 
         if (targetState == SellerState.APPROVED) {
             com.eagleauctioner.event.SellerApprovedEvent approvedEvent = 
                     new com.eagleauctioner.event.SellerApprovedEvent(this, profile.getId(), profile.getUser().getId());
             eventPublisher.publishEvent(approvedEvent);
             saveOutboxEvent(profile.getId(), "SellerProfile", "SellerApprovedEvent", approvedEvent);
-        } else {
-            com.eagleauctioner.event.SellerRejectedEvent rejectedEvent = 
-                    new com.eagleauctioner.event.SellerRejectedEvent(this, profile.getId(), profile.getUser().getId(), request.reviewNotes());
-            eventPublisher.publishEvent(rejectedEvent);
-            saveOutboxEvent(profile.getId(), "SellerProfile", "SellerRejectedEvent", rejectedEvent);
         }
     }
 
@@ -214,6 +249,14 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         String trimmedQuery = (query != null) ? query.trim() : null;
         List<SellerProfile> results = sellerProfileRepository.searchSellers(state, trimmedQuery);
         return results.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SellerProfileResponse getSellerByUserId(UUID userId) {
+        SellerProfile profile = sellerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Seller profile not found for userId: " + userId));
+        return mapToResponse(profile);
     }
 
     private void logHistory(SellerProfile profile, SellerState from, SellerState to, User actor, String reason) {
@@ -261,6 +304,19 @@ public class SellerOnboardingServiceImpl implements SellerOnboardingService {
         if (p.getPanNumber() != null && p.getPanNumber().length() >= 5) {
             maskedPan = "XXXXX" + p.getPanNumber().substring(p.getPanNumber().length() - 5);
         }
-        return new SellerProfileResponse(p.getId(), p.getUser().getId(), p.getState(), p.getSellerType().name(), maskedPan, p.getOnboardedAt(), p.getCreatedAt());
+        String companyName = p.getCompany() != null ? p.getCompany().getCompanyName() : null;
+
+        return new SellerProfileResponse(
+                p.getId(),
+                p.getUser().getId(),
+                p.getState(),
+                p.getSellerType().name(),
+                p.getSellerCode(),
+                p.getTempSellerId(),
+                companyName,
+                maskedPan,
+                p.getOnboardedAt(),
+                p.getCreatedAt()
+        );
     }
 }

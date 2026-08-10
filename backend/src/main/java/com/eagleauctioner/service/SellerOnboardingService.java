@@ -7,7 +7,9 @@ import java.util.UUID;
 
 public interface SellerOnboardingService {
     SellerProfileResponse registerSeller(UUID userId, SellerRegistrationRequest request);
+    SellerProfileResponse createSellerInternal(UUID creatorId, InternalSellerCreateRequest request);
     void submitDocuments(UUID profileId, UUID userId, List<KycDocumentRequest> documents);
     void reviewSeller(UUID profileId, UUID reviewerId, KycReviewRequest request);
     List<SellerProfileResponse> searchSellers(SellerState state, String query);
+    SellerProfileResponse getSellerByUserId(UUID userId);
 }

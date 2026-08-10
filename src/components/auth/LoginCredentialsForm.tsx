@@ -146,24 +146,19 @@ export const LoginCredentialsForm: React.FC<LoginCredentialsFormProps> = memo(({
         </button>
 
         {/* Public Registration Links */}
-        <div className="border-t border-slate-800/80 pt-4 text-center space-y-2">
-          <span className="text-[10px] uppercase font-bold text-slate-500 block">Don't have an enterprise account?</span>
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <button
-              type="button"
-              onClick={() => onOpenSignUp?.("BUYER")}
-              className="py-2 px-3 rounded-xl bg-slate-950 hover:bg-blue-600/10 border border-slate-800 text-blue-400 hover:border-blue-500/30 font-bold transition-all cursor-pointer"
-            >
-              Sign Up as Buyer
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenSignUp?.("SELLER")}
-              className="py-2 px-3 rounded-xl bg-slate-950 hover:bg-emerald-600/10 border border-slate-800 text-emerald-400 hover:border-emerald-500/30 font-bold transition-all cursor-pointer"
-            >
-              Sign Up as Seller
-            </button>
-          </div>
+        <div className="border-t border-slate-800/80 pt-4 text-center space-y-3">
+          <span className="text-[10px] uppercase font-bold text-slate-500 block">Looking to participate in auctions?</span>
+          <button
+            type="button"
+            onClick={() => onOpenSignUp?.("BUYER")}
+            className="w-full py-2.5 px-4 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-400 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>Public Bidder / Buyer Registration</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+          <p className="text-[10px] text-slate-500 italic">
+            * Seller access is provided directly by AUCTBIZ enterprise operations.
+          </p>
         </div>
       </form>
     </div>

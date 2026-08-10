@@ -101,13 +101,7 @@ export const AppRouter: React.FC = () => {
           />
           <Route
             path="/onboarding"
-            element={
-              <ProtectedRoute>
-                <EnterpriseLayout>
-                  <KycOnboardingView />
-                </EnterpriseLayout>
-              </ProtectedRoute>
-            }
+            element={<KycOnboardingView />}
           />
           <Route
             path="/admin/kyc"

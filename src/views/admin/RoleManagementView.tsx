@@ -14,16 +14,17 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { authorizationService } from "../../api/authorizationService";
-import { RoleDTO, PermissionDTO, MODULE_NAME, DepartmentDTO } from "../../types/authorization";
+import { RoleDTO, PermissionDTO, DepartmentDTO } from "../../types/authorization";
+import { useNotification } from "../../providers/NotificationProvider";
 
 export const RoleManagementView: React.FC = () => {
+  const { showNotification } = useNotification();
   const [roles, setRoles] = useState<RoleDTO[]>([]);
   const [permissions, setPermissions] = useState<PermissionDTO[]>([]);
   const [departments, setDepartments] = useState<DepartmentDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedModule, setSelectedModule] = useState<string>("ALL");
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -83,11 +84,11 @@ export const RoleManagementView: React.FC = () => {
     e.preventDefault();
     const cleanSuffix = roleName.trim().toUpperCase().replace(/^ROLE_/, "").replace(/[^A-Z0-9_]/g, "");
     if (!cleanSuffix) {
-      alert("Please enter a valid role name after ROLE_ (e.g. MARKETING, FINANCE_MANAGER)");
+      showNotification("Please enter a valid role name after ROLE_ (e.g. MARKETING, FINANCE_MANAGER)", "error");
       return;
     }
     if (selectedPermissionIds.length === 0) {
-      alert("Please select at least one action permission");
+      showNotification("Please select at least one action permission", "error");
       return;
     }
 
@@ -101,17 +102,19 @@ export const RoleManagementView: React.FC = () => {
           description: roleDescription,
           permissionIds: selectedPermissionIds,
         });
+        showNotification("Role updated successfully", "success");
       } else {
         await authorizationService.createRole({
           name: fullRoleName,
           description: roleDescription,
           permissionIds: selectedPermissionIds,
         });
+        showNotification("Role created successfully", "success");
       }
       setIsModalOpen(false);
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to save role");
+      showNotification(err.response?.data?.message || "Failed to save role", "error");
     } finally {
       setSubmitting(false);
     }
@@ -119,7 +122,7 @@ export const RoleManagementView: React.FC = () => {
 
   const handleDeleteRole = async (role: RoleDTO) => {
     if (role.systemRole) {
-      alert("System roles cannot be deleted.");
+      showNotification("System roles cannot be deleted.", "warning");
       return;
     }
     if (!window.confirm(`Are you sure you want to delete custom role '${role.name}'?`)) {
@@ -128,9 +131,10 @@ export const RoleManagementView: React.FC = () => {
 
     try {
       await authorizationService.deleteRole(role.id);
+      showNotification("Role deleted successfully", "success");
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to delete role");
+      showNotification(err.response?.data?.message || "Failed to delete role", "error");
     }
   };
 

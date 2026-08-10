@@ -122,7 +122,7 @@ public class OnboardingIntegrationTest {
 
         BidderProfileResponse profileResponse = bidderOnboardingService.registerBidder(testBidder.getId(), registerRequest);
         assertNotNull(profileResponse);
-        assertEquals(BidderState.DRAFT, profileResponse.state());
+        assertEquals(BidderState.SUBMITTED, profileResponse.state());
 
         UUID profileId = profileResponse.id();
 

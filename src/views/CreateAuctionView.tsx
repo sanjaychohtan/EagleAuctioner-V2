@@ -188,6 +188,23 @@ export const CreateAuctionView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Seller / Customer Code Selection */}
+            <div className="md:col-span-2">
+              <label className="block text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-wider mb-1.5">
+                Assigned Seller / Customer Entity (Seller Code) *
+              </label>
+              <select
+                className="w-full bg-slate-950 border border-indigo-500/40 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono font-bold focus:outline-none focus:border-indigo-400 cursor-pointer"
+              >
+                <option value="auc-cust-00125">AUC-CUST-00125 — ABC Industries Private Limited</option>
+                <option value="auc-cust-00126">AUC-CUST-00126 — Tata Steel Logistics Ltd</option>
+                <option value="auc-cust-00127">AUC-CUST-00127 — Reliance Industrial Materials</option>
+              </select>
+              <p className="text-[9px] font-mono text-slate-500 mt-1">
+                Selected Seller Code establishes the immutable ownership boundary for this auction.
+              </p>
+            </div>
+
             {/* Title */}
             <div className="md:col-span-2">
               <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1.5">

@@ -54,6 +54,12 @@ export interface BidderProfileResponse {
   email: string;
   state: BidderState;
   bidderType: "INDIVIDUAL" | "CORPORATE";
+  accountType?: string;
+  tempCustomerId?: string;
+  permanentCustomerId?: string;
+  bidderId?: string;
+  planType?: string;
+  paymentStatus?: string;
   maskedPan: string;
   maskedAadhaar: string;
   panVerificationStatus: string;
@@ -121,6 +127,41 @@ const saveSandboxDB = (data: BidderProfileResponse[]) => {
 };
 
 export const OnboardingService = {
+  /**
+   * Registers a new public bidder account and profile atomically.
+   */
+  async registerPublicBidder(payload: {
+    email: string;
+    mobile: string;
+    password: string;
+    bidderDetails: BidderRegistrationRequest;
+  }): Promise<any> {
+    console.log("[OnboardingService] Registering public bidder", payload.email);
+    const res = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER_BIDDER, payload);
+    return res.data;
+  },
+
+  /**
+   * Registers a new public seller account and profile atomically.
+   */
+  async registerPublicSeller(payload: {
+    email: string;
+    mobile: string;
+    password: string;
+    sellerDetails: {
+      sellerType: "INDIVIDUAL" | "CORPORATE";
+      panNumber: string;
+      companyName?: string;
+      registrationNumber?: string;
+      gstin?: string;
+      registeredAddress?: string;
+    };
+  }): Promise<any> {
+    console.log("[OnboardingService] Registering public seller", payload.email);
+    const res = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER_SELLER, payload);
+    return res.data;
+  },
+
   /**
    * Registers a new bidder/seller profile in the system.
    */

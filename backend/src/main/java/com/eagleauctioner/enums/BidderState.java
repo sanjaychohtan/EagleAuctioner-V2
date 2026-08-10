@@ -10,19 +10,31 @@ public enum BidderState {
     DRAFT {
         @Override
         public Set<BidderState> getNextValidStates() {
-            return Set.of(KYC_PENDING);
+            return Set.of(SUBMITTED, KYC_PENDING, UNDER_REVIEW);
+        }
+    },
+    SUBMITTED {
+        @Override
+        public Set<BidderState> getNextValidStates() {
+            return Set.of(UNDER_REVIEW, ACTION_REQUIRED, APPROVED, REJECTED);
         }
     },
     KYC_PENDING {
         @Override
         public Set<BidderState> getNextValidStates() {
-            return Set.of(UNDER_REVIEW, DRAFT);
+            return Set.of(UNDER_REVIEW, DRAFT, SUBMITTED);
         }
     },
     UNDER_REVIEW {
         @Override
         public Set<BidderState> getNextValidStates() {
-            return Set.of(APPROVED, REJECTED);
+            return Set.of(APPROVED, REJECTED, ACTION_REQUIRED);
+        }
+    },
+    ACTION_REQUIRED {
+        @Override
+        public Set<BidderState> getNextValidStates() {
+            return Set.of(UNDER_REVIEW, SUBMITTED, REJECTED);
         }
     },
     APPROVED {
@@ -34,7 +46,7 @@ public enum BidderState {
     REJECTED {
         @Override
         public Set<BidderState> getNextValidStates() {
-            return Set.of(DRAFT, KYC_PENDING);
+            return Set.of(DRAFT, KYC_PENDING, SUBMITTED);
         }
     },
     SUSPENDED {

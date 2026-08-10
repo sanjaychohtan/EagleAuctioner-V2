@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { useKycStore } from "../store/useKycStore";
 import { useAppStore } from "../store/useAppStore";
 import { RegistrationScreen } from "./RegistrationScreen";
@@ -10,11 +11,24 @@ export const KycOnboardingView: React.FC = () => {
   const { user } = useAuth();
   const { profile, fetchProfile, isLoading } = useKycStore();
   const { themeMode } = useAppStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
   const [selectedFlow, setSelectedFlow] = useState<"BUYER" | "SELLER" | null>(null);
 
+  // Sync selectedFlow with URL search params (or location state)
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    const roleParam = searchParams.get("role")?.toUpperCase() || (location.state as any)?.role?.toUpperCase();
+    if (roleParam === "BUYER" || roleParam === "SELLER") {
+      setSelectedFlow(roleParam as "BUYER" | "SELLER");
+    }
+  }, [searchParams, location.state]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   // If a profile exists in backend state, auto-bind to that flow
   useEffect(() => {
@@ -26,6 +40,11 @@ export const KycOnboardingView: React.FC = () => {
       }
     }
   }, [profile, user]);
+
+  const handleSelectFlow = (flow: "BUYER" | "SELLER") => {
+    setSelectedFlow(flow);
+    setSearchParams({ role: flow });
+  };
 
   if (isLoading) {
     return (
@@ -70,7 +89,7 @@ export const KycOnboardingView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* BUYER CARD */}
         <div 
-          onClick={() => setSelectedFlow("BUYER")}
+          onClick={() => handleSelectFlow("BUYER")}
           className={`group border p-6 rounded-2xl flex flex-col justify-between gap-8 cursor-pointer transition-all hover:shadow-xl relative overflow-hidden ${
             isDark 
               ? "bg-slate-900 hover:bg-slate-900/80 border-slate-800 hover:border-blue-500 hover:shadow-blue-500/5" 
@@ -108,7 +127,7 @@ export const KycOnboardingView: React.FC = () => {
 
         {/* SELLER CARD */}
         <div 
-          onClick={() => setSelectedFlow("SELLER")}
+          onClick={() => handleSelectFlow("SELLER")}
           className={`group border p-6 rounded-2xl flex flex-col justify-between gap-8 cursor-pointer transition-all hover:shadow-xl relative overflow-hidden ${
             isDark 
               ? "bg-slate-900 hover:bg-slate-900/80 border-slate-800 hover:border-blue-500 hover:shadow-blue-500/5" 
